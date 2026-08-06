@@ -2,6 +2,7 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
+import { ScrollReveal } from "@/components/primitives";
 import { listBlogPosts, urlForImage } from "@/lib/blog";
 import { SITE_URL } from "@/lib/site";
 
@@ -36,65 +37,65 @@ export default async function BlogIndex() {
   return (
     <>
       <Navigation />
-      <main className="min-h-screen bg-mom-black text-white pt-32 pb-24">
-        <div className="max-w-6xl mx-auto px-6">
-          <header className="mb-16 text-center">
-            <p className="text-[10px] md:text-xs uppercase tracking-[0.3em] text-mom-pink font-semibold mb-4">
-              Journal
-            </p>
-            <h1 className="text-5xl md:text-7xl font-quirk uppercase leading-[0.95]">
-              Stories from the Jar
-            </h1>
-            <p className="mt-6 text-white/70 max-w-2xl mx-auto">
-              Thecha culture, ingredient deep-dives, kitchen experiments, and the
-              occasional grandma story.
-            </p>
-          </header>
+      <main className="bg-cream pt-28 md:pt-36 pb-20 md:pb-28 cv-auto">
+        <div className="max-w-[1400px] mx-auto px-5 md:px-9">
+          <ScrollReveal>
+            <header className="mb-14 md:mb-16 max-w-2xl">
+              <p className="text-tag text-red uppercase tracking-[0.08em] mb-4">
+                Journal
+              </p>
+              <h1 className="text-h1 text-green mb-5">Stories from the jar</h1>
+              <p className="text-body text-dark/80">
+                Thecha culture, ingredient deep-dives, kitchen experiments, and the
+                occasional grandma story.
+              </p>
+            </header>
+          </ScrollReveal>
 
           {posts.length === 0 ? (
-            <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-12 text-center">
-              <p className="text-white/60 text-sm">
-                No posts yet — the first one is in the oven.
-              </p>
-            </div>
+            <ScrollReveal>
+              <div className="bg-cream-dark p-12 text-center">
+                <p className="text-body text-dark/60">
+                  No posts yet — the first one is in the oven.
+                </p>
+              </div>
+            </ScrollReveal>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {posts.map((post) => (
-                <Link
-                  key={post._id}
-                  href={`/blog/${post.slug}`}
-                  className="group rounded-2xl overflow-hidden border border-white/10 bg-white/[0.02] hover:border-mom-pink/40 transition-all duration-300 hover:shadow-[0_0_40px_rgba(245,25,127,0.15)]"
-                >
-                  {post.coverImage && (
-                    <div className="aspect-[16/10] overflow-hidden bg-mom-black/40">
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img
-                        src={urlForImage(post.coverImage)}
-                        alt={post.coverImage.alt || post.title}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                        loading="lazy"
-                      />
+              {posts.map((post, i) => (
+                <ScrollReveal key={post._id} delay={Math.min(i * 0.05, 0.2)}>
+                  <Link href={`/blog/${post.slug}`} className="group block bg-cream-dark">
+                    {post.coverImage && (
+                      <div className="aspect-[16/10] overflow-hidden">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img
+                          src={urlForImage(post.coverImage)}
+                          alt={post.coverImage.alt || post.title}
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                          loading="lazy"
+                        />
+                      </div>
+                    )}
+                    <div className="p-6">
+                      <time
+                        dateTime={post.publishedAt}
+                        className="text-body-sm text-dark/50 uppercase tracking-[0.06em]"
+                      >
+                        {new Date(post.publishedAt).toLocaleDateString("en-IN", {
+                          day: "numeric",
+                          month: "long",
+                          year: "numeric",
+                        })}
+                      </time>
+                      <h2 className="text-h4 font-bold text-dark mt-3 group-hover:text-red transition-colors">
+                        {post.title}
+                      </h2>
+                      <p className="mt-3 text-body-sm text-dark/70 line-clamp-3">
+                        {post.excerpt}
+                      </p>
                     </div>
-                  )}
-                  <div className="p-6">
-                    <time
-                      dateTime={post.publishedAt}
-                      className="text-[10px] uppercase tracking-[0.25em] text-white/40"
-                    >
-                      {new Date(post.publishedAt).toLocaleDateString("en-IN", {
-                        day: "numeric",
-                        month: "long",
-                        year: "numeric",
-                      })}
-                    </time>
-                    <h2 className="text-xl font-quirk mt-3 group-hover:text-mom-pink transition-colors">
-                      {post.title}
-                    </h2>
-                    <p className="mt-3 text-white/60 text-sm leading-relaxed line-clamp-3">
-                      {post.excerpt}
-                    </p>
-                  </div>
-                </Link>
+                  </Link>
+                </ScrollReveal>
               ))}
             </div>
           )}

@@ -15,6 +15,8 @@ import {
   CART_DISCOUNT_THRESHOLD,
   SHIPPING_FLAT_RATE,
   SHIPPING_FREE_THRESHOLD,
+  PRODUCT_CARD_IMAGES,
+  PDP_ACCENT_COLOR,
 } from "@/lib/products";
 import {
   trackAddPaymentInfo,
@@ -180,17 +182,15 @@ export default function CheckoutPageClient() {
     return (
       <SmoothScroll>
         <Navigation />
-        <main className="min-h-screen bg-mom-black pt-28 md:pt-36 pb-20 md:pb-28 text-white">
-          <div className="max-w-2xl mx-auto px-6 md:px-12 text-center">
-            <h1 className="text-4xl md:text-6xl font-quirk uppercase leading-[0.9] mb-4">
-              Nothing to check out yet.
-            </h1>
-            <p className="text-white/75 mb-8">
+        <main className="bg-cream pt-28 md:pt-36 pb-20 md:pb-28 cv-auto">
+          <div className="max-w-2xl mx-auto px-5 md:px-9 text-center">
+            <h1 className="text-h1 text-red mb-4">Nothing to check out yet.</h1>
+            <p className="text-body text-dark/70 mb-8">
               Pop a jar into your cart first — then we&apos;ll do the spicy stuff.
             </p>
             <Link
               href="/shop"
-              className="inline-block px-8 py-4 rounded-full bg-mom-pink text-white text-xs uppercase tracking-[0.2em] font-quirk hover:bg-mom-pink/90 transition-colors"
+              className="inline-flex items-center justify-center text-btn font-bold bg-green text-cream px-8 py-4 hover:bg-green/90 transition-colors"
             >
               Shop the heat
             </Link>
@@ -350,7 +350,7 @@ export default function CheckoutPageClient() {
           contact: shipping.phone,
         },
         notes,
-        theme: { color: "#F5197F" },
+        theme: { color: "#9B1E15" },
         handler: async (payment: RazorpaySuccess) => {
           try {
             const verifyRes = await fetch("/api/razorpay/verify", {
@@ -434,52 +434,50 @@ export default function CheckoutPageClient() {
         strategy="afterInteractive"
       />
       <Navigation />
-      <main className="min-h-screen bg-mom-black pt-28 md:pt-36 pb-20 md:pb-28 text-white">
-        <div className="max-w-[1200px] mx-auto px-6 md:px-12">
+      <main className="bg-cream pt-28 md:pt-36 pb-20 md:pb-28 cv-auto">
+        <div className="max-w-[1400px] mx-auto px-5 md:px-9">
           <div className="mb-10 md:mb-14">
-            <p className="text-xs md:text-sm uppercase tracking-[0.4em] text-mom-pink mb-3 font-semibold">
-              Checkout
-            </p>
-            <h1 className="text-4xl md:text-6xl lg:text-7xl font-quirk uppercase leading-[0.9]">
-              Where should we send it?
-            </h1>
+            <h1 className="text-h1 text-red">Where should we send it?</h1>
           </div>
 
-          <div className="grid lg:grid-cols-[1fr_400px] gap-10 lg:gap-12">
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              void handlePay();
+            }}
+            noValidate
+            className="grid lg:grid-cols-[1fr_400px] gap-10 lg:gap-12 items-start"
+          >
             {/* LEFT — shipping form */}
-            <form
-              onSubmit={(e) => {
-                e.preventDefault();
-                void handlePay();
-              }}
-              className="space-y-6"
-              noValidate
-            >
+            <div className="space-y-6">
               <FieldGroup title="Contact">
-                <Field label="Full name" error={errors.name}>
+                <Field label="full name" error={errors.name}>
                   <input
                     type="text"
                     autoComplete="name"
+                    placeholder="e.g. Priya Sharma"
                     className={inputClass(!!errors.name)}
                     {...field("name")}
                   />
                 </Field>
-                <div className="grid sm:grid-cols-2 gap-4">
-                  <Field label="Email" error={errors.email}>
+                <div className="grid sm:grid-cols-2 gap-5">
+                  <Field label="email" error={errors.email}>
                     <input
                       type="email"
                       autoComplete="email"
                       inputMode="email"
+                      placeholder="you@example.com"
                       className={inputClass(!!errors.email)}
                       {...field("email")}
                     />
                   </Field>
-                  <Field label="Phone (10-digit)" error={errors.phone}>
+                  <Field label="phone (10-digit)" error={errors.phone}>
                     <input
                       type="tel"
                       autoComplete="tel-national"
                       inputMode="numeric"
                       maxLength={10}
+                      placeholder="98765 43210"
                       className={inputClass(!!errors.phone)}
                       {...field("phone")}
                     />
@@ -488,46 +486,50 @@ export default function CheckoutPageClient() {
               </FieldGroup>
 
               <FieldGroup title="Shipping address">
-                <Field label="Address" error={errors.address1}>
+                <Field label="address" error={errors.address1}>
                   <input
                     type="text"
                     autoComplete="address-line1"
-                    placeholder="House / Flat / Building"
+                    placeholder="e.g. Flat 4B, Shreeji Apartments"
                     className={inputClass(!!errors.address1)}
                     {...field("address1")}
                   />
                 </Field>
-                <Field label="Apartment, landmark, etc. (optional)">
+                <Field label="apartment, landmark, etc. (optional)">
                   <input
                     type="text"
                     autoComplete="address-line2"
+                    placeholder="e.g. Near Sai Service Petrol Pump"
                     className={inputClass(false)}
                     {...field("address2")}
                   />
                 </Field>
-                <div className="grid sm:grid-cols-3 gap-4">
-                  <Field label="City" error={errors.city}>
+                <div className="grid sm:grid-cols-3 gap-5">
+                  <Field label="city" error={errors.city}>
                     <input
                       type="text"
                       autoComplete="address-level2"
+                      placeholder="e.g. Mumbai"
                       className={inputClass(!!errors.city)}
                       {...field("city")}
                     />
                   </Field>
-                  <Field label="State" error={errors.state}>
+                  <Field label="state" error={errors.state}>
                     <input
                       type="text"
                       autoComplete="address-level1"
+                      placeholder="e.g. Maharashtra"
                       className={inputClass(!!errors.state)}
                       {...field("state")}
                     />
                   </Field>
-                  <Field label="Pincode" error={errors.pincode}>
+                  <Field label="pincode" error={errors.pincode}>
                     <input
                       type="text"
                       autoComplete="postal-code"
                       inputMode="numeric"
                       maxLength={6}
+                      placeholder="e.g. 400001"
                       className={inputClass(!!errors.pincode)}
                       {...field("pincode")}
                     />
@@ -558,71 +560,42 @@ export default function CheckoutPageClient() {
                   }
                 />
               </FieldGroup>
+            </div>
 
-              {submitError && (
-                <p className="text-sm text-mom-red bg-mom-red/10 border border-mom-red/30 rounded-2xl px-4 py-3">
-                  {submitError}
-                </p>
-              )}
-
-              <button
-                type="submit"
-                disabled={paying || pincodeStatus.state === "unavailable"}
-                className="w-full py-4 rounded-full bg-mom-pink text-white text-xs uppercase tracking-[0.2em] font-quirk hover:bg-mom-pink/90 transition-colors cursor-pointer hover:shadow-[0_0_30px_rgba(245,25,127,0.4)] disabled:opacity-60 disabled:cursor-not-allowed"
-              >
-                {payButtonLabel}
-              </button>
-
-              <p className="text-[11px] uppercase tracking-[0.25em] text-white/55 text-center">
-                {paymentMethod === "cod"
-                  ? "Cash on delivery · No payment now"
-                  : "Powered by Razorpay · UPI · Cards · Netbanking · Wallets"}
-              </p>
-
-              <Link
-                href="/cart"
-                className="block text-center text-xs uppercase tracking-[0.25em] text-white/75 hover:text-white transition-colors"
-              >
-                ← Back to cart
-              </Link>
-            </form>
-
-            {/* RIGHT — summary */}
+            {/* RIGHT — summary + pay action */}
             <aside className="lg:sticky lg:top-28 self-start">
-              <div className="rounded-2xl border border-white/[0.08] bg-white/[0.02] p-5 md:p-6">
-                <h3 className="text-xs md:text-sm uppercase tracking-[0.3em] text-white/75 mb-5">
+              <div className="bg-cream-dark p-6 md:p-7">
+                <h3 className="text-tag font-bold text-dark uppercase tracking-[0.06em] mb-5">
                   Order summary
                 </h3>
 
-                <ul className="space-y-3 pb-4 mb-4 border-b border-white/[0.08]">
+                <ul className="space-y-4">
                   {lines.map((line) => {
                     const p = getProduct(line.slug);
                     if (!p) return null;
                     return (
                       <li key={line.slug} className="flex items-center gap-3">
-                        <div className="relative w-12 h-12 shrink-0 rounded-lg bg-white/[0.04] overflow-hidden">
+                        <div className="relative w-14 h-14 shrink-0 rounded-md bg-cream overflow-hidden">
                           <Image
-                            src={p.image}
+                            src={PRODUCT_CARD_IMAGES[line.slug] ?? p.image}
                             alt={p.name}
                             fill
-                            className="object-contain p-1"
+                            className="object-contain p-1.5"
                           />
-                          <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 rounded-full bg-mom-pink text-white text-[10px] font-quirk flex items-center justify-center">
+                          <span className="absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] px-1 rounded-full bg-red text-cream text-[10px] font-bold flex items-center justify-center">
                             {line.qty}
                           </span>
                         </div>
                         <div className="flex-1 min-w-0">
                           <p
-                            className="font-quirk text-xs uppercase tracking-wide truncate"
-                            style={{ color: p.color }}
+                            className="text-sm font-bold truncate"
+                            style={{ color: PDP_ACCENT_COLOR[p.flavor] }}
                           >
                             {p.shortName}
                           </p>
-                          <p className="text-[11px] text-white/55 uppercase tracking-wide">
-                            {p.weight}
-                          </p>
+                          <p className="text-body-sm text-dark/50">{p.weight}</p>
                         </div>
-                        <span className="text-sm font-quirk text-white">
+                        <span className="text-body-sm font-bold text-dark">
                           ₹{p.price * line.qty}
                         </span>
                       </li>
@@ -630,7 +603,9 @@ export default function CheckoutPageClient() {
                   })}
                 </ul>
 
-                <div className="space-y-2 mb-4">
+                <div className="dotted-divider text-dark/15 my-5" />
+
+                <div className="space-y-2 mb-5">
                   <Row label="Subtotal" value={`₹${subtotal}`} />
                   {discountUnlocked && (
                     <Row
@@ -646,23 +621,42 @@ export default function CheckoutPageClient() {
                   />
                 </div>
 
-                <div className="flex justify-between items-baseline pt-4 border-t border-white/[0.08]">
-                  <span className="text-base font-quirk uppercase tracking-wide">
-                    Total
-                  </span>
-                  <span className="text-2xl font-quirk text-mom-pink">
-                    ₹{total}
-                  </span>
+                <div className="dotted-divider text-dark/15 mb-4" />
+
+                <div className="flex justify-between items-baseline">
+                  <span className="text-body font-bold text-dark">Total</span>
+                  <span className="text-h4 font-bold text-red">₹{total}</span>
                 </div>
               </div>
 
-              <p className="text-[11px] text-white/55 leading-relaxed mt-5">
+              {submitError && (
+                <p className="text-body-sm text-red bg-red/10 px-4 py-3 mt-5">
+                  {submitError}
+                </p>
+              )}
+
+              <button
+                type="submit"
+                disabled={paying || pincodeStatus.state === "unavailable"}
+                className="w-full text-btn font-bold bg-green text-cream py-4 hover:bg-green/90 transition-colors cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed mt-5"
+              >
+                {payButtonLabel}
+              </button>
+
+              <p className="text-body-sm text-dark/60 mt-4">
                 {paymentMethod === "cod"
                   ? "Pay in cash when your jars arrive. You'll get an email confirmation now and a tracking link as soon as we ship."
                   : "Pay securely with UPI, debit/credit card, netbanking or wallets via Razorpay. You'll get an email confirmation the moment payment is captured."}
               </p>
+
+              <Link
+                href="/"
+                className="flex items-center justify-center gap-2 text-btn text-dark/70 hover:text-red transition-colors mt-5"
+              >
+                <span aria-hidden="true">←</span> Back to home
+              </Link>
             </aside>
-          </div>
+          </form>
         </div>
       </main>
       <Footer />
@@ -672,12 +666,10 @@ export default function CheckoutPageClient() {
 
 function FieldGroup({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <fieldset className="rounded-2xl border border-white/[0.08] bg-white/[0.02] p-5 md:p-6 space-y-4">
-      <legend className="px-2 -ml-2 text-xs uppercase tracking-[0.3em] text-white/75">
-        {title}
-      </legend>
-      {children}
-    </fieldset>
+    <div className="bg-cream-dark p-6 md:p-7">
+      <h2 className="text-h4 font-bold text-green mb-6">{title}</h2>
+      <div className="space-y-5">{children}</div>
+    </div>
   );
 }
 
@@ -692,19 +684,19 @@ function Field({
 }) {
   return (
     <label className="block">
-      <span className="block text-[11px] uppercase tracking-[0.25em] text-white/75 mb-1.5">
+      <span className="block text-[1.2rem] text-dark capitalize mb-1.5">
         {label}
       </span>
       {children}
-      {error && <span className="block text-[11px] text-mom-red mt-1">{error}</span>}
+      {error && <span className="block text-body-sm text-red mt-1">{error}</span>}
     </label>
   );
 }
 
 function inputClass(hasError: boolean) {
-  return `w-full px-4 py-3 bg-white/[0.04] border ${
-    hasError ? "border-mom-red/60" : "border-white/[0.10]"
-  } rounded-xl text-sm text-white placeholder:text-white/30 outline-none focus:border-mom-pink/60 transition-colors`;
+  return `w-full bg-transparent border-0 border-b-2 ${
+    hasError ? "border-red" : "border-green"
+  } py-2.5 text-base text-dark placeholder:text-dark/35 outline-none focus:border-red transition-colors`;
 }
 
 function Row({
@@ -719,21 +711,21 @@ function Row({
   muted?: boolean;
 }) {
   return (
-    <div className="flex justify-between text-sm">
+    <div className="flex justify-between text-body-sm">
       <span
         className={
           accent
-            ? "text-mom-green"
+            ? "text-green font-semibold"
             : muted
-            ? "text-white/55"
-            : "text-white/85"
+            ? "text-dark/50"
+            : "text-dark/70"
         }
       >
         {label}
       </span>
       <span
-        className={`font-quirk ${
-          accent ? "text-mom-green" : muted ? "text-white/55" : "text-white"
+        className={`font-semibold ${
+          accent ? "text-green" : muted ? "text-dark/50" : "text-dark"
         }`}
       >
         {value}
@@ -753,25 +745,17 @@ function PincodeStatusLine({
 }) {
   if (status.state === "idle") return null;
   if (status.state === "checking") {
-    return (
-      <p className="text-[11px] uppercase tracking-[0.2em] text-white/55">
-        Checking serviceability…
-      </p>
-    );
+    return <p className="text-body-sm text-dark/50">Checking serviceability…</p>;
   }
   if (status.state === "available") {
     return (
-      <p className="text-[11px] uppercase tracking-[0.2em] text-mom-green">
+      <p className="text-body-sm text-green font-semibold">
         ✓ Deliverable
         {status.codAvailable ? " · COD available" : " · COD unavailable here"}
       </p>
     );
   }
-  return (
-    <p className="text-[11px] uppercase tracking-[0.2em] text-mom-red">
-      {status.reason}
-    </p>
-  );
+  return <p className="text-body-sm text-red font-semibold">{status.reason}</p>;
 }
 
 function PaymentOption({
@@ -792,23 +776,19 @@ function PaymentOption({
       type="button"
       onClick={onClick}
       disabled={disabled}
-      className={`w-full text-left rounded-xl px-4 py-3 border transition-all cursor-pointer ${
-        active
-          ? "bg-mom-pink/10 border-mom-pink/40"
-          : "bg-white/[0.04] border-white/[0.10] hover:border-white/30"
+      className={`w-full text-left px-4 py-3.5 transition-colors cursor-pointer ${
+        active ? "bg-green/10" : "bg-cream hover:bg-cream/60"
       } disabled:opacity-50 disabled:cursor-not-allowed`}
     >
       <div className="flex items-center gap-3">
         <span
-          className={`w-4 h-4 rounded-full border ${
-            active ? "border-mom-pink bg-mom-pink/40" : "border-white/30"
+          className={`w-4 h-4 rounded-full border-2 shrink-0 ${
+            active ? "border-green bg-green" : "border-dark/25"
           }`}
         />
         <div className="flex-1">
-          <p className="text-sm font-quirk text-white uppercase tracking-wide">
-            {title}
-          </p>
-          <p className="text-[11px] text-white/55 mt-0.5">{subtitle}</p>
+          <p className="text-body font-bold text-dark">{title}</p>
+          <p className="text-body-sm text-dark/55 mt-0.5">{subtitle}</p>
         </div>
       </div>
     </button>

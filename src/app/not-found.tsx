@@ -13,28 +13,26 @@ export default function NotFound() {
   return (
     <>
       <Navigation />
-      <main className="min-h-screen bg-mom-black text-white pt-28 md:pt-36 pb-24 md:pb-32">
-        <div className="max-w-2xl mx-auto px-6 md:px-12 text-center">
-          <p className="text-xs md:text-sm uppercase tracking-[0.4em] text-mom-pink mb-4 font-semibold">
+      <main className="min-h-screen bg-cream pt-28 md:pt-36 pb-24 md:pb-32 cv-auto">
+        <div className="max-w-2xl mx-auto px-5 md:px-9 text-center">
+          <p className="text-tag text-red uppercase tracking-[0.08em] mb-4">
             Lost in the spice rack
           </p>
-          <h1 className="text-6xl md:text-8xl font-quirk uppercase leading-[0.9] mb-6">
-            404
-          </h1>
-          <p className="text-base md:text-lg text-white/85 leading-relaxed mb-10 max-w-md mx-auto">
+          <h1 className="text-h1 text-green mb-6">404</h1>
+          <p className="text-body text-dark/80 mb-10 max-w-md mx-auto">
             This page doesn&apos;t exist — or it ran for the door because the
             thecha was too spicy. Either way, head back to the good stuff.
           </p>
           <div className="flex flex-wrap items-center justify-center gap-4">
             <Link
               href="/shop"
-              className="px-7 py-3 bg-mom-pink text-white text-[12px] uppercase tracking-[0.2em] font-quirk rounded-full hover:bg-mom-pink/90 transition-colors"
+              className="inline-flex items-center justify-center text-btn font-bold bg-green text-cream px-8 py-4 hover:bg-green/90 transition-colors"
             >
               Shop the jars
             </Link>
             <Link
               href="/"
-              className="px-7 py-3 border border-white/15 text-white text-[12px] uppercase tracking-[0.2em] font-quirk rounded-full hover:bg-white/[0.04] transition-colors"
+              className="inline-flex items-center justify-center text-btn font-bold bg-cream-dark text-dark px-8 py-4 hover:text-red transition-colors"
             >
               Back home
             </Link>

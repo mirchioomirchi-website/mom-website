@@ -4,33 +4,100 @@
 // Delivery) into Shopify Admin so they show up in Orders, decrement inventory,
 // auto-trigger Shopify's confirmation email, and auto-sync to Shiprocket.
 //
-// Required env vars (NEVER expose ADMIN_TOKEN to the client):
+// Required env vars (NEVER expose CLIENT_SECRET to the client):
 //   SHOPIFY_STORE_DOMAIN          e.g. "mirchi-o-mirchi.myshopify.com"
-//   SHOPIFY_ADMIN_TOKEN           starts with "shpat_" — from a custom app
+//   SHOPIFY_CLIENT_ID             from the app's Dev Dashboard Settings page
+//   SHOPIFY_CLIENT_SECRET         from the app's Dev Dashboard Settings page
 //   SHOPIFY_ADMIN_API_VERSION     defaults to "2025-01"
 //
-// To create the access token:
-//   1. Shopify Admin → Settings → Apps and sales channels → Develop apps
-//   2. Create app named "MOM Order Bridge"
-//   3. Configure Admin API scopes: write_orders, read_orders, write_customers,
-//      read_products, read_inventory
-//   4. Install → reveal the Admin API access token (shown ONCE)
+// Auth: Shopify custom apps no longer issue a static "shpat_" token you copy
+// once — the Dev Dashboard only gives a Client ID + Client Secret pair. We
+// exchange those for a short-lived access token via the OAuth client
+// credentials grant (RFC 6749 §4.4), documented at:
+//   https://shopify.dev/docs/apps/build/authentication-authorization/access-tokens/client-credentials-grant
+// Tokens expire after 24h (86399s), so we cache the token in memory and
+// transparently refetch it (with a safety buffer) whenever it's stale.
+//
+// To get the Client ID/Secret:
+//   1. dev.shopify.com/dashboard → your app (e.g. "MOM Order Bridge") → Settings
+//   2. Copy the Client ID; click the eye icon (or Rotate) to reveal the Secret
+//   3. Configure Admin API scopes for the app's active version: write_orders,
+//      read_orders, write_customers, read_products, read_inventory,
+//      write_inventory, read_fulfillments, write_fulfillments
+//   4. Install the app on the store (Settings → Apps → find it under
+//      "Uninstalled" → Install) — client credentials only work for apps
+//      installed on a store in the same organization as the app.
 
 const STORE_DOMAIN =
   process.env.SHOPIFY_STORE_DOMAIN ||
   process.env.NEXT_PUBLIC_SHOPIFY_STORE_DOMAIN ||
   "";
-const ADMIN_TOKEN = process.env.SHOPIFY_ADMIN_TOKEN || "";
+const CLIENT_ID = process.env.SHOPIFY_CLIENT_ID || "";
+const CLIENT_SECRET = process.env.SHOPIFY_CLIENT_SECRET || "";
 const API_VERSION =
   process.env.SHOPIFY_ADMIN_API_VERSION ||
   process.env.NEXT_PUBLIC_SHOPIFY_API_VERSION ||
   "2025-01";
 
-export const shopifyAdminConfigured = Boolean(STORE_DOMAIN && ADMIN_TOKEN);
+export const shopifyAdminConfigured = Boolean(
+  STORE_DOMAIN && CLIENT_ID && CLIENT_SECRET
+);
 
 const ENDPOINT = STORE_DOMAIN
   ? `https://${STORE_DOMAIN}/admin/api/${API_VERSION}/graphql.json`
   : "";
+const TOKEN_ENDPOINT = STORE_DOMAIN
+  ? `https://${STORE_DOMAIN}/admin/oauth/access_token`
+  : "";
+
+// In-memory access-token cache (per server instance). Refetched ~2 minutes
+// before actual expiry so we never hand out a token that dies mid-request.
+let tokenCache: { token: string; expiresAt: number } | null = null;
+const TOKEN_REFRESH_BUFFER_MS = 2 * 60 * 1000;
+
+async function getAccessToken(): Promise<string | null> {
+  if (!shopifyAdminConfigured) return null;
+  if (tokenCache && Date.now() < tokenCache.expiresAt) {
+    return tokenCache.token;
+  }
+  try {
+    const res = await fetch(TOKEN_ENDPOINT, {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: new URLSearchParams({
+        grant_type: "client_credentials",
+        client_id: CLIENT_ID,
+        client_secret: CLIENT_SECRET,
+      }).toString(),
+      signal: AbortSignal.timeout(15_000),
+    });
+    if (!res.ok) {
+      const text = await res.text().catch(() => "");
+      console.error(
+        "[shopify-admin] token exchange HTTP",
+        res.status,
+        text.slice(0, 500)
+      );
+      return null;
+    }
+    const json = (await res.json()) as {
+      access_token?: string;
+      expires_in?: number;
+    };
+    if (!json.access_token) {
+      console.error("[shopify-admin] token exchange returned no access_token");
+      return null;
+    }
+    tokenCache = {
+      token: json.access_token,
+      expiresAt: Date.now() + (json.expires_in ?? 86399) * 1000 - TOKEN_REFRESH_BUFFER_MS,
+    };
+    return tokenCache.token;
+  } catch (err) {
+    console.error("[shopify-admin] token exchange failed", err);
+    return null;
+  }
+}
 
 type GraphQLResp<T> = {
   data?: T;
@@ -44,12 +111,16 @@ async function adminFetch<T>(
   if (!shopifyAdminConfigured) {
     return { data: null, errors: ["Shopify Admin not configured"] };
   }
+  const accessToken = await getAccessToken();
+  if (!accessToken) {
+    return { data: null, errors: ["Could not obtain Shopify access token"] };
+  }
   try {
     const res = await fetch(ENDPOINT, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "X-Shopify-Access-Token": ADMIN_TOKEN,
+        "X-Shopify-Access-Token": accessToken,
       },
       body: JSON.stringify({ query, variables }),
       // Admin API can be slow under load — give it a sensible budget.

@@ -20,6 +20,19 @@ export type Product = {
   badge?: string;
   isCombo?: boolean;
   comboItems?: string[];
+  // ── PDP-specific fields ──────────────────────────────────────────────
+  // Free-text heat label shown on the product page (e.g. "Medium - Hot").
+  // Distinct from the numeric spiceLevel used for the chili-icon indicator.
+  heatLevel: string;
+  // Punchy brand-voice paragraph used in the PDP "story" section — separate
+  // from longDescription (which is the factual jar-copy in the hero).
+  storyText: string;
+  // Macro/closeup product photo + a secondary lifestyle photo, both meant to
+  // come from Shopify product metafields. Optional — components fall back
+  // to a color-tinted panel with the front jar shot when a flavor doesn't
+  // have real photography yet.
+  closeupImage?: string;
+  secondaryImage?: string;
 };
 
 export const PRODUCTS: Product[] = [
@@ -34,6 +47,7 @@ export const PRODUCTS: Product[] = [
     longDescription:
       "Our Green Chilli thecha is the original — sharp, fresh and built for people who like their flavour with a kick. We use hand-picked green chillies, pound them in stone mortars and blend with garlic and olive oil.",
     price: 299,
+    originalPrice: 399,
     weight: "250g",
     image: "/images/jar-green-final.webp",
     color: "#7BB55E",
@@ -42,11 +56,10 @@ export const PRODUCTS: Product[] = [
     ingredients: [
       "Fresh green chillies",
       "Fresh garlic",
-      "Fresh coriander",
-      "Olive oil",
-      "Lemon",
-      "Cumin",
-      "Salt",
+      "Coriander",
+      "Cold pressed oil",
+      "Lemon juice",
+      "Rock salt & cumin",
     ],
     pairings: [
       "Hot Bhakri",
@@ -57,6 +70,9 @@ export const PRODUCTS: Product[] = [
     ],
     spiceLevel: 4,
     badge: "Bestseller",
+    heatLevel: "Mild - Medium",
+    storyText:
+      "This one keeps it fresh. Spoon it over rice, fold it into curd, or eat it straight off a hot bhakri — Green Chilli Thecha is for whoever asked for 'more garlic, less rules.'",
   },
   {
     slug: "red-chilli-thecha",
@@ -69,6 +85,7 @@ export const PRODUCTS: Product[] = [
     longDescription:
       "Whole red chillies stone-ground with raw garlic and olive oil. Rich, dark, and deeply hot — pairs with anything that needs life.",
     price: 299,
+    originalPrice: 399,
     weight: "250g",
     image: "/images/jar-red-final.webp",
     color: "#E53935",
@@ -77,11 +94,10 @@ export const PRODUCTS: Product[] = [
     ingredients: [
       "Fresh red chillies",
       "Fresh garlic",
-      "Fresh coriander",
-      "Olive oil",
-      "Lemon",
-      "Cumin",
-      "Salt",
+      "Coriander",
+      "Cold pressed oil",
+      "Lemon juice",
+      "Rock salt & cumin",
     ],
     pairings: [
       "Dosa",
@@ -91,6 +107,11 @@ export const PRODUCTS: Product[] = [
       "Anything boring",
     ],
     spiceLevel: 5,
+    heatLevel: "Medium - Hot",
+    storyText:
+      "This one doesn't play safe. Stir it into dal-chawal, smear it on a sandwich, or eat it off the spoon — Red Chilli Thecha is for whoever asked for 'more spicy.'",
+    closeupImage: "/images/pdp/red-closeup.webp",
+    secondaryImage: "/images/pdp/red-secondary.webp",
   },
   {
     slug: "mixed-chilli-thecha",
@@ -103,6 +124,7 @@ export const PRODUCTS: Product[] = [
     longDescription:
       "Green and red chillies stone-ground into one bold and layered thecha. Best of both heats in one jar.",
     price: 299,
+    originalPrice: 399,
     weight: "250g",
     image: "/images/jar-mixed-final.webp",
     color: "#FF9A1E",
@@ -112,11 +134,10 @@ export const PRODUCTS: Product[] = [
       "Fresh green chillies",
       "Fresh red chillies",
       "Fresh garlic",
-      "Fresh coriander",
-      "Olive oil",
-      "Lemon",
-      "Cumin",
-      "Salt",
+      "Coriander",
+      "Cold pressed oil",
+      "Lemon juice",
+      "Rock salt & cumin",
     ],
     pairings: [
       "Vada Pav",
@@ -126,19 +147,22 @@ export const PRODUCTS: Product[] = [
       "Maggi",
     ],
     spiceLevel: 4,
+    heatLevel: "Medium - Hot",
+    storyText:
+      "This one doesn't pick sides. Stir it into misal, load it onto vada pav, or eat it off the spoon — Mixed Chilli Thecha is for whoever asked for 'both, actually.'",
   },
   {
     slug: "combo-pack",
     name: "Combo Pack",
     shortName: "Combo Pack",
     flavor: "combo",
-    tagline: "Three Heats. Save ₹98.",
+    tagline: "Three Heats. Save ₹100.",
     description:
-      "All three flavours — Green, Mixed, Red — together. Save ₹98 vs buying separately.",
+      "All three flavours — Green, Mixed, Red — together. Save ₹100 vs buying separately.",
     longDescription:
       "Can't pick a favourite? You don't have to. The Combo Pack gives you all three flavours in one go — fresh green, bold red and fiery mixed — at a price that beats buying separately. Great gift, great trial set, great answer to the question 'which one is the spiciest?'",
     price: 799,
-    originalPrice: 897,
+    originalPrice: 899,
     weight: "3 × 250g",
     image: "/images/jar-mixed-final.webp",
     color: "#F5197F",
@@ -163,6 +187,9 @@ export const PRODUCTS: Product[] = [
       "/images/jar-mixed-final.webp",
       "/images/jar-red-final.webp",
     ],
+    heatLevel: "Mild - Hot",
+    storyText:
+      "Can't pick a favourite? Don't. Keep all three within arm's reach — on the table, in the fridge, wherever flavour's needed — Combo Pack is for whoever asked for 'why choose.'",
   },
 ];
 
@@ -171,8 +198,35 @@ export function getProduct(slug: string): Product | undefined {
 }
 
 export function getRelatedProducts(slug: string): Product[] {
-  return PRODUCTS.filter((p) => p.slug !== slug && !p.isCombo);
+  return PRODUCTS.filter((p) => p.slug !== slug);
 }
+
+// Clean, product-only photography (no lifestyle staging) used in compact UI
+// contexts — the cart drawer's line-item rows, PDP cross-sell cards — where
+// the fuller "-final" jar renders read too busy. Single source of truth so
+// every place that needs a small product thumbnail stays in sync, with a
+// dedicated combo-pack shot instead of falling back to a single jar.
+export const PRODUCT_CARD_IMAGES: Record<string, string> = {
+  "green-chilli-thecha": "/images/green chilli.png",
+  "red-chilli-thecha": "/images/red chilli.png",
+  "mixed-chilli-thecha": "/images/mixed chilli.png",
+  "combo-pack": "/images/combo products.png",
+};
+
+// PDP-only accent colors. `product.color` (the bright candy hexes used for
+// character illustrations, shop cards, etc.) is intentionally vivid for
+// those other contexts — but on the Product Detail Page every other element
+// (buttons, dividers, banners) draws from the site's single global palette
+// (globals.css --color-* tokens). This map keeps the PDP's per-flavor tints
+// (ingredients banner text, cross-sell highlight background, marquee text,
+// hero fallback panel) inside that same palette instead of introducing a
+// second, mismatched color system on just this one page.
+export const PDP_ACCENT_COLOR: Record<Product["flavor"], string> = {
+  green: "var(--color-green)",
+  red: "var(--color-red)",
+  mixed: "var(--color-orange)",
+  combo: "var(--color-pink)",
+};
 
 // Discount config — must match CheckoutPageClient.tsx so the server-computed
 // total and the client-displayed total agree.

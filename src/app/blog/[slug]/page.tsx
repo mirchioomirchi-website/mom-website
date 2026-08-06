@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { PortableText, type PortableTextComponents } from "next-sanity";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
+import { ScrollReveal } from "@/components/primitives";
 import { getBlogPost, listBlogSlugs, urlForImage } from "@/lib/blog";
 import { SITE_URL, safeJsonLd } from "@/lib/site";
 
@@ -71,11 +72,11 @@ const portableComponents: PortableTextComponents = {
           <img
             src={urlForImage(value)}
             alt={value.alt || ""}
-            className="w-full rounded-xl border border-white/10"
+            className="w-full"
             loading="lazy"
           />
           {value.alt && (
-            <figcaption className="text-xs text-white/50 mt-3 text-center">
+            <figcaption className="text-body-sm text-dark/50 mt-3 text-center">
               {value.alt}
             </figcaption>
           )}
@@ -85,18 +86,18 @@ const portableComponents: PortableTextComponents = {
   },
   block: {
     h2: ({ children }) => (
-      <h2 className="text-3xl font-quirk mt-12 mb-4 text-white">{children}</h2>
+      <h2 className="text-h3 font-bold text-green mt-12 mb-4">{children}</h2>
     ),
     h3: ({ children }) => (
-      <h3 className="text-2xl font-quirk mt-10 mb-3 text-white">{children}</h3>
+      <h3 className="text-h4 font-bold text-green mt-10 mb-3">{children}</h3>
     ),
     blockquote: ({ children }) => (
-      <blockquote className="border-l-4 border-mom-pink pl-6 my-8 text-white/80 italic">
+      <blockquote className="border-l-4 border-red pl-6 my-8 text-body text-dark/70 italic">
         {children}
       </blockquote>
     ),
     normal: ({ children }) => (
-      <p className="text-white/80 leading-relaxed mb-5">{children}</p>
+      <p className="text-body text-dark/80 mb-5">{children}</p>
     ),
   },
   marks: {
@@ -107,13 +108,13 @@ const portableComponents: PortableTextComponents = {
           href={href}
           target="_blank"
           rel="noopener noreferrer"
-          className="text-mom-pink underline underline-offset-2 hover:text-mom-pink/80"
+          className="text-red underline underline-offset-2 hover:text-red/80 transition-colors"
         >
           {children}
         </a>
       );
     },
-    strong: ({ children }) => <strong className="text-white">{children}</strong>,
+    strong: ({ children }) => <strong className="text-dark font-bold">{children}</strong>,
   },
 };
 
@@ -149,65 +150,72 @@ export default async function BlogPostPage({
   return (
     <>
       <Navigation />
-      <main className="min-h-screen bg-mom-black text-white pt-32 pb-24">
+      <main className="bg-cream pt-28 md:pt-36 pb-20 md:pb-28 cv-auto">
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: safeJsonLd(articleJsonLd) }}
         />
-        <article className="max-w-3xl mx-auto px-6">
-          <header className="mb-12">
-            <Link
-              href="/blog"
-              className="text-[10px] uppercase tracking-[0.3em] text-mom-pink hover:text-mom-pink/80 transition-colors"
-            >
-              ← Back to journal
-            </Link>
-            <time
-              dateTime={post.publishedAt}
-              className="block text-[11px] uppercase tracking-[0.25em] text-white/40 mt-6"
-            >
-              {new Date(post.publishedAt).toLocaleDateString("en-IN", {
-                day: "numeric",
-                month: "long",
-                year: "numeric",
-              })}
-              {post.author ? ` · ${post.author}` : ""}
-            </time>
-            <h1 className="text-4xl md:text-6xl font-quirk uppercase mt-4 leading-[0.95]">
-              {post.title}
-            </h1>
-            <p className="mt-6 text-lg text-white/70 leading-relaxed">{post.excerpt}</p>
-          </header>
+        <article className="max-w-3xl mx-auto px-5 md:px-9">
+          <ScrollReveal>
+            <header className="mb-12">
+              <Link
+                href="/blog"
+                className="inline-flex items-center gap-2 text-btn text-dark/70 hover:text-red transition-colors"
+              >
+                <span aria-hidden="true">←</span> Back to journal
+              </Link>
+              <time
+                dateTime={post.publishedAt}
+                className="block text-tag text-dark/50 uppercase tracking-[0.06em] mt-6"
+              >
+                {new Date(post.publishedAt).toLocaleDateString("en-IN", {
+                  day: "numeric",
+                  month: "long",
+                  year: "numeric",
+                })}
+                {post.author ? ` · ${post.author}` : ""}
+              </time>
+              <h1 className="text-h1 text-red mt-4 mb-6">{post.title}</h1>
+              <p className="text-body text-dark/80">{post.excerpt}</p>
+            </header>
+          </ScrollReveal>
 
           {post.coverImage && (
-            <div className="rounded-2xl overflow-hidden border border-white/10 mb-12">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={urlForImage(post.coverImage)}
-                alt={post.coverImage.alt || post.title}
-                className="w-full aspect-[16/10] object-cover"
-              />
+            <ScrollReveal delay={0.05}>
+              <div className="mb-12">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={urlForImage(post.coverImage)}
+                  alt={post.coverImage.alt || post.title}
+                  className="w-full aspect-[16/10] object-cover"
+                />
+              </div>
+            </ScrollReveal>
+          )}
+
+          <ScrollReveal delay={0.08}>
+            <div>
+              {post.body ? (
+                <PortableText value={post.body} components={portableComponents} />
+              ) : null}
             </div>
-          )}
 
-          <div className="prose-mom">
-            {post.body ? (
-              <PortableText value={post.body} components={portableComponents} />
-            ) : null}
-          </div>
-
-          {post.tags && post.tags.length > 0 && (
-            <footer className="mt-16 pt-8 border-t border-white/10 flex flex-wrap gap-2">
-              {post.tags.map((tag) => (
-                <span
-                  key={tag}
-                  className="px-3 py-1 text-[10px] uppercase tracking-[0.2em] rounded-full border border-white/15 text-white/60"
-                >
-                  {tag}
-                </span>
-              ))}
-            </footer>
-          )}
+            {post.tags && post.tags.length > 0 && (
+              <footer className="mt-16 pt-8">
+                <div className="dotted-divider text-dark/15 mb-8" />
+                <div className="flex flex-wrap gap-2">
+                  {post.tags.map((tag) => (
+                    <span
+                      key={tag}
+                      className="text-body-sm text-dark/60 border border-dark/15 px-3 py-1"
+                    >
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+              </footer>
+            )}
+          </ScrollReveal>
         </article>
       </main>
       <Footer />

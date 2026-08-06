@@ -1,34 +1,66 @@
 import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
-import { Inter } from "next/font/google";
 import "./globals.css";
 import dynamic from "next/dynamic";
 import { CartProvider } from "@/lib/cart-context";
 import Analytics from "@/components/Analytics";
-
-// MiniCart only renders after a user adds an item — code-split it into its
-// own chunk so motion + Image overhead don't sit in the initial bundle.
-const MiniCart = dynamic(() => import("@/components/MiniCart"));
-const WhatsAppFab = dynamic(() => import("@/components/WhatsAppFab"));
 import { SITE_URL, SITE_NAME, SITE_LEGAL_NAME, DEFAULT_OG_IMAGE, safeJsonLd } from "@/lib/site";
 
-const quirk = localFont({
-  src: "../../public/fonts/Quirk-Regular.woff2",
+const MiniCart = dynamic(() => import("@/components/MiniCart"));
+const WhatsAppFab = dynamic(() => import("@/components/WhatsAppFab"));
+
+// All three brand typefaces load through next/font/local — one consistent
+// mechanism (subsetting, preload, font-display, automatic fallback metrics)
+// instead of mixing next/font with hand-written @font-face rules. Each
+// variable is consumed by the @theme tokens in globals.css.
+const afacad = localFont({
+  src: [
+    {
+      path: "../../public/fonts/afacad/Afacad-VariableFont_wght.ttf",
+      style: "normal",
+    },
+    {
+      path: "../../public/fonts/afacad/Afacad-Italic-VariableFont_wght.ttf",
+      style: "italic",
+    },
+  ],
   variable: "--font-quirk",
   display: "swap",
   preload: true,
 });
 
-const inter = Inter({
-  subsets: ["latin"],
-  variable: "--font-inter",
+// Primary body/UI typeface. Weights map 1:1 to the type scale in globals.css
+// (Medium 500 = body text, DemiBold 600 = tags/buttons); Bold/ExtraBold are
+// kept for the handful of components (nav popups, cart drawer) still using
+// heavier inline weights.
+const greycliff = localFont({
+  src: [
+    { path: "../../public/fonts/greycliff/GreycliffCF-Medium.otf", weight: "500", style: "normal" },
+    { path: "../../public/fonts/greycliff/GreycliffCF-DemiBold.otf", weight: "600", style: "normal" },
+    { path: "../../public/fonts/greycliff/GreycliffCF-Bold.otf", weight: "700", style: "normal" },
+    { path: "../../public/fonts/greycliff/GreycliffCF-ExtraBold.otf", weight: "800", style: "normal" },
+  ],
+  variable: "--font-body",
   display: "swap",
+  preload: true,
+});
+
+// Devanagari-supporting accent typeface — used only for the bilingual
+// eyebrow labels ("पदार्थ · Ingredients") and similar brand flourishes.
+const sura = localFont({
+  src: [
+    { path: "../../public/fonts/sura/Sura-Regular.ttf", weight: "400", style: "normal" },
+    { path: "../../public/fonts/sura/Sura-Bold.ttf", weight: "700", style: "normal" },
+  ],
+  variable: "--font-accent",
+  display: "swap",
+  preload: false,
 });
 
 const OG_IMAGE = `${SITE_URL}${DEFAULT_OG_IMAGE}`;
 
 export const viewport: Viewport = {
-  themeColor: "#000000",
+  themeColor: "#1A0D04",
   width: "device-width",
   initialScale: 1,
   maximumScale: 5,
@@ -58,10 +90,6 @@ export const metadata: Metadata = {
   creator: SITE_LEGAL_NAME,
   publisher: SITE_LEGAL_NAME,
   formatDetection: { email: false, address: false, telephone: false },
-  // NOTE: do NOT set a global `canonical` here. Next.js inherits this on
-  // every sub-page that doesn't override it, which would point /about, /shop,
-  // /blog/* etc. all back to "/" and tank SEO. Each page sets its own
-  // canonical via its own `metadata` export.
   alternates: { types: { "application/rss+xml": `${SITE_URL}/rss.xml` } },
   openGraph: {
     title: `${SITE_NAME} — Bold Flavour. Real Thecha.`,
@@ -102,7 +130,7 @@ const organizationJsonLd = {
   name: SITE_NAME,
   legalName: SITE_LEGAL_NAME,
   url: SITE_URL,
-  logo: `${SITE_URL}/images/mom-logo-white.webp`,
+  logo: `${SITE_URL}/MOM_logo.svg`,
   description:
     "Handcrafted Indian thecha. Three bold flavours. No fillers. No shortcuts.",
 };
@@ -125,7 +153,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${quirk.variable} ${inter.variable}`}>
+    <html lang="en" className={`${afacad.variable} ${greycliff.variable} ${sura.variable}`}>
       <head>
         <script
           type="application/ld+json"
@@ -138,11 +166,8 @@ export default function RootLayout({
         <link rel="preconnect" href="https://cdn.sanity.io" crossOrigin="anonymous" />
         <link rel="preconnect" href="https://cdn.shopify.com" crossOrigin="anonymous" />
         <link rel="dns-prefetch" href="https://checkout.razorpay.com" />
-        {/* NOTE: hero first-frame preload moved out of layout into app/page.tsx
-            (home only). Preloading 14KB of webp on /shop, /about, /blog etc.
-            wasted bandwidth and hurt LCP on those routes. */}
       </head>
-      <body className="bg-mom-black text-white font-sans antialiased">
+      <body className="bg-cream text-dark font-sans antialiased">
         <Analytics />
         <CartProvider>
           {children}

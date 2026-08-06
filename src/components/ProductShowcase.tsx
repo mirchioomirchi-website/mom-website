@@ -1,60 +1,26 @@
 "use client";
 
-import { useRef, useEffect } from "react";
+import { useRef, useState, useEffect } from "react";
 import Image from "next/image";
-import Link from "next/link";
 import { useScroll, useMotionValueEvent } from "motion/react";
 import { useCart } from "@/lib/cart-context";
+import type { Product } from "@/lib/products";
 
-const PRODUCTS = [
-  {
-    slug: "green-chilli-thecha",
-    name: "Green Chilli",
-    subtitle: "Thecha",
-    tagline: "Fresh. Garlicky. Addictive.",
-    description:
-      "Hand-pounded green chillies, fresh garlic and olive oil. The OG — fresh, garlicky and dangerously addictive.",
-    image: "/images/jar-green-final.webp",
-    color: "#7BB55E",
-    accentRgb: "123, 181, 94",
-    speech: "Classy. Sassy. Thodi bad-assy.",
-  },
-  {
-    slug: "red-chilli-thecha",
-    name: "Red Chilli",
-    subtitle: "Thecha",
-    tagline: "Bold. Fiery. Garlicky.",
-    description:
-      "Whole red chillies, fresh garlic and olive oil. A bold red thecha with fiery heat, a garlicky kick and a heat that builds.",
-    image: "/images/jar-red-final.webp",
-    color: "#E53935",
-    accentRgb: "229, 57, 53",
-    speech: "Too hot to handle, baby.",
-  },
-  {
-    slug: "mixed-chilli-thecha",
-    name: "Mixed Chilli",
-    subtitle: "Thecha",
-    tagline: "Punchy. Complex. Full Power.",
-    description:
-      "Green and red chillies, fresh garlic and olive oil come together in one full-flavour thecha — bright, bold, layered and made for people who want the best of both mirchis.",
-    image: "/images/jar-mixed-final.webp",
-    color: "#FF9A1E",
-    accentRgb: "255, 154, 30",
-    speech: "Mirchi lagi toh? IDGAFlying Chappal!",
-  },
-];
+// Presentation-only extras that don't belong in the shared checkout-critical
+// products.ts (dark showcase background + Devanagari subtitle + rotation
+// frame count). Keyed by flavor so this stays in sync automatically if a
+// slug is renamed. Frame images in public/images/jar-frames are true
+// transparent (alpha) cutouts of the real multi-angle jar photography, so
+// bgDark just needs to be a good-looking backdrop — no pixel-matching
+// required, unlike a flattened/baked-background crop.
+const SHOWCASE_EXTRAS: Record<string, { bgDark: string; devanagari: string; frames: number }> = {
+  green: { bgDark: "#114A22", devanagari: "मिर्ची चा ठेचा", frames: 14 },
+  red: { bgDark: "#9B1E15", devanagari: "मिर्ची चा ठेचा", frames: 11 },
+  mixed: { bgDark: "#B44800", devanagari: "मिर्ची चा ठेचा", frames: 14 },
+};
 
-function lerp(p: number, stops: number[], values: number[]) {
-  if (p <= stops[0]) return values[0];
-  if (p >= stops[stops.length - 1]) return values[values.length - 1];
-  for (let i = 0; i < stops.length - 1; i++) {
-    if (p >= stops[i] && p <= stops[i + 1]) {
-      const t = (p - stops[i]) / (stops[i + 1] - stops[i]);
-      return values[i] + t * (values[i + 1] - values[i]);
-    }
-  }
-  return values[values.length - 1];
+function framePath(flavor: string, n: number) {
+  return `/images/jar-frames/${flavor}-${n}.webp`;
 }
 
 function plateau(p: number, center: number, halfFlat: number, halfFade: number) {
@@ -65,94 +31,214 @@ function plateau(p: number, center: number, halfFlat: number, halfFade: number) 
   return Math.cos((t * Math.PI) / 2) ** 2;
 }
 
-const HALF_FLAT = 0.08;
-const HALF_FADE = 0.22;
-const CENTERS = [0, 0.5, 1];
-const RGB = [
-  [123, 181, 94],
-  [229, 57, 53],
-  [255, 154, 30],
-];
+function hexToRgb(hex: string): [number, number, number] {
+  const m = hex.replace("#", "");
+  return [
+    parseInt(m.slice(0, 2), 16),
+    parseInt(m.slice(2, 4), 16),
+    parseInt(m.slice(4, 6), 16),
+  ];
+}
 
-export default function ProductShowcase() {
+// Small crescent "chili pod" glyph used for the spice-level indicator —
+// matches the curved icon row in the design reference (not a simple dot).
+function ChiliIcon({ filled, color }: { filled: boolean; color: string }) {
+  return (
+    <svg width="14" height="20" viewBox="0 0 14 20" fill="none" aria-hidden="true">
+      <path
+        d="M3.5 1.5C3.5 1.5 10.5 4.8 10.5 10C10.5 15.2 3.5 18.5 3.5 18.5C3.5 18.5 7.8 13.2 7.8 10C7.8 6.8 3.5 1.5 3.5 1.5Z"
+        fill={filled ? color : "none"}
+        stroke={color}
+        strokeWidth={filled ? 0 : 1.3}
+        opacity={filled ? 1 : 0.4}
+      />
+    </svg>
+  );
+}
+
+function QtyStepper({
+  qty,
+  setQty,
+  color,
+}: {
+  qty: number;
+  setQty: (fn: (q: number) => number) => void;
+  color: string;
+}) {
+  return (
+    <div className="flex items-center bg-white/[0.08] border border-white/15 rounded-full">
+      <button
+        onClick={() => setQty((q) => Math.max(1, q - 1))}
+        className="w-9 h-10 md:w-10 md:h-11 text-white/70 hover:text-white transition-colors cursor-pointer"
+        aria-label="Decrease quantity"
+      >
+        −
+      </button>
+      <span className="w-8 text-center font-quirk text-sm md:text-base" style={{ color }}>
+        {qty}
+      </span>
+      <button
+        onClick={() => setQty((q) => q + 1)}
+        className="w-9 h-10 md:w-10 md:h-11 text-white/70 hover:text-white transition-colors cursor-pointer"
+        aria-label="Increase quantity"
+      >
+        +
+      </button>
+    </div>
+  );
+}
+
+// "Boom" starburst Add to Cart button — the exact pink shape supplied in the
+// design assets, with the label overlaid on top instead of a plain pill.
+function BoomAddToCart({ onClick }: { onClick: () => void }) {
+  const [added, setAdded] = useState(false);
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  return (
+    <button
+      type="button"
+      onClick={() => {
+        onClick();
+        if (timerRef.current) clearTimeout(timerRef.current);
+        setAdded(true);
+        timerRef.current = setTimeout(() => setAdded(false), 1200);
+      }}
+      aria-label="Add to cart"
+      className="relative w-[118px] h-[60px] md:w-[145px] md:h-[74px] shrink-0 cursor-pointer hover:scale-105 active:scale-95 transition-transform duration-200"
+    >
+      <svg viewBox="0 0 145 74" className="absolute inset-0 w-full h-full">
+        <path
+          d="M61.5225 13.6456L75.9025 0L89.5126 19.0001L123.014 10.5L121.444 30.0001L145 37.0001L114.116 49.5002L120.397 66.0002L83.1856 56.504L65.9567 74L57.366 55.3234L16.7509 61.0002L23.556 46.0001L0 31.4999L29.8375 26.5001L22.509 10L61.5225 13.6456Z"
+          fill="var(--color-pink)"
+        />
+      </svg>
+      <span className="relative z-10 flex items-center justify-center w-full h-full text-white text-[9px] md:text-[10.5px] font-quirk font-bold uppercase tracking-[0.06em] leading-none px-3 text-center">
+        {added ? "Added!" : "Add to Cart"}
+      </span>
+    </button>
+  );
+}
+
+export default function ProductShowcase({ products }: { products: Product[] }) {
+  const flavours = products.filter((p) => !p.isCombo).slice(0, 3);
+  const N = flavours.length;
+  const segWidth = N > 0 ? 1 / N : 1;
+  const centers = flavours.map((_, i) => i * segWidth + segWidth / 2);
+  const rgbDark = flavours.map((p) => hexToRgb(SHOWCASE_EXTRAS[p.flavor]?.bgDark ?? p.color));
+  const frameCounts = flavours.map((p) => SHOWCASE_EXTRAS[p.flavor]?.frames ?? 1);
+
   const outerRef = useRef<HTMLDivElement>(null);
-  const glowRef = useRef<HTMLDivElement>(null);
-  const jarRefs = useRef<(HTMLDivElement | null)[]>([]);
-  const copyRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const sectionBgRef = useRef<HTMLDivElement>(null);
+  const jarWrapperRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const jarFrameRefs = useRef<(HTMLImageElement | null)[][]>(flavours.map(() => []));
+  const titleRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const detailRefs = useRef<(HTMLDivElement | null)[]>([]);
   const dotRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const activeIndexRef = useRef(-1);
+  const lastFrameIdxRef = useRef<number[]>(flavours.map(() => -1));
   const { add } = useCart();
+  const [qtys, setQtys] = useState<number[]>(() => flavours.map(() => 1));
+
+  const setQtyAt = (i: number, fn: (q: number) => number) => {
+    setQtys((prev) => {
+      const next = [...prev];
+      next[i] = fn(prev[i] ?? 1);
+      return next;
+    });
+  };
 
   const { scrollYProgress } = useScroll({
     target: outerRef,
     offset: ["start start", "end end"],
   });
 
-  // Last-applied state so we can skip redundant DOM writes — Lenis fires the
-  // scroll change event on every frame even when nothing meaningful changed.
-  const lastGlowRef = useRef({ r: -1, g: -1, b: -1 });
+  const lastBgRef = useRef({ r: -1, g: -1, b: -1 });
 
   const apply = (progress: number) => {
-    const rawWeights = CENTERS.map((c) => plateau(progress, c, HALF_FLAT, HALF_FADE));
+    const rawWeights = centers.map((c) => plateau(progress, c, segWidth * 0.24, segWidth * 0.55));
     const wSum = rawWeights.reduce((a, b) => a + b, 0) || 1;
     const weights = rawWeights.map((w) => w / wSum);
 
-    const glowR = Math.round(
-      RGB[0][0] * weights[0] + RGB[1][0] * weights[1] + RGB[2][0] * weights[2]
-    );
-    const glowG = Math.round(
-      RGB[0][1] * weights[0] + RGB[1][1] * weights[1] + RGB[2][1] * weights[2]
-    );
-    const glowB = Math.round(
-      RGB[0][2] * weights[0] + RGB[1][2] * weights[1] + RGB[2][2] * weights[2]
-    );
+    let bgR = 0;
+    let bgG = 0;
+    let bgB = 0;
+    for (let i = 0; i < rgbDark.length; i++) {
+      bgR += rgbDark[i][0] * weights[i];
+      bgG += rgbDark[i][1] * weights[i];
+      bgB += rgbDark[i][2] * weights[i];
+    }
+    bgR = Math.round(bgR);
+    bgG = Math.round(bgG);
+    bgB = Math.round(bgB);
 
-    // Only rebuild the radial-gradient string if any RGB channel moved
-    // ≥3 units — sub-3 deltas are invisible but cost a re-parse + paint
-    // on a 140vw × 140vh element every frame.
-    const last = lastGlowRef.current;
+    const last = lastBgRef.current;
     if (
-      glowRef.current &&
-      (Math.abs(glowR - last.r) >= 3 ||
-        Math.abs(glowG - last.g) >= 3 ||
-        Math.abs(glowB - last.b) >= 3)
+      sectionBgRef.current &&
+      (Math.abs(bgR - last.r) >= 2 || Math.abs(bgG - last.g) >= 2 || Math.abs(bgB - last.b) >= 2)
     ) {
-      glowRef.current.style.background = `radial-gradient(circle at 50% 55%, rgba(${glowR},${glowG},${glowB},0.28) 0%, rgba(${glowR},${glowG},${glowB},0.08) 38%, transparent 68%)`;
-      lastGlowRef.current = { r: glowR, g: glowG, b: glowB };
+      sectionBgRef.current.style.backgroundColor = `rgb(${bgR}, ${bgG}, ${bgB})`;
+      lastBgRef.current = { r: bgR, g: bgG, b: bgB };
     }
 
-    for (let i = 0; i < CENTERS.length; i++) {
-      const center = CENTERS[i];
-      const segmentWidth = 0.5;
-      const local = (progress - center) / segmentWidth;
+    // Text is static — it doesn't slide or continuously crossfade. It just
+    // snaps to whichever product currently has the most scroll weight.
+    let activeIndex = 0;
+    let bestWeight = -1;
+    for (let i = 0; i < rawWeights.length; i++) {
+      if (rawWeights[i] > bestWeight) {
+        bestWeight = rawWeights[i];
+        activeIndex = i;
+      }
+    }
+    if (activeIndex !== activeIndexRef.current) {
+      activeIndexRef.current = activeIndex;
+      for (let i = 0; i < flavours.length; i++) {
+        const isActive = i === activeIndex;
+        const title = titleRefs.current[i];
+        if (title) {
+          title.style.opacity = isActive ? "1" : "0";
+          title.style.pointerEvents = isActive ? "auto" : "none";
+        }
+        const detail = detailRefs.current[i];
+        if (detail) {
+          detail.style.opacity = isActive ? "1" : "0";
+          detail.style.pointerEvents = isActive ? "auto" : "none";
+        }
+        // Jar sits in one fixed center position the whole time — it never
+        // slides, scales or blurs. It just appears in place once it becomes
+        // the active product, then cycles through its own rotation frames
+        // as the user keeps scrolling (see the frame-index loop below).
+        const wrapper = jarWrapperRefs.current[i];
+        if (wrapper) {
+          wrapper.style.opacity = isActive ? "1" : "0";
+          wrapper.style.zIndex = isActive ? "2" : "1";
+        }
+      }
+    }
+
+    for (let i = 0; i < centers.length; i++) {
+      const segStart = i * segWidth;
       const visibility = rawWeights[i];
 
-      const jar = jarRefs.current[i];
-      if (jar) {
-        const y =
-          lerp(Math.abs(local), [0, 0.5, 1], [0, 8, 35]) *
-          (local > 0 ? -1 : 1);
-        const scale = lerp(Math.abs(local), [0, 1], [1, 0.7]);
-        const rotate = local * -8;
-        const blur = lerp(Math.abs(local), [0, 0.6, 1], [0, 0, 8]);
-        jar.style.opacity = String(visibility);
-        // translate3d forces GPU layer; cheaper than translateY + scale + rotate composed
-        jar.style.transform = `translate3d(0, ${y}%, 0) scale(${scale}) rotate(${rotate}deg)`;
-        jar.style.filter = blur > 0.2 ? `blur(${blur.toFixed(1)}px)` : "";
-        jar.style.zIndex = String(10 + Math.round(visibility * 10));
-      }
+      // t sweeps 0→1 across this product's own dedicated third of the
+      // scroll track — this drives the real rotation frame index, so the
+      // jar keeps turning as the user scrolls through its segment.
+      const t = Math.max(0, Math.min(1, (progress - segStart) / segWidth));
 
-      const copy = copyRefs.current[i];
-      if (copy) {
-        const x = local * 50;
-        copy.style.opacity = String(visibility);
-        copy.style.transform = `translate3d(${x}%, 0, 0)`;
-        copy.style.pointerEvents = visibility > 0.5 ? "auto" : "none";
+      const frameCount = frameCounts[i];
+      const frameIdx = Math.max(0, Math.min(frameCount - 1, Math.round(t * (frameCount - 1))));
+      if (frameIdx !== lastFrameIdxRef.current[i]) {
+        const frames = jarFrameRefs.current[i];
+        const prevIdx = lastFrameIdxRef.current[i];
+        if (prevIdx >= 0 && frames[prevIdx]) frames[prevIdx]!.style.opacity = "0";
+        if (frames[frameIdx]) frames[frameIdx]!.style.opacity = "1";
+        lastFrameIdxRef.current[i] = frameIdx;
       }
 
       const dot = dotRefs.current[i];
       if (dot) {
         dot.style.width = `${(24 + visibility * 16).toFixed(0)}px`;
-        dot.style.background = `rgba(${RGB[i][0]},${RGB[i][1]},${RGB[i][2]},${(0.3 + visibility * 0.7).toFixed(2)})`;
+        dot.style.background = `rgba(${rgbDark[i][0]},${rgbDark[i][1]},${rgbDark[i][2]},${(0.4 + visibility * 0.6).toFixed(2)})`;
       }
     }
   };
@@ -168,113 +254,112 @@ export default function ProductShowcase() {
     <section
       id="flavours"
       ref={outerRef}
-      className="relative h-[260vh] md:h-[350vh] bg-mom-black"
+      className="relative h-[280vh] md:h-[350vh]"
     >
-      <div className="sticky top-0 h-screen w-full overflow-hidden flex flex-col">
-        <div
-          ref={glowRef}
-          className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[140vw] h-[140vh] pointer-events-none"
-        />
-
-        <div className="relative z-30 pt-[8vh] md:pt-[11vh] pb-[1vh] md:pb-[2vh] text-center pointer-events-none">
-          <p className="text-[10px] md:text-[12px] uppercase tracking-[0.4em] md:tracking-[0.5em] text-white/45 mb-1.5 md:mb-2">
-            Three flavours
-          </p>
-          <h2 className="text-[8vw] md:text-[4.2vw] font-quirk uppercase leading-none">
-            <span className="text-gradient-pink">Pick Your Mirchi.</span>
-          </h2>
-        </div>
-
-        {/* Mobile: vertical stack with compact jar on top + tight copy below.
-            Desktop: 2-column with large jar on left + copy on right. */}
+      <div
+        ref={sectionBgRef}
+        className="sticky top-0 h-screen w-full overflow-hidden flex flex-col"
+        style={{ backgroundColor: SHOWCASE_EXTRAS[flavours[0]?.flavor]?.bgDark ?? "#114A22" }}
+      >
         <div className="relative flex-1 z-10 pointer-events-none">
-          <div className="w-full max-w-[1400px] h-full mx-auto px-5 md:px-12 pb-[6vh] md:pb-[8vh] flex flex-col md:grid md:grid-cols-2 md:gap-8 md:items-center">
-            {/* JAR LANE */}
-            <div className="relative w-full flex items-center justify-center md:justify-start basis-[42%] md:basis-auto md:h-full">
-              {PRODUCTS.map((p, i) => (
-                <div
-                  key={p.name}
-                  ref={(el) => {
-                    jarRefs.current[i] = el;
-                  }}
-                  className="absolute will-change-transform"
-                  style={{ opacity: 0 }}
-                >
-                  <Image
-                    src={p.image}
-                    alt={p.name + " " + p.subtitle}
-                    width={700}
-                    height={937}
-                    priority={i === 0}
-                    sizes="(max-width: 768px) 60vw, 600px"
-                    // Reduced drop-shadow radius (60 → 28) — same depth read,
-                    // ~half the GPU filter cost per transformed paint.
-                    className="h-[32vh] md:h-[78vh] max-h-[700px] w-auto object-contain drop-shadow-[0_18px_28px_rgba(0,0,0,0.55)]"
-                  />
-                </div>
-              ))}
+          <div className="w-full max-w-[1400px] h-full mx-auto px-5 md:px-9 pt-[7vh] md:pt-0 flex flex-col md:grid md:grid-cols-[1fr_1.1fr_1fr] md:gap-6 md:items-center">
+            {/* TITLE LANE — name, Devanagari subtitle, spice level */}
+            <div className="relative w-full flex items-center justify-center md:justify-start h-[16vh] md:basis-auto md:h-full order-1 md:order-1">
+              {flavours.map((p, i) => {
+                const extra = SHOWCASE_EXTRAS[p.flavor];
+                return (
+                  <div
+                    key={p.slug}
+                    ref={(el) => {
+                      titleRefs.current[i] = el;
+                    }}
+                    className="absolute inset-0 flex flex-col items-center md:items-start justify-center text-center md:text-left transition-opacity duration-200"
+                    style={{ opacity: 0 }}
+                  >
+                    <h3 className="text-[9vw] md:text-[3.2vw] font-quirk leading-[0.92] uppercase text-cream">
+                      {p.name}
+                    </h3>
+                    {extra && (
+                      <p className="font-sura text-[13px] md:text-[16px] text-cream/65 mt-1.5 md:mt-3">
+                        {extra.devanagari}
+                      </p>
+                    )}
+                    <div className="flex gap-1.5 mt-3 md:mt-5">
+                      {Array.from({ length: 5 }).map((_, d) => (
+                        <ChiliIcon key={d} filled={d < p.spiceLevel} color={p.color} />
+                      ))}
+                    </div>
+                  </div>
+                );
+              })}
             </div>
 
-            {/* COPY LANE */}
-            <div className="relative w-full flex items-start md:items-center basis-[58%] md:basis-auto md:h-full mt-2 md:mt-0">
-              {PRODUCTS.map((p, i) => (
+            {/* JAR LANE — real per-flavor rotation photography, frame-swapped on scroll */}
+            <div className="relative w-full flex items-center justify-center h-[36vh] md:basis-auto md:h-full order-2 md:order-2">
+              {flavours.map((p, i) => {
+                const frameCount = frameCounts[i];
+                return (
+                  <div
+                    key={p.slug}
+                    ref={(el) => {
+                      jarWrapperRefs.current[i] = el;
+                    }}
+                    className="absolute inset-0 m-auto h-[32vh] md:h-[60vh] max-h-[600px] aspect-[800/1105]"
+                    style={{ opacity: 0 }}
+                  >
+                    {Array.from({ length: frameCount }).map((_, f) => (
+                      <Image
+                        key={f}
+                        ref={(el) => {
+                          jarFrameRefs.current[i][f] = el;
+                        }}
+                        src={framePath(p.flavor, f + 1)}
+                        alt={p.name}
+                        fill
+                        priority={i === 0 && f === 0}
+                        unoptimized
+                        className="object-contain"
+                        style={{ opacity: f === 0 ? 1 : 0 }}
+                      />
+                    ))}
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* DETAIL LANE — tagline, description, qty (desktop only), price + boom CTA */}
+            <div className="relative w-full flex items-start md:items-center h-[34vh] md:basis-auto md:h-full order-3 md:order-3">
+              {flavours.map((p, i) => (
                 <div
-                  key={p.name}
+                  key={p.slug}
                   ref={(el) => {
-                    copyRefs.current[i] = el;
+                    detailRefs.current[i] = el;
                   }}
-                  className="absolute inset-0 flex flex-col justify-center px-1 md:px-0 will-change-transform"
+                  className="absolute inset-0 flex flex-col justify-center items-center md:items-start text-center md:text-left px-2 md:px-0 transition-opacity duration-200"
                   style={{ opacity: 0 }}
                 >
                   <p
-                    className="text-[10px] md:text-[12px] uppercase tracking-[0.35em] md:tracking-[0.5em] mb-1.5 md:mb-3"
-                    style={{ color: p.color }}
-                  >
-                    {p.subtitle}
-                  </p>
-                  <h3
-                    className="text-[11vw] md:text-[5.5vw] font-quirk leading-[0.9] mb-2 md:mb-3 uppercase"
-                    style={{ color: p.color }}
-                  >
-                    {p.name}
-                  </h3>
-                  <p
-                    className="text-[11px] md:text-base font-quirk uppercase tracking-[0.15em] mb-2.5 md:mb-5"
-                    style={{ color: `rgba(${p.accentRgb}, 0.9)` }}
+                    className="text-sm md:text-lg font-quirk uppercase tracking-[0.15em] mb-2 md:mb-4"
+                    style={{ color: "#FFF3D7" }}
                   >
                     {p.tagline}
                   </p>
-                  <p className="hidden md:block text-base text-white/60 leading-relaxed max-w-md mb-6">
+                  <p className="block text-body leading-relaxed text-cream/60 max-w-xs md:max-w-sm mb-4 md:mb-6">
                     {p.description}
                   </p>
-                  <div
-                    className="inline-block self-start px-3 py-1.5 md:px-4 md:py-2 rounded-full text-[10px] md:text-[12px] uppercase tracking-[0.25em] md:tracking-[0.3em] font-quirk mb-4 md:mb-5"
-                    style={{
-                      background: `rgba(${p.accentRgb}, 0.12)`,
-                      border: `1px solid rgba(${p.accentRgb}, 0.4)`,
-                      color: p.color,
-                    }}
-                  >
-                    {p.speech}
+                  <div className="hidden md:block pointer-events-auto mb-5 md:mb-7">
+                    <QtyStepper
+                      qty={qtys[i] ?? 1}
+                      setQty={(fn) => setQtyAt(i, fn)}
+                      color={p.color}
+                    />
                   </div>
-                  <div className="flex gap-2 md:gap-3">
-                    <button
-                      onClick={() => add(p.slug)}
-                      className="px-4 md:px-6 py-2 md:py-3 rounded-full text-[10px] md:text-xs uppercase tracking-[0.18em] font-quirk text-white transition-opacity duration-300 hover:opacity-90 cursor-pointer whitespace-nowrap"
-                      style={{ background: p.color }}
-                    >
-                      Add to Cart
-                    </button>
-                    <Link
-                      href={`/products/${p.slug}`}
-                      className="px-4 md:px-6 py-2 md:py-3 rounded-full text-[10px] md:text-xs uppercase tracking-[0.18em] font-quirk transition-colors duration-300 border hover:bg-white/[0.04] cursor-pointer whitespace-nowrap"
-                      style={{
-                        color: p.color,
-                        borderColor: `rgba(${p.accentRgb}, 0.3)`,
-                      }}
-                    >
-                      Details →
-                    </Link>
+                  <div className="flex items-center gap-5 md:gap-7 pointer-events-auto">
+                    <p className="font-quirk text-cream text-xl md:text-3xl">
+                      ₹{p.price}
+                      <span className="text-cream/40 text-base md:text-lg"> /{p.weight.replace("g", "G")}</span>
+                    </p>
+                    <BoomAddToCart onClick={() => add(p.slug, qtys[i] ?? 1)} />
                   </div>
                 </div>
               ))}
@@ -283,16 +368,16 @@ export default function ProductShowcase() {
         </div>
 
         <div className="absolute bottom-5 md:bottom-8 left-1/2 -translate-x-1/2 flex gap-2.5 md:gap-3 z-30">
-          {PRODUCTS.map((p, i) => (
+          {flavours.map((p, i) => (
             <div
-              key={p.name}
+              key={p.slug}
               ref={(el) => {
                 dotRefs.current[i] = el;
               }}
               className="h-[3px] rounded-full"
               style={{
                 width: "24px",
-                background: `rgba(${p.accentRgb}, 0.3)`,
+                background: `rgba(${rgbDark[i][0]},${rgbDark[i][1]},${rgbDark[i][2]},0.4)`,
                 transition: "width 200ms ease-out, background 200ms ease-out",
               }}
             />

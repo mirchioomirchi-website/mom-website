@@ -1,180 +1,201 @@
 "use client";
 
-import { motion } from "motion/react";
+import { useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { ScrollReveal, WordReveal, AddToCartButton } from "@/components/primitives";
-import { PRODUCTS } from "@/lib/products";
-import { useCart } from "@/lib/cart-context";
+import { ScrollReveal } from "@/components/primitives";
 import { SITE_CONTENT } from "@/lib/content";
+import { getProduct } from "@/lib/products";
+import { useCart } from "@/lib/cart-context";
+
+const { eyebrowDevanagari, eyebrowEnglish, shopAllLabel, shopAllHref, marqueeText, jars } =
+  SITE_CONTENT.shop;
+
+const CUTOUT_SRC: Record<string, string> = {
+  green: "/images/shop/green-jar.webp",
+  red: "/images/shop/red-jar.webp",
+  mixed: "/images/shop/orange-jar.webp",
+};
+
+// Same pink starburst as the product showcase's Add to Cart button, sized up
+// a little and given a second line for price.
+function JarBoom({ price, onAdd }: { price: number; onAdd: () => void }) {
+  const [added, setAdded] = useState(false);
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  return (
+    <button
+      type="button"
+      onClick={(e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        onAdd();
+        if (timerRef.current) clearTimeout(timerRef.current);
+        setAdded(true);
+        timerRef.current = setTimeout(() => setAdded(false), 1200);
+      }}
+      aria-label="Add to cart"
+      className="relative w-[112px] h-[77px] md:w-[136px] md:h-[94px] cursor-pointer hover:scale-105 active:scale-95 transition-transform duration-200"
+    >
+      <svg viewBox="0 0 148 102" className="absolute inset-0 w-full h-full">
+        <path
+          d="M62.5446 19.2911L76.8611 0.912855L90.5595 26.3861L124.021 14.853L122.542 41.0504L146.13 50.371L115.304 67.2677L121.662 89.4084L84.407 76.7822L67.2596 100.342L58.582 75.2859L17.9936 83.0515L24.7288 62.8803L1.10555 43.4855L30.9197 36.6666L23.5144 14.5296L62.5446 19.2911Z"
+          fill="var(--color-pink)"
+          stroke="var(--color-yellow)"
+        />
+      </svg>
+      <span className="relative z-10 flex flex-col items-center justify-center w-full h-full text-yellow font-quirk leading-tight px-3 text-center gap-0.5">
+        {added ? (
+          <span className="text-[12px] md:text-[14px] font-medium uppercase tracking-[0.06em]">
+            Added!
+          </span>
+        ) : (
+          <>
+            <span className="text-[14px] md:text-[16px] font-medium">₹{price}</span>
+            <span className="text-[9px] md:text-[10.5px] uppercase tracking-[0.06em] underline underline-offset-2">
+              Add to Cart
+            </span>
+          </>
+        )}
+      </span>
+    </button>
+  );
+}
 
 export default function Shop() {
   const { add } = useCart();
+  const [hovered, setHovered] = useState<string | null>(null);
+  const active = jars.find((j) => j.flavor === hovered) ?? null;
 
   return (
     <section
       id="shop"
-      className="relative py-16 md:py-28 bg-mom-dark overflow-hidden cv-auto"
+      className="relative overflow-hidden cv-auto transition-colors duration-500"
+      style={{ backgroundColor: active ? active.bgDark : "#FFF3D7" }}
     >
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-mom-pink/[0.03] blur-[150px] rounded-full pointer-events-none" />
-
-      <div className="relative w-full max-w-[1400px] mx-auto px-6 md:px-12">
-        <div className="text-center mb-10 md:mb-16">
-          <ScrollReveal>
-            <p className="text-[12px] uppercase tracking-[0.4em] text-mom-pink mb-4 font-semibold">
-              {SITE_CONTENT.shop.eyebrow}
-            </p>
+      <div className="relative w-full max-w-[1400px] mx-auto px-5 md:px-9 pt-10 md:pt-14 pb-16 md:pb-24">
+        {/* Top row — eyebrow + Shop All link, always on top */}
+        <div className="relative z-40 flex items-center justify-between mb-6 md:mb-10">
+          <ScrollReveal className="flex items-center gap-2.5">
+            <span
+              className={`font-sura text-[15px] md:text-base transition-colors duration-500 ${active ? "text-cream" : "text-pink"}`}
+            >
+              {eyebrowDevanagari}
+            </span>
+            <span
+              className={`text-sm transition-colors duration-500 ${active ? "text-cream/50" : "text-pink/50"}`}
+            >
+              •
+            </span>
+            <span
+              className={`font-sura text-[15px] md:text-base transition-colors duration-500 ${active ? "text-cream" : "text-pink"}`}
+            >
+              {eyebrowEnglish}
+            </span>
           </ScrollReveal>
-          <WordReveal
-            text={SITE_CONTENT.shop.heading}
-            tag="h2"
-            className="text-5xl md:text-7xl lg:text-8xl font-quirk leading-[0.85] uppercase text-white"
-          />
+
+          <Link
+            href={shopAllHref}
+            className={`text-btn inline-flex items-center gap-1.5 underline underline-offset-4 decoration-2 transition-colors duration-500 ${
+              active ? "text-cream decoration-cream" : "text-dark decoration-dark"
+            }`}
+          >
+            {shopAllLabel}
+            <span aria-hidden="true">→</span>
+          </Link>
         </div>
 
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
-          {PRODUCTS.map((product, i) => (
-            <ScrollReveal key={product.slug} delay={i * 0.1} distance={50}>
-              <motion.div
-                whileHover={{
-                  y: -8,
-                  transition: { duration: 0.4, ease: [0.16, 1, 0.3, 1] },
-                }}
-                className={`relative rounded-2xl border bg-white/[0.02] overflow-hidden group transition-all duration-500 hover:bg-white/[0.04] ${
-                  product.isCombo
-                    ? "border-mom-pink/20 hover:border-mom-pink/30"
-                    : "border-white/[0.06] hover:border-white/[0.1]"
+        {/* Background marquee — "Pick Your Mirchi" tiled behind the photo, fades
+            out on hover in favour of the active jar's title */}
+        <div
+          className="absolute inset-0 z-0 flex flex-col justify-center gap-6 md:gap-10 transition-opacity duration-500 pointer-events-none"
+          style={{ opacity: active ? 0 : 1 }}
+          aria-hidden="true"
+        >
+          {[0, 1, 2].map((row) => (
+            <div
+              key={row}
+              className="relative w-screen left-1/2 -translate-x-1/2 overflow-hidden"
+            >
+              <div
+                className={`flex whitespace-nowrap font-quirk font-medium text-green text-[9vw] md:text-[64px] leading-none ${
+                  row % 2 === 0 ? "animate-marquee-ltr" : "animate-marquee-rtl"
                 }`}
+                style={{ animationDuration: "40s" }}
               >
-                {/* Badge */}
-                {product.badge && (
-                  <motion.div
-                    className="absolute top-3 right-3 z-10 px-3 py-1 rounded-full text-[12px] uppercase tracking-[0.1em] font-quirk text-white"
-                    style={{ background: product.color }}
-                    initial={{ scale: 0, rotate: -12 }}
-                    whileInView={{ scale: 1, rotate: 0 }}
-                    viewport={{ once: true }}
-                    transition={{
-                      delay: 0.4 + i * 0.1,
-                      type: "spring",
-                      stiffness: 300,
-                      damping: 20,
-                    }}
-                  >
-                    {product.badge}
-                  </motion.div>
-                )}
-
-                <div
-                  className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none"
-                  style={{
-                    background: `radial-gradient(ellipse at 50% 30%, ${product.color}0A 0%, transparent 70%)`,
-                  }}
-                />
-
-                <Link
-                  href={`/products/${product.slug}`}
-                  className="block relative p-6 md:p-8 flex flex-col items-center text-center"
-                >
-                  {/* Product image */}
-                  <motion.div
-                    className="relative w-32 h-32 md:w-44 md:h-44 mb-5"
-                    whileHover={{ rotate: [0, -2, 2, 0] }}
-                    transition={{ duration: 0.5 }}
-                  >
-                    {product.isCombo ? (
-                      <>
-                        <div className="absolute inset-0 -translate-x-[28%] translate-y-[3%] rotate-[-10deg] scale-[0.78] transition-transform duration-700 group-hover:-translate-x-[34%] group-hover:rotate-[-14deg]">
-                          <Image
-                            src="/images/jar-green-final.webp"
-                            alt="Green jar"
-                            fill
-                            sizes="(max-width: 768px) 35vw, 180px"
-                            className="object-contain drop-shadow-[0_10px_20px_rgba(0,0,0,0.5)]"
-                          />
-                        </div>
-                        <div className="absolute inset-0 translate-x-[28%] translate-y-[3%] rotate-[10deg] scale-[0.78] transition-transform duration-700 group-hover:translate-x-[34%] group-hover:rotate-[14deg]">
-                          <Image
-                            src="/images/jar-red-final.webp"
-                            alt="Red jar"
-                            fill
-                            sizes="(max-width: 768px) 35vw, 180px"
-                            className="object-contain drop-shadow-[0_10px_20px_rgba(0,0,0,0.5)]"
-                          />
-                        </div>
-                        <div className="absolute inset-0 transition-transform duration-700 group-hover:scale-105">
-                          <Image
-                            src="/images/jar-mixed-final.webp"
-                            alt="Mixed jar"
-                            fill
-                            sizes="(max-width: 768px) 35vw, 180px"
-                            className="object-contain drop-shadow-[0_15px_30px_rgba(0,0,0,0.6)]"
-                          />
-                        </div>
-                      </>
-                    ) : (
-                      <Image
-                        src={product.image}
-                        alt={product.name}
-                        fill
-                        sizes="(max-width: 768px) 35vw, 180px"
-                        className="object-contain group-hover:scale-110 transition-transform duration-700"
-                      />
-                    )}
-                    <div
-                      className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-2/3 h-6 rounded-full blur-lg opacity-0 group-hover:opacity-30 transition-opacity duration-700"
-                      style={{ background: product.color }}
-                    />
-                  </motion.div>
-
-                  <h3 className="text-sm md:text-base font-quirk uppercase tracking-wide mb-0.5 group-hover:text-white transition-colors">
-                    {product.name}
-                  </h3>
-                  <p className="text-[12px] text-white/55 tracking-[0.2em] uppercase mt-1 mb-4">
-                    {product.weight}
-                  </p>
-
-                  <div className="flex items-baseline gap-2 mb-5">
-                    <span
-                      className="text-xl md:text-2xl font-quirk"
-                      style={{ color: product.color }}
-                    >
-                      ₹{product.price}
-                    </span>
-                    {product.originalPrice && (
-                      <span className="text-[12px] text-white/40 line-through">
-                        ₹{product.originalPrice}
-                      </span>
-                    )}
-                  </div>
-                </Link>
-
-                {/* CTA — outside the Link so it doesn't navigate */}
-                <div className="px-6 md:px-8 pb-6 md:pb-8">
-                  <AddToCartButton
-                    onClick={() => add(product.slug)}
-                    color={product.color}
-                    size="md"
-                    className="w-full"
-                  />
-                </div>
-              </motion.div>
-            </ScrollReveal>
+                <span className="pr-10">{`${marqueeText}    `.repeat(6)}</span>
+                <span className="pr-10">{`${marqueeText}    `.repeat(6)}</span>
+              </div>
+            </div>
           ))}
         </div>
 
-        <ScrollReveal delay={0.3}>
-          <div className="flex flex-wrap justify-center gap-6 md:gap-12 mt-10 md:mt-14">
-            {SITE_CONTENT.shop.trustSignals.map((signal) => (
-              <span
-                key={signal}
-                className="text-[12px] uppercase tracking-[0.2em] text-white/55"
+        {/* Active jar title — replaces the marquee up top while hovering */}
+        <div
+          className="absolute left-0 right-0 top-24 md:top-32 z-20 text-center transition-opacity duration-500 pointer-events-none"
+          style={{ opacity: active ? 1 : 0 }}
+        >
+          <h2 className="text-h2 text-cream">
+            {active?.title}
+          </h2>
+        </div>
+
+        {/* Product composite — full photo + per-jar cutouts + hover hotspots */}
+        <div className="relative z-10 w-full aspect-[2400/1603] mt-2">
+          <Image
+            src="/images/shop/full.webp"
+            alt="Mirchi O Mirchi jars and boxes"
+            fill
+            unoptimized
+            className="object-contain transition-opacity duration-500"
+            style={{ opacity: active ? 0.2 : 1 }}
+          />
+
+          {jars.map((jar) => (
+            <Image
+              key={jar.flavor}
+              src={CUTOUT_SRC[jar.flavor]}
+              alt=""
+              fill
+              unoptimized
+              aria-hidden="true"
+              className="object-contain transition-opacity duration-500 pointer-events-none"
+              style={{ opacity: hovered === jar.flavor ? 1 : 0 }}
+            />
+          ))}
+
+          {jars.map((jar) => {
+            const product = getProduct(jar.slug);
+            const isActive = hovered === jar.flavor;
+            return (
+              <div
+                key={jar.flavor}
+                className="absolute z-30"
+                style={{
+                  left: `${jar.hotspot.left}%`,
+                  top: `${jar.hotspot.top}%`,
+                  width: `${jar.hotspot.width}%`,
+                  height: `${jar.hotspot.height}%`,
+                }}
+                onMouseEnter={() => setHovered(jar.flavor)}
+                onMouseLeave={() => setHovered((h) => (h === jar.flavor ? null : h))}
               >
-                {signal}
-              </span>
-            ))}
-          </div>
-        </ScrollReveal>
+                <Link
+                  href={`/products/${jar.slug}`}
+                  className="absolute inset-0"
+                  aria-label={`View ${jar.title}`}
+                />
+                <div
+                  className={`absolute top-0 right-0 -translate-y-1/3 translate-x-1/3 transition-all duration-300 ${
+                    isActive ? "opacity-100 scale-100" : "opacity-0 scale-75 pointer-events-none"
+                  }`}
+                >
+                  {product && <JarBoom price={product.price} onAdd={() => add(jar.slug)} />}
+                </div>
+              </div>
+            );
+          })}
+        </div>
       </div>
     </section>
   );

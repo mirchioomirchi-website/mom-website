@@ -1,121 +1,129 @@
 "use client";
 
-import { useRef } from "react";
-import { motion, useScroll, useTransform } from "motion/react";
+import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
-import { ScrollReveal, WordReveal } from "@/components/primitives";
+import { ScrollReveal } from "@/components/primitives";
 import { SITE_CONTENT } from "@/lib/content";
 
-const INGREDIENTS = SITE_CONTENT.ingredients.items;
+const LINES = SITE_CONTENT.ingredients.lines;
+
+// How many times the two-item chip pattern repeats inside a single half of
+// the track. The track is rendered twice back-to-back (see JSX below) and
+// looped via `translateX(0) -> translateX(-50%)`, so as long as one repeated
+// half is wider than the viewport the marquee reads as perfectly seamless.
+const REPEAT = 6;
+
+function buildChipText(items: readonly { en: string; dev: string }[]) {
+  const unit = items.map((it) => `${it.en}   ${it.dev}`).join("    ·    ") + "    ·    ";
+  return unit.repeat(REPEAT);
+}
+
+const BASE_RATE = 1;
+const SCROLL_RATE = 1.4;
+const EASE = 0.06;
 
 export default function Ingredients() {
-  const sectionRef = useRef<HTMLDivElement>(null);
-  const { scrollYProgress } = useScroll({
-    target: sectionRef,
-    offset: ["start end", "end start"],
-  });
-  const glowX = useTransform(scrollYProgress, [0, 1], [-200, 200]);
+  const trackRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const rateRef = useRef<number[]>(LINES.map(() => BASE_RATE));
+  const targetRateRef = useRef<number[]>(LINES.map(() => BASE_RATE));
+  const [hovered, setHovered] = useState<number | null>(null);
+
+  useEffect(() => {
+    const anims = trackRefs.current.map((el) => el?.getAnimations()[0] ?? null);
+
+    let scrollTimeout: ReturnType<typeof setTimeout>;
+    const onScroll = () => {
+      targetRateRef.current = targetRateRef.current.map(() => SCROLL_RATE);
+      clearTimeout(scrollTimeout);
+      scrollTimeout = setTimeout(() => {
+        targetRateRef.current = targetRateRef.current.map(() => BASE_RATE);
+      }, 250);
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+
+    let raf = 0;
+    const tick = () => {
+      anims.forEach((anim, i) => {
+        if (!anim) return;
+        const current = rateRef.current[i];
+        const target = targetRateRef.current[i];
+        const next = current + (target - current) * EASE;
+        rateRef.current[i] = next;
+        try {
+          anim.playbackRate = next;
+        } catch {
+          // ignore — animation may not support playbackRate in some browsers
+        }
+      });
+      raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      clearTimeout(scrollTimeout);
+      cancelAnimationFrame(raf);
+    };
+  }, []);
 
   return (
     <section
       id="ingredients"
-      ref={sectionRef}
-      className="relative pt-16 pb-10 md:py-28 bg-mom-black overflow-hidden cv-auto"
+      className="relative h-[90vh] flex flex-col justify-center pt-16 pb-[220px] bg-cream overflow-hidden cv-auto"
     >
-      {/* Moving ambient glow */}
-      <motion.div
-        className="absolute top-1/3 w-[600px] h-[600px] rounded-full bg-mom-green/[0.06] blur-[150px] pointer-events-none"
-        style={{ x: glowX }}
-      />
-
-      <div className="relative w-full max-w-[1400px] mx-auto px-6 md:px-12">
-        {/* Heading */}
-        <div className="text-center mb-10 md:mb-16">
-          <ScrollReveal>
-            <p className="text-[12px] uppercase tracking-[0.4em] text-mom-green mb-4 font-semibold">
-              {SITE_CONTENT.ingredients.eyebrow}
-            </p>
-          </ScrollReveal>
-          <WordReveal
-            text={SITE_CONTENT.ingredients.heading}
-            tag="h2"
-            className="text-5xl md:text-7xl lg:text-8xl font-quirk leading-[0.85] uppercase text-white"
+      {/* Hover overlays — full-bleed decorative ingredient scatter, one per line */}
+      {LINES.map((line, i) => (
+        <div
+          key={line.overlay}
+          className="absolute top-0 bottom-0 w-screen left-1/2 -translate-x-1/2 transition-opacity duration-500 ease-out pointer-events-none"
+          style={{ opacity: hovered === i ? 1 : 0 }}
+          aria-hidden="true"
+        >
+          <Image
+            src={line.overlay}
+            alt=""
+            fill
+            unoptimized
+            className="object-cover"
           />
         </div>
+      ))}
 
-        {/* Ingredient grid — large cards with prominent numbering */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 md:gap-6">
-          {INGREDIENTS.map((ingredient, i) => (
-            <ScrollReveal
-              key={ingredient.name}
-              delay={i * 0.06}
-              direction={i % 3 === 0 ? "left" : i % 3 === 2 ? "right" : "up"}
-              distance={40}
-            >
-              <motion.div
-                className="relative rounded-3xl border border-white/[0.08] bg-gradient-to-b from-white/[0.04] to-white/[0.01] overflow-hidden group hover:border-white/[0.15] transition-all duration-500"
-                whileHover={{
-                  y: -8,
-                  transition: { duration: 0.35, ease: [0.16, 1, 0.3, 1] },
-                }}
-              >
-                {/* Hover glow */}
-                <div
-                  className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none"
-                  style={{
-                    background: `radial-gradient(ellipse at 50% 0%, ${ingredient.color}20 0%, transparent 65%)`,
-                  }}
-                />
-
-                {/* Image area with overlaid number */}
-                <div className="relative h-48 md:h-56 overflow-hidden">
-                  <Image
-                    src={ingredient.image}
-                    alt={ingredient.name}
-                    fill
-                    className="object-cover group-hover:scale-110 transition-transform duration-1000"
-                  />
-                  {/* Gradient fade to dark at bottom */}
-                  <div className="absolute inset-0 bg-gradient-to-b from-transparent via-mom-black/30 to-mom-black" />
-
-                  {/* Big number */}
-                  <div
-                    className="absolute top-4 left-5 font-quirk text-5xl md:text-6xl leading-none tracking-tighter"
-                    style={{
-                      color: ingredient.color,
-                      textShadow: `0 4px 24px ${ingredient.color}50`,
-                    }}
-                  >
-                    {ingredient.n}
-                  </div>
-                </div>
-
-                {/* Content */}
-                <div className="relative p-6 md:p-7">
-                  <h3
-                    className="font-quirk text-xl md:text-2xl uppercase tracking-wide mb-2 leading-tight"
-                    style={{ color: ingredient.color }}
-                  >
-                    {ingredient.name}
-                  </h3>
-                  <p className="text-sm md:text-base text-white/75 leading-relaxed">
-                    {ingredient.description}
-                  </p>
-                </div>
-              </motion.div>
-            </ScrollReveal>
-          ))}
-        </div>
-
-        {/* Bottom statement */}
-        <ScrollReveal delay={0.3}>
-          <div className="text-center mt-10 md:mt-16">
-            <p
-              className="text-2xl md:text-3xl font-quirk text-white/40 uppercase [&_em]:not-italic"
-              dangerouslySetInnerHTML={{ __html: SITE_CONTENT.ingredients.footerHtml }}
-            />
-          </div>
+      {/* Eyebrow */}
+      <div className="relative w-full max-w-[1400px] mx-auto px-5 md:px-9 mb-10 md:mb-16 text-center">
+        <ScrollReveal className="inline-flex items-center gap-2.5">
+          <span className="font-sura text-pink text-[15px] md:text-base">
+            {SITE_CONTENT.ingredients.eyebrowDevanagari}
+          </span>
+          <span className="text-pink/50 text-sm">•</span>
+          <span className="font-sura text-pink text-[15px] md:text-base">
+            {SITE_CONTENT.ingredients.eyebrowEnglish}
+          </span>
         </ScrollReveal>
+      </div>
+
+      {/* Marquee lines — full-bleed, alternating direction, hover reveals overlay */}
+      <div className="relative flex flex-col gap-8 md:gap-12">
+        {LINES.map((line, i) => (
+          <div
+            key={line.overlay + i}
+            className="relative w-screen left-1/2 -translate-x-1/2 overflow-x-hidden overflow-y-visible"
+            onMouseEnter={() => setHovered(i)}
+            onMouseLeave={() => setHovered((h) => (h === i ? null : h))}
+          >
+            <div
+              ref={(el) => {
+                trackRefs.current[i] = el;
+              }}
+              className={`flex whitespace-nowrap font-sura leading-[1.5] py-1.5 md:py-2 text-[24px] md:text-[32px] lg:text-[36px] text-dark/70 select-none transition-opacity duration-300 ease-out ${
+                line.direction === "ltr" ? "animate-marquee-ltr" : "animate-marquee-rtl"
+              } ${hovered !== null && hovered !== i ? "opacity-20" : "opacity-100"}`}
+            >
+              <span>{buildChipText(line.items)}</span>
+              <span aria-hidden="true">{buildChipText(line.items)}</span>
+            </div>
+          </div>
+        ))}
       </div>
     </section>
   );

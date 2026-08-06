@@ -13,7 +13,7 @@ export default function Quality() {
       <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1/2 h-[600px] bg-mom-green/[0.06] blur-[140px] rounded-full pointer-events-none" />
       <div className="absolute right-0 top-1/2 -translate-y-1/2 w-1/2 h-[600px] bg-mom-red/[0.06] blur-[140px] rounded-full pointer-events-none" />
 
-      <div className="relative w-full max-w-[1200px] mx-auto px-6 md:px-12">
+      <div className="relative w-full max-w-[1400px] mx-auto px-6 md:px-20">
         {/* Heading */}
         <div className="text-center mb-10 md:mb-16">
           <ScrollReveal>

@@ -1,231 +1,156 @@
 "use client";
 
-import { useState } from "react";
+import Image from "next/image";
 import Link from "next/link";
-import { ScrollReveal, WordReveal } from "@/components/primitives";
+import { ScrollReveal } from "@/components/primitives";
 import { SITE_CONTENT } from "@/lib/content";
-import { trackSignUp } from "@/lib/analytics-events";
 
-// FSSAI license number + GSTIN come from env so the values can be filled in
-// Vercel without a code change. Both render only if present.
+const { brand, shopLinks, exploreLinks, legalLinks, copyright } = SITE_CONTENT.footer;
+const trackOrderLink = exploreLinks.find((l) => l.name === "Track Order")!;
+
+// FSSAI license number comes from env so it can be filled in on Vercel
+// without a code change. Falls back to "Applied For" so the line always
+// renders — swap in the real number via NEXT_PUBLIC_FSSAI_NUMBER once issued.
 function FooterCompliance() {
   const fssai = process.env.NEXT_PUBLIC_FSSAI_NUMBER;
   const gstin = process.env.NEXT_PUBLIC_GSTIN;
-  if (!fssai && !gstin) return null;
   return (
-    <div className="mt-10 flex flex-wrap justify-center gap-x-6 gap-y-2 text-[11px] uppercase tracking-[0.25em] text-white/45">
-      {fssai && <span>FSSAI · {fssai}</span>}
+    <div className="flex flex-wrap gap-x-6 gap-y-2 text-[11px] uppercase tracking-[0.2em] text-dark/55">
+      <span>FSSAI Lic. No. {fssai || "Applied For"}</span>
       {gstin && <span>GSTIN · {gstin}</span>}
     </div>
   );
 }
 
-type NewsletterStatus = "idle" | "sending" | "sent" | "error";
-
-function NewsletterForm() {
-  const [status, setStatus] = useState<NewsletterStatus>("idle");
-  const [error, setError] = useState<string | null>(null);
-
-  async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    setError(null);
-    setStatus("sending");
-    const data = new FormData(e.currentTarget);
-    const email = String(data.get("email") || "");
-    const website = String(data.get("website") || "");
-    try {
-      const res = await fetch("/api/newsletter", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, source: "footer", website }),
-      });
-      const body = (await res.json().catch(() => ({}))) as { error?: string };
-      if (!res.ok) throw new Error(body.error || `Couldn't subscribe (${res.status})`);
-      setStatus("sent");
-      trackSignUp("newsletter_footer");
-    } catch (err) {
-      setStatus("error");
-      setError(err instanceof Error ? err.message : "Couldn't subscribe.");
-    }
-  }
-
+function InstagramGlyph() {
   return (
-    <form
-      onSubmit={onSubmit}
-      noValidate
-      className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto mt-6"
+    <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7">
+      <rect x="2.5" y="2.5" width="19" height="19" rx="5" />
+      <circle cx="12" cy="12" r="4.3" />
+      <circle cx="17.6" cy="6.4" r="1" fill="currentColor" stroke="none" />
+    </svg>
+  );
+}
+
+function SocialIcon() {
+  return (
+    <a
+      href="https://www.instagram.com/mirchiomirchi/"
+      target="_blank"
+      rel="noopener noreferrer"
+      aria-label="Mirchi O Mirchi on Instagram"
+      className="w-11 h-11 rounded-md flex items-center justify-center text-green hover:bg-green hover:text-cream transition-colors duration-300"
     >
-      {/* Honeypot */}
-      <input
-        type="text"
-        name="website"
-        tabIndex={-1}
-        autoComplete="off"
-        aria-hidden="true"
-        className="absolute opacity-0 pointer-events-none w-px h-px overflow-hidden"
-      />
-      <label className="sr-only" htmlFor="newsletter-email">
-        Email address
-      </label>
-      <input
-        id="newsletter-email"
-        type="email"
-        name="email"
-        required
-        maxLength={150}
-        autoComplete="email"
-        aria-label="Email address"
-        placeholder={SITE_CONTENT.footer.newsletter.placeholder}
-        disabled={status === "sending" || status === "sent"}
-        className="flex-1 px-5 py-3 bg-white/[0.03] border border-white/[0.08] rounded-full text-xs text-white placeholder:text-white/30 outline-none focus:border-mom-pink/40 transition-colors disabled:opacity-60"
-      />
-      <button
-        type="submit"
-        disabled={status === "sending" || status === "sent"}
-        className="px-6 py-3 bg-mom-pink text-white text-[12px] uppercase tracking-[0.15em] font-quirk rounded-full hover:bg-mom-pink/90 hover:shadow-[0_0_20px_rgba(245,25,127,0.3)] transition-all cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
-      >
-        {status === "sending"
-          ? "…"
-          : status === "sent"
-            ? "Subscribed"
-            : SITE_CONTENT.footer.newsletter.cta}
-      </button>
-      {error && (
-        <p
-          role="alert"
-          className="basis-full text-[11px] text-mom-red text-center"
-        >
-          {error}
-        </p>
-      )}
-    </form>
+      <InstagramGlyph />
+    </a>
+  );
+}
+
+function LinkColumn({
+  heading,
+  links,
+}: {
+  heading: string;
+  links: readonly { name: string; href: string }[];
+}) {
+  return (
+    <div>
+      <h5 className="text-[12px] font-semibold text-dark/45 uppercase tracking-[0.2em] mb-4">
+        {heading}
+      </h5>
+      <ul className="space-y-3">
+        {links.map((l) => (
+          <li key={l.name} className={l.name === "Track Order" ? "hidden md:block" : undefined}>
+            <Link href={l.href} className="text-body-sm text-dark/75 hover:text-green transition-colors">
+              {l.name}
+            </Link>
+          </li>
+        ))}
+      </ul>
+    </div>
   );
 }
 
 export default function Footer() {
   return (
-    <footer className="relative bg-mom-black border-t border-white/[0.04] cv-auto">
-      <div className="w-full max-w-[1400px] mx-auto px-8 md:px-12 py-14 md:py-20">
-        {/* Newsletter */}
+    <footer className="relative bg-cream cv-auto">
+      <div className="w-full max-w-[1400px] mx-auto px-5 md:px-9 pt-14 md:pt-20 pb-8 md:pb-10">
+        {/* Wordmark */}
         <ScrollReveal>
-          <div className="text-center mb-16">
-            <WordReveal
-              text={SITE_CONTENT.footer.newsletter.heading}
-              tag="h3"
-              className="text-3xl md:text-5xl font-quirk uppercase mb-3"
-            />
-            <p className="text-[12px] text-white/35 max-w-sm mx-auto leading-relaxed">
-              {SITE_CONTENT.footer.newsletter.body}
-            </p>
-
-            <NewsletterForm />
-          </div>
+          <Image
+            src="/footer-logo.svg"
+            alt={brand.title}
+            width={1296}
+            height={143}
+            className="w-full h-auto mb-10 md:mb-16"
+          />
         </ScrollReveal>
 
-        {/* Divider */}
-        <div className="w-full h-[1px] bg-white/[0.06] mb-12" />
-
-        {/* Footer grid */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-10">
-          <ScrollReveal delay={0}>
-            <div className="col-span-2 md:col-span-1">
-              <h4 className="text-base font-quirk tracking-[0.1em] uppercase mb-3">
-                {SITE_CONTENT.footer.brand.title}
-              </h4>
-              <p className="text-[12px] text-white/35 leading-[1.8] whitespace-pre-line">
-                {SITE_CONTENT.footer.brand.tagline}
-              </p>
+        {/* Brand block + link columns */}
+        <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-10 md:gap-16 mb-10 md:mb-14">
+          <div className="flex items-start justify-between md:block gap-6 md:max-w-[280px]">
+            <p className="text-dark/80 text-[17px] md:text-lg leading-relaxed">
+              {brand.tagline.split("\n").map((line) => (
+                <span key={line} className="block">
+                  {line}
+                </span>
+              ))}
+            </p>
+            <div className="flex items-center gap-2.5 shrink-0 md:mt-6">
+              <SocialIcon />
+              <SocialIcon />
+              <SocialIcon />
             </div>
-          </ScrollReveal>
+          </div>
 
-          <ScrollReveal delay={0.1}>
-            <div>
-              <h5 className="text-[12px] uppercase tracking-[0.25em] text-white/30 mb-3">
-                Shop
-              </h5>
-              <ul className="space-y-2">
-                {[
-                  { name: "Green Chilli Thecha", href: "/products/green-chilli-thecha" },
-                  { name: "Mixed Chilli Thecha", href: "/products/mixed-chilli-thecha" },
-                  { name: "Red Chilli Thecha", href: "/products/red-chilli-thecha" },
-                  { name: "Combo Pack", href: "/products/combo-pack" },
-                ].map((item) => (
-                  <li key={item.name}>
-                    <Link
-                      href={item.href}
-                      className="text-[12px] text-white/35 hover:text-mom-pink transition-colors"
-                    >
-                      {item.name}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
+          <div className="grid grid-cols-2 md:flex md:gap-16 lg:gap-24 gap-8">
+            <LinkColumn heading="Shop" links={shopLinks} />
+            <LinkColumn heading="Explore" links={exploreLinks} />
+            <div className="hidden md:block">
+              <LinkColumn heading="Legal" links={legalLinks} />
             </div>
-          </ScrollReveal>
-
-          <ScrollReveal delay={0.2}>
-            <div>
-              <h5 className="text-[12px] uppercase tracking-[0.25em] text-white/30 mb-3">
-                Company
-              </h5>
-              <ul className="space-y-2">
-                {[
-                  { name: "About Us", href: "/about" },
-                  { name: "Contact Us", href: "/contact" },
-                  { name: "Track Order", href: "/orders/track" },
-                  { name: "Shop", href: "/shop" },
-                  { name: "Blog", href: "/blog" },
-                ].map((item) => (
-                  <li key={item.name}>
-                    <Link
-                      href={item.href}
-                      className="text-[12px] text-white/35 hover:text-mom-pink transition-colors"
-                    >
-                      {item.name}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </ScrollReveal>
-
-          <ScrollReveal delay={0.3}>
-            <div>
-              <h5 className="text-[12px] uppercase tracking-[0.25em] text-white/30 mb-3">
-                Follow
-              </h5>
-              <p className="text-[11px] text-white/30 leading-[1.7] mb-3">
-                Socials launching soon. Sign up above for first access.
-              </p>
-            </div>
-          </ScrollReveal>
+          </div>
         </div>
 
-        {/* Compliance line — FSSAI / GSTIN populate from env when available */}
-        <FooterCompliance />
-
-        {/* Bottom bar */}
-        <div className="mt-8 pt-5 border-t border-white/[0.04] flex flex-col md:flex-row justify-between items-center gap-3">
-          <p className="text-[12px] text-white/25 tracking-wide">
-            &copy; 2026 Mirchi O Mirchi. All rights reserved. Vivenza Marketing LLP.
-          </p>
-          <div className="flex flex-wrap justify-center gap-5">
-            {[
-              { name: "Privacy Policy", href: "/privacy" },
-              { name: "Terms of Service", href: "/terms" },
-              { name: "Refund Policy", href: "/refund" },
-              { name: "Shipping Policy", href: "/shipping" },
-              { name: "Contact Us", href: "/contact" },
-            ].map((link) => (
-              <Link
-                key={link.name}
-                href={link.href}
-                className="text-[12px] text-white/25 hover:text-white/50 transition-colors"
+        {/* Mobile-only: Track Order + collapsible Legal — grid-aligned under
+            the Shop / Explore columns above so Legal sits directly under
+            Explore rather than pinned to the far edge. */}
+        <div className="md:hidden grid grid-cols-2 gap-8 mb-10">
+          <Link href={trackOrderLink.href} className="inline-flex items-center gap-1.5 font-medium text-green">
+            {trackOrderLink.name}
+            <span aria-hidden="true">→</span>
+          </Link>
+          <details className="group">
+            <summary className="list-none flex items-center gap-1.5 font-medium text-green cursor-pointer select-none">
+              Legal
+              <svg
+                width="12"
+                height="12"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                className="transition-transform duration-300 group-open:rotate-180"
               >
-                {link.name}
-              </Link>
-            ))}
-          </div>
+                <path d="M6 9l6 6 6-6" />
+              </svg>
+            </summary>
+            <ul className="mt-3 space-y-2.5">
+              {legalLinks.map((l) => (
+                <li key={l.name}>
+                  <Link href={l.href} className="text-dark/70 text-sm">
+                    {l.name}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </details>
+        </div>
+
+        {/* Copyright (left) + compliance (right) */}
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+          <p className="text-dark/60 text-[12px] md:text-[13px]">{copyright}</p>
+          <FooterCompliance />
         </div>
       </div>
     </footer>

@@ -9,6 +9,7 @@ import {
   useCallback,
   ReactNode,
 } from "react";
+import { useRouter } from "next/navigation";
 import { PRODUCTS, Product } from "@/lib/products";
 import {
   trackAddToCart,
@@ -38,6 +39,7 @@ type CartContextValue = {
   miniProduct: Product | null;
   openMini: (product: Product) => void;
   closeMini: () => void;
+  openCart: () => void;
 };
 
 const CartContext = createContext<CartContextValue | null>(null);
@@ -45,6 +47,7 @@ const CartContext = createContext<CartContextValue | null>(null);
 const LINES_KEY = "mom-cart-v1";
 
 export function CartProvider({ children }: { children: ReactNode }) {
+  const router = useRouter();
   const [lines, setLines] = useState<CartLine[]>([]);
   const [hydrated, setHydrated] = useState(false);
   const [miniOpen, setMiniOpen] = useState(false);
@@ -127,7 +130,13 @@ export function CartProvider({ children }: { children: ReactNode }) {
     setMiniOpen(true);
   }, []);
 
+
+
   const closeMini = useCallback(() => setMiniOpen(false), []);
+
+  const openCart = useCallback(() => {
+    setMiniOpen(true);
+  }, []);
 
   const itemCount = lines.reduce((s, l) => s + l.qty, 0);
   const subtotal = lines.reduce((s, l) => {
@@ -149,6 +158,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
       miniProduct,
       openMini,
       closeMini,
+      openCart,
     }),
     [
       lines,
@@ -163,6 +173,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
       miniProduct,
       openMini,
       closeMini,
+      openCart,
     ]
   );
 
