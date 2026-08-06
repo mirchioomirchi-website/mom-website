@@ -34,7 +34,10 @@ export default function PdpIngredients({ product }: { product: Product }) {
           {/* Outer dotted frame — the site's global dotted border, sitting
               with a visible gap around the yellow box rather than flush
               against it. */}
-          <div className="dotted-frame relative text-red p-3 md:p-4">
+          <div
+            className="dotted-frame relative p-3 md:p-4"
+            style={{ color: accentColor }}
+          >
             <div
               className="relative rounded-md px-7 md:px-16 py-10 md:py-14"
               style={{ background: "#FFB300", color: accentColor }}

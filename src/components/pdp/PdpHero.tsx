@@ -23,7 +23,10 @@ function DetailRow({
   return (
     <div className="flex items-baseline gap-2">
       <span className="text-body text-dark/70 whitespace-nowrap">{label}</span>
-      <span className="flex-1 dotted-divider translate-y-[-4px]" />
+      <span
+        className="flex-1 dotted-divider translate-y-[-4px]"
+        style={{ color: accentColor }}
+      />
       <span className="text-tag font-bold whitespace-nowrap" style={{ color: accentColor }}>
         {value}
       </span>
@@ -89,7 +92,12 @@ export default function PdpHero({ product }: { product: Product }) {
           {/* Hindi name is hero-only decoration on desktop — dropped on
               mobile to save vertical space now that the jar overlaps the
               photo above it. */}
-          <p className="hidden md:block font-sura text-red text-[1.4rem]">{hindiName}</p>
+          <p
+            className="hidden md:block font-sura text-[1.4rem]"
+            style={{ color: accentColor }}
+          >
+            {hindiName}
+          </p>
 
           {/* Pulled up over the closeup photo's bottom edge on mobile so it
               reads as overlaying the image, half in/half out. */}
@@ -136,13 +144,14 @@ export default function PdpHero({ product }: { product: Product }) {
                   +
                 </button>
               </div>
-              <div className="dotted-divider" />
+              <div className="dotted-divider" style={{ color: accentColor }} />
             </div>
 
             <button
               type="button"
               onClick={() => add(product.slug, qty)}
-              className="text-btn font-bold flex-1 h-11 bg-red text-cream uppercase tracking-[0.06em] hover:bg-red/90 transition-colors"
+              className="text-btn font-bold flex-1 h-11 text-cream uppercase tracking-[0.06em] hover:opacity-90 transition-opacity cursor-pointer"
+              style={{ backgroundColor: accentColor }}
             >
               Add to Cart
             </button>
