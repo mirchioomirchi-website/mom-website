@@ -1,8 +1,14 @@
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
-import { PRODUCTS, getProduct } from "@/lib/products";
+import { PRODUCTS } from "@/lib/products";
+import { getLiveProduct, getLiveProducts } from "@/lib/products-source";
 import { SITE_URL, safeJsonLd } from "@/lib/site";
 import ProductDetailClient from "./ProductDetailClient";
+
+// Re-check Shopify every 5 minutes (matches the in-memory cache TTL in
+// shopify-product-data.ts) so metafield/price/photo edits made in Shopify
+// Admin show up on the live site without a redeploy.
+export const revalidate = 300;
 
 export function generateStaticParams() {
   return PRODUCTS.map((p) => ({ slug: p.slug }));
@@ -14,7 +20,7 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
   const { slug } = await params;
-  const product = getProduct(slug);
+  const product = await getLiveProduct(slug);
   if (!product) return {};
   const title = `${product.name} — Mirchi O Mirchi`;
   const url = `${SITE_URL}/products/${product.slug}`;
@@ -47,8 +53,11 @@ export default async function ProductPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const product = getProduct(slug);
+  const allLive = await getLiveProducts();
+  const product = allLive.find((p) => p.slug === slug);
   if (!product) notFound();
+
+  const relatedProducts = allLive.filter((p) => p.slug !== slug);
 
   const productJsonLd = {
     "@context": "https://schema.org",
@@ -75,7 +84,7 @@ export default async function ProductPage({
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: safeJsonLd(productJsonLd) }}
       />
-      <ProductDetailClient product={product} />
+      <ProductDetailClient product={product} relatedProducts={relatedProducts} />
     </>
   );
 }

@@ -25,6 +25,7 @@ function MirchiCorner({ className }: { className?: string }) {
 
 export default function PdpIngredients({ product }: { product: Product }) {
   const ingredientsDevanagari = SITE_CONTENT.ingredients.eyebrowDevanagari;
+  const accentColor = product.pdpAccentColor ?? PDP_ACCENT_COLOR[product.flavor];
 
   return (
     <section className="relative bg-cream py-14 md:py-20 cv-auto">
@@ -36,7 +37,7 @@ export default function PdpIngredients({ product }: { product: Product }) {
           <div className="dotted-frame relative text-red p-3 md:p-4">
             <div
               className="relative rounded-md px-7 md:px-16 py-10 md:py-14"
-              style={{ background: "#FFB300", color: PDP_ACCENT_COLOR[product.flavor] }}
+              style={{ background: "#FFB300", color: accentColor }}
             >
               <MirchiCorner className="absolute top-4 left-4 md:top-6 md:left-6" />
               <MirchiCorner className="absolute top-4 right-4 md:top-6 md:right-6 -scale-x-100" />
@@ -46,13 +47,13 @@ export default function PdpIngredients({ product }: { product: Product }) {
               {/* Mobile-only heading row — centered, smaller than the actual
                   ingredient list below it, with a middot between the
                   Devanagari and English labels. */}
-              <div className="md:hidden flex items-center justify-center gap-2 mb-6 font-sura" style={{ color: PDP_ACCENT_COLOR[product.flavor] }}>
+              <div className="md:hidden flex items-center justify-center gap-2 mb-6 font-sura" style={{ color: accentColor }}>
                 <span className="text-lg font-medium">{ingredientsDevanagari}</span>
                 <span aria-hidden="true" className="text-lg font-medium">·</span>
                 <span className="text-lg font-medium">Ingredients</span>
               </div>
 
-              <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6 font-sura" style={{ color: PDP_ACCENT_COLOR[product.flavor] }}>
+              <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6 font-sura" style={{ color: accentColor }}>
                 <span className="hidden md:block text-3xl md:text-4xl font-medium shrink-0 md:mr-8 lg:mr-16">Ingredients</span>
 
                 <ul className="flex-1 flex flex-col items-center gap-3 md:gap-4">

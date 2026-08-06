@@ -35,7 +35,9 @@ export default function PdpHero({ product }: { product: Product }) {
   const { add } = useCart();
   const [qty, setQty] = useState(1);
   const { devanagariLabel } = SITE_CONTENT.productPage;
-  const accentColor = PDP_ACCENT_COLOR[product.flavor];
+  const accentColor = product.pdpAccentColor ?? PDP_ACCENT_COLOR[product.flavor];
+  const mainImage = product.mainImage ?? PRODUCT_CARD_IMAGES[product.slug] ?? product.image;
+  const hindiName = product.nameHi ?? devanagariLabel;
 
   return (
     // Mobile: image + jar-overlay + content all sized to fit within the
@@ -61,11 +63,11 @@ export default function PdpHero({ product }: { product: Product }) {
           ) : (
             <div
               className="absolute inset-0 flex items-center justify-center"
-              style={{ background: PDP_ACCENT_COLOR[product.flavor] }}
+              style={{ background: accentColor }}
             >
               <div className="relative w-1/2 aspect-square">
                 <Image
-                  src={PRODUCT_CARD_IMAGES[product.slug] ?? product.image}
+                  src={mainImage}
                   alt={product.name}
                   fill
                   priority
@@ -87,13 +89,13 @@ export default function PdpHero({ product }: { product: Product }) {
           {/* Hindi name is hero-only decoration on desktop — dropped on
               mobile to save vertical space now that the jar overlaps the
               photo above it. */}
-          <p className="hidden md:block font-sura text-red text-[1.4rem]">{devanagariLabel}</p>
+          <p className="hidden md:block font-sura text-red text-[1.4rem]">{hindiName}</p>
 
           {/* Pulled up over the closeup photo's bottom edge on mobile so it
               reads as overlaying the image, half in/half out. */}
           <div className="relative z-10 w-48 md:w-44 aspect-[3/4] -mt-32 md:mt-0 mb-3 md:mb-1">
             <Image
-              src={PRODUCT_CARD_IMAGES[product.slug] ?? product.image}
+              src={mainImage}
               alt={product.name}
               fill
               priority

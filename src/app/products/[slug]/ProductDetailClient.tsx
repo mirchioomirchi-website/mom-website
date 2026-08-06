@@ -14,7 +14,13 @@ import PdpCrossSell from "@/components/pdp/PdpCrossSell";
 import { Product } from "@/lib/products";
 import { trackViewItem } from "@/lib/analytics-events";
 
-export default function ProductDetailClient({ product }: { product: Product }) {
+export default function ProductDetailClient({
+  product,
+  relatedProducts,
+}: {
+  product: Product;
+  relatedProducts: Product[];
+}) {
   useEffect(() => {
     trackViewItem(product);
   }, [product]);
@@ -27,7 +33,7 @@ export default function ProductDetailClient({ product }: { product: Product }) {
         <PdpStory product={product} />
         <PdpIngredients product={product} />
         <PdpPairing />
-        <PdpCrossSell product={product} />
+        <PdpCrossSell relatedProducts={relatedProducts} />
         <Instagram />
         <CtaBanner />
       </main>

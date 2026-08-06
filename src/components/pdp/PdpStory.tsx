@@ -59,6 +59,8 @@ export default function PdpStory({ product }: { product: Product }) {
   }, [product.tagline]);
 
   const repeated = `${product.tagline}    `.repeat(REPEATS);
+  const accentColor = product.pdpAccentColor ?? PDP_ACCENT_COLOR[product.flavor];
+  const mainImage = product.mainImage ?? PRODUCT_CARD_IMAGES[product.slug] ?? product.image;
 
   return (
     <section className="relative bg-cream cv-auto">
@@ -82,7 +84,7 @@ export default function PdpStory({ product }: { product: Product }) {
               ref={textRef}
               fontSize="100"
               fontWeight="500"
-              fill={PDP_ACCENT_COLOR[product.flavor]}
+              fill={accentColor}
               style={{ fontFamily: "var(--font-quirk)" }}
             >
               <textPath ref={textPathRef} href={`#${pathId}`} startOffset="0">
@@ -108,11 +110,11 @@ export default function PdpStory({ product }: { product: Product }) {
           ) : (
             <div
               className="absolute inset-0 flex items-center justify-center"
-              style={{ filter: "brightness(0.88)", background: PDP_ACCENT_COLOR[product.flavor] }}
+              style={{ filter: "brightness(0.88)", background: accentColor }}
             >
               <div className="relative w-1/2 aspect-square">
                 <Image
-                  src={PRODUCT_CARD_IMAGES[product.slug] ?? product.image}
+                  src={mainImage}
                   alt={product.name}
                   fill
                   className="object-contain opacity-95"

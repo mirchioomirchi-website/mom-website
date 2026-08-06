@@ -33,6 +33,18 @@ export type Product = {
   // have real photography yet.
   closeupImage?: string;
   secondaryImage?: string;
+  // ── Shopify-sourced fields (populated by getLiveProduct/getLiveProducts in
+  // src/lib/products-source.ts; undefined on the static PRODUCTS array below,
+  // which only exists as a resilience fallback if Shopify is unreachable) ──
+  // Per-product Hindi/Devanagari name, shown in the PDP hero.
+  nameHi?: string;
+  // Per-product accent hex color from the Shopify "Accent Color" metafield —
+  // used for PDP buttons/borders/highlights in place of the fixed
+  // PDP_ACCENT_COLOR[flavor] design-token map below.
+  pdpAccentColor?: string;
+  // Native Shopify product photo (the transparent jar-front cutout) — used
+  // in place of PRODUCT_CARD_IMAGES[slug] wherever that compact shot appears.
+  mainImage?: string;
 };
 
 export const PRODUCTS: Product[] = [

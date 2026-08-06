@@ -6,7 +6,7 @@ import Link from "next/link";
 import { ScrollReveal } from "@/components/primitives";
 import { SITE_CONTENT } from "@/lib/content";
 import { useCart } from "@/lib/cart-context";
-import { getRelatedProducts, PDP_ACCENT_COLOR, PRODUCT_CARD_IMAGES, type Product } from "@/lib/products";
+import { PDP_ACCENT_COLOR, PRODUCT_CARD_IMAGES, type Product } from "@/lib/products";
 
 // How long each product stays highlighted before auto-advancing.
 const ROTATE_MS = 4500;
@@ -29,10 +29,11 @@ function ChiliIcon({ filled, color }: { filled: boolean; color: string }) {
 // "first highlighted card" treatment in the design.
 function HighlightedCard({ product }: { product: Product }) {
   const { add } = useCart();
+  const accentColor = product.pdpAccentColor ?? PDP_ACCENT_COLOR[product.flavor];
   return (
     <div
       className="relative md:h-[380px] flex items-center justify-center gap-8 md:gap-12 rounded-lg overflow-hidden p-6 md:p-8 transition-transform duration-300 hover:scale-[1.01]"
-      style={{ background: PDP_ACCENT_COLOR[product.flavor] }}
+      style={{ background: accentColor }}
     >
       {/* Full-card link, sitting under the Add to Cart button (same
           hotspot-overlay pattern used on the homepage Shop section). */}
@@ -40,7 +41,7 @@ function HighlightedCard({ product }: { product: Product }) {
 
       <div className="relative z-10 w-36 md:w-48 aspect-[3/4] shrink-0 pointer-events-none">
         <Image
-          src={PRODUCT_CARD_IMAGES[product.slug] ?? product.image}
+          src={product.mainImage ?? PRODUCT_CARD_IMAGES[product.slug] ?? product.image}
           alt={product.name}
           fill
           className="object-contain"
@@ -81,7 +82,7 @@ function CollapsedCard({ product, onSelect }: { product: Product; onSelect: () =
     >
       <div className="relative w-28 md:w-36 aspect-[3/4]">
         <Image
-          src={PRODUCT_CARD_IMAGES[product.slug] ?? product.image}
+          src={product.mainImage ?? PRODUCT_CARD_IMAGES[product.slug] ?? product.image}
           alt={product.name}
           fill
           className="object-contain"
@@ -93,8 +94,12 @@ function CollapsedCard({ product, onSelect }: { product: Product; onSelect: () =
   );
 }
 
-export default function PdpCrossSell({ product }: { product: Product }) {
-  const related = getRelatedProducts(product.slug);
+export default function PdpCrossSell({
+  relatedProducts,
+}: {
+  relatedProducts: Product[];
+}) {
+  const related = relatedProducts;
   const [activeIndex, setActiveIndex] = useState(0);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const scrollRef = useRef<HTMLDivElement | null>(null);

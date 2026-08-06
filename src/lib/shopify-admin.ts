@@ -104,7 +104,10 @@ type GraphQLResp<T> = {
   errors?: Array<{ message: string }>;
 };
 
-async function adminFetch<T>(
+// Exported so other server-only modules (e.g. shopify-product-data.ts) can
+// run their own Admin API queries without duplicating the OAuth/token/fetch
+// plumbing above.
+export async function adminFetch<T>(
   query: string,
   variables?: Record<string, unknown>
 ): Promise<{ data: T | null; errors: string[] }> {
