@@ -87,9 +87,9 @@ function CartItem({ slug, qty }: { slug: string; qty: number }) {
             <button
               onClick={() => setQty(slug, qty - 1)}
               style={{
-                width: 26, height: 26, border: "none",
+                width: 34, height: 34, border: "none",
                 background: "none", cursor: "pointer", color: "#1A0D04",
-                borderRadius: "50%", fontSize: "1rem", lineHeight: 1,
+                borderRadius: "50%", fontSize: "1.4rem", lineHeight: 1,
                 display: "flex", alignItems: "center", justifyContent: "center",
                 transition: "all 0.15s",
               }}
@@ -105,9 +105,9 @@ function CartItem({ slug, qty }: { slug: string; qty: number }) {
             <button
               onClick={() => setQty(slug, qty + 1)}
               style={{
-                width: 26, height: 26, border: "none",
+                width: 34, height: 34, border: "none",
                 background: "none", cursor: "pointer", color: "#1A0D04",
-                borderRadius: "50%", fontSize: "1rem", lineHeight: 1,
+                borderRadius: "50%", fontSize: "1.4rem", lineHeight: 1,
                 display: "flex", alignItems: "center", justifyContent: "center",
                 transition: "all 0.15s",
               }}

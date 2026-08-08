@@ -11,35 +11,23 @@ import { PDP_ACCENT_COLOR, PRODUCT_CARD_IMAGES, type Product } from "@/lib/produ
 // How long each product stays highlighted before auto-advancing.
 const ROTATE_MS = 4500;
 
-function ChiliIcon({ filled, color }: { filled: boolean; color: string }) {
-  return (
-    <svg width="14" height="20" viewBox="0 0 14 20" fill="none" aria-hidden="true">
-      <path
-        d="M3.5 1.5C3.5 1.5 10.5 4.8 10.5 10C10.5 15.2 3.5 18.5 3.5 18.5C3.5 18.5 7.8 13.2 7.8 10C7.8 6.8 3.5 1.5 3.5 1.5Z"
-        fill={filled ? color : "none"}
-        stroke={color}
-        strokeWidth={filled ? 0 : 1.2}
-        opacity={filled ? 1 : 0.4}
-      />
-    </svg>
-  );
-}
-
 // The active product — full details + direct Add to Cart, matching the
-// "first highlighted card" treatment in the design.
+// "first highlighted card" treatment in the design. Stacked (image on top,
+// details below) on mobile so nothing collides in a narrow card; back to
+// the side-by-side layout on desktop where there's room.
 function HighlightedCard({ product }: { product: Product }) {
   const { add } = useCart();
   const accentColor = product.pdpAccentColor ?? PDP_ACCENT_COLOR[product.flavor];
   return (
     <div
-      className="relative md:h-[380px] flex items-center justify-center gap-8 md:gap-12 rounded-lg overflow-hidden p-6 md:p-8 transition-transform duration-300 hover:scale-[1.01]"
+      className="relative flex flex-col md:flex-row md:h-[380px] items-center justify-center gap-5 md:gap-12 rounded-lg overflow-hidden p-6 md:p-8 transition-transform duration-300 hover:scale-[1.01]"
       style={{ background: accentColor }}
     >
       {/* Full-card link, sitting under the Add to Cart button (same
           hotspot-overlay pattern used on the homepage Shop section). */}
       <Link href={`/products/${product.slug}`} className="absolute inset-0 z-0" aria-label={`View ${product.name}`} />
 
-      <div className="relative z-10 w-36 md:w-48 aspect-[3/4] shrink-0 pointer-events-none">
+      <div className="relative z-10 w-32 md:w-48 aspect-[3/4] shrink-0 pointer-events-none">
         <Image
           src={product.mainImage ?? PRODUCT_CARD_IMAGES[product.slug] ?? product.image}
           alt={product.name}
@@ -48,14 +36,9 @@ function HighlightedCard({ product }: { product: Product }) {
           sizes="200px"
         />
       </div>
-      <div className="relative z-10 flex flex-col gap-3 md:gap-3.5 min-w-0">
+      <div className="relative z-10 flex flex-col items-center md:items-start text-center md:text-left gap-2 md:gap-3.5 min-w-0">
         <h3 className="text-h3 text-cream pointer-events-none">{product.shortName}</h3>
         <p className="text-body-sm font-bold text-cream/80 uppercase tracking-[0.06em] pointer-events-none">{product.tagline}</p>
-        <div className="flex gap-1.5 pointer-events-none">
-          {[1, 2, 3, 4, 5].map((i) => (
-            <ChiliIcon key={i} filled={i <= product.spiceLevel} color="#EF4444" />
-          ))}
-        </div>
         <p className="text-body-sm font-semibold text-cream/70 uppercase tracking-[0.06em] pointer-events-none">{product.weight}</p>
         <div className="flex items-center gap-3 mt-1">
           <span className="text-h4 font-bold text-cream pointer-events-none">₹{product.price}</span>

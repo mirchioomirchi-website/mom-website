@@ -82,7 +82,7 @@ export default function ShopProductGrid() {
           </div>
         </ScrollReveal>
 
-        <div className="grid md:grid-cols-3 gap-8 md:gap-10">
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-10">
           {flavours.map((product, i) => {
             const style = FLAVOR_STYLE[product.flavor];
             return (
@@ -91,9 +91,9 @@ export default function ShopProductGrid() {
                   <Link
                     href={`/products/${product.slug}`}
                     onClick={() => trackSelectItem(product, SHOP_LIST_NAME, SHOP_LIST_ID, i)}
-                    className={`relative flex items-center justify-center w-full aspect-[4/5] ${style.panelBg} overflow-hidden`}
+                    className={`relative flex items-center justify-center w-full aspect-square md:aspect-[4/5] ${style.panelBg} overflow-hidden`}
                   >
-                    <div className="relative w-[42%] aspect-[1200/1631]">
+                    <div className="relative w-[58%] md:w-[42%] aspect-[1200/1631]">
                       <Image
                         src={PRODUCT_CARD_IMAGES[product.slug] ?? product.image}
                         alt={product.name}
@@ -104,24 +104,24 @@ export default function ShopProductGrid() {
                     </div>
                   </Link>
 
-                  <div className="flex items-baseline justify-between gap-3 mt-5 mb-2">
-                    <Link href={`/products/${product.slug}`}>
-                      <h3 className="text-h4 font-bold text-dark hover:opacity-80 transition-opacity">
+                  <div className="flex items-baseline justify-between gap-2 mt-3 md:mt-5 mb-1 md:mb-2">
+                    <Link href={`/products/${product.slug}`} className="min-w-0">
+                      <h3 className="text-sm md:text-h4 font-bold text-dark hover:opacity-80 transition-opacity truncate">
                         {product.name}
                       </h3>
                     </Link>
-                    <span className={`text-body-sm font-bold ${style.text} uppercase shrink-0`}>
+                    <span className={`text-[11px] md:text-body-sm font-bold ${style.text} uppercase shrink-0`}>
                       {product.weight.replace("g", "G")}
                     </span>
                   </div>
 
-                  <p className="text-body text-dark/70 mb-6">{product.description}</p>
+                  <p className="hidden md:block text-body text-dark/70 mb-6">{product.description}</p>
 
-                  <div className="mt-auto flex items-center justify-between gap-4">
+                  <div className="mt-auto flex flex-col gap-2 md:flex-row md:items-center md:justify-between md:gap-4">
                     <p className="flex items-baseline gap-2">
-                      <span className={`text-h4 font-bold ${style.text}`}>₹{product.price}</span>
+                      <span className={`text-lg md:text-h4 font-bold ${style.text}`}>₹{product.price}</span>
                       {product.originalPrice && (
-                        <span className="text-body-sm text-dark/40 line-through">
+                        <span className="text-[11px] md:text-body-sm text-dark/40 line-through">
                           ₹{product.originalPrice}
                         </span>
                       )}
@@ -129,7 +129,7 @@ export default function ShopProductGrid() {
                     <button
                       type="button"
                       onClick={() => add(product.slug)}
-                      className={`text-btn font-bold inline-flex items-center gap-2 ${style.button} text-cream px-5 py-3 hover:opacity-90 transition-opacity cursor-pointer shrink-0`}
+                      className={`text-[11px] md:text-btn font-bold inline-flex items-center justify-center gap-1.5 md:gap-2 w-full md:w-auto ${style.button} text-cream px-3 py-2 md:px-5 md:py-3 hover:opacity-90 transition-opacity cursor-pointer shrink-0`}
                     >
                       Add to Cart
                       <CartIcon />

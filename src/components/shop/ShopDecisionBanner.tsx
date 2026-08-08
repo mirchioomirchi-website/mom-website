@@ -21,49 +21,50 @@ export default function ShopDecisionBanner() {
           </p>
         </ScrollReveal>
 
-        {/* Flex row instead of grid — the dotted column rules are real
-            sibling elements that stretch (align-items: stretch, the flex
-            default) to match the row's height automatically, rather than
-            absolutely-positioned dividers anchored to top/bottom offsets. */}
+        {/* Mobile — swipeable cards: each column is its own full card, ~85%
+            of the viewport wide so the next card peeks in at the edge as an
+            affordance to keep scrolling (same convention as the PDP
+            cross-sell carousel). Desktop — unchanged flex row with real
+            dotted-divider siblings between columns. */}
         <ScrollReveal delay={0.05}>
-          <div className="bg-pink flex flex-col md:flex-row">
+          <div className="md:hidden flex gap-4 overflow-x-auto snap-x snap-mandatory pb-2 -mx-5 px-5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+            {columns.map((col) => (
+              <div
+                key={col.slug}
+                className="snap-center shrink-0 w-[85%] bg-pink rounded-lg flex flex-col items-center text-center gap-3 px-6 py-10"
+              >
+                <h3 className="text-h4 font-bold text-cream">{col.question}</h3>
+                <p className="text-body text-cream/75">{col.detail}</p>
+                <Link
+                  href={`/products/${col.slug}`}
+                  className="text-btn font-bold text-cream underline decoration-cream decoration-2 underline-offset-4 hover:text-cream/80 transition-colors mt-4"
+                >
+                  {col.ctaLabel}
+                </Link>
+              </div>
+            ))}
+          </div>
+
+          <div className="hidden md:flex bg-pink">
             {columns.map((col, i) => (
               <Fragment key={col.slug}>
                 {i > 0 && (
-                  <>
-                    {/* Mobile — horizontal dotted rule between stacked
-                        columns, same dot pattern as desktop. */}
-                    <div
-                      aria-hidden="true"
-                      className="block md:hidden mx-6"
-                      style={{
-                        height: "3px",
-                        flexShrink: 0,
-                        backgroundImage:
-                          "radial-gradient(circle, #FFF3D7 1.5px, transparent 1.5px)",
-                        backgroundSize: "13px 3px",
-                        backgroundRepeat: "repeat-x",
-                        backgroundPosition: "0 50%",
-                      }}
-                    />
-                    {/* Desktop — vertical dotted rule between columns. */}
-                    <div
-                      aria-hidden="true"
-                      className="hidden md:block my-8"
-                      style={{
-                        alignSelf: "stretch",
-                        width: "3px",
-                        flexShrink: 0,
-                        backgroundImage:
-                          "radial-gradient(circle, #FFF3D7 1.5px, transparent 1.5px)",
-                        backgroundSize: "3px 13px",
-                        backgroundRepeat: "repeat-y",
-                        backgroundPosition: "50% 0",
-                      }}
-                    />
-                  </>
+                  <div
+                    aria-hidden="true"
+                    className="my-8"
+                    style={{
+                      alignSelf: "stretch",
+                      width: "3px",
+                      flexShrink: 0,
+                      backgroundImage:
+                        "radial-gradient(circle, #FFF3D7 1.5px, transparent 1.5px)",
+                      backgroundSize: "3px 13px",
+                      backgroundRepeat: "repeat-y",
+                      backgroundPosition: "50% 0",
+                    }}
+                  />
                 )}
-                <div className="flex-1 flex flex-col items-center text-center gap-3 px-6 md:px-8 py-10 md:py-14">
+                <div className="flex-1 flex flex-col items-center text-center gap-3 px-8 py-14">
                   <h3 className="text-h4 font-bold text-cream">{col.question}</h3>
                   <p className="text-body text-cream/75">{col.detail}</p>
                   <Link

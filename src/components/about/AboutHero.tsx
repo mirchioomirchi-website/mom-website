@@ -13,7 +13,7 @@ const { headingLines, subheading, eyebrowDevanagari, eyebrowEnglish } =
 // with zero gap between them.
 export default function AboutHero() {
   return (
-    <section className="relative bg-cream min-h-[80vh] overflow-hidden pt-[150px] md:pt-[200px] cv-auto">
+    <section className="relative bg-cream min-h-[92vh] md:min-h-[80vh] overflow-hidden pt-[150px] md:pt-[200px] cv-auto">
       <div className="max-w-[1400px] mx-auto px-5 md:px-9">
         <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-10">
           <ScrollReveal className="max-w-xl">
@@ -46,7 +46,7 @@ export default function AboutHero() {
 
       {/* Pinned flush to the section's bottom edge — no gap before the
           red section that follows. */}
-      <div className="absolute right-4 md:right-[10rem] bottom-0 w-56 md:w-[21rem] aspect-[319/364]">
+      <div className="absolute right-4 md:right-[10rem] bottom-0 w-40 md:w-[21rem] aspect-[319/364]">
         <Image
           src="/images/about/hero-character.svg"
           alt="Mirchi O Mirchi character illustration"

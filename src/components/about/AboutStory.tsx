@@ -28,7 +28,7 @@ export default function AboutStory() {
 
         <ScrollReveal delay={0.05}>
           <div className="h-[45vh] md:h-[80vh] flex flex-col justify-center gap-4 bg-red px-6 md:px-14">
-            <h2 className="text-h2 font-bold text-cream max-w-lg mb-4 md:mb-6">{heading}</h2>
+            <h2 className="text-h2 font-medium md:font-bold text-cream max-w-lg mb-4 md:mb-6">{heading}</h2>
             {paragraphs.map((p, i) => (
               <p
                 key={p}

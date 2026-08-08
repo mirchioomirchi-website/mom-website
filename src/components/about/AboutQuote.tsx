@@ -34,7 +34,7 @@ export default function AboutQuote() {
               <p className="text-tag font-medium text-sm md:text-lg text-red uppercase tracking-[0.08em] mb-4">
                 {label}
               </p>
-              <p className="text-h2 font-bold text-red max-w-2xl mx-auto">
+              <p className="text-h2 font-medium md:font-bold text-red max-w-2xl mx-auto">
                 &ldquo;{text}&rdquo;
               </p>
             </div>
