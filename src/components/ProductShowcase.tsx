@@ -54,7 +54,7 @@ function QtyStepper({
   onIncrease: () => void;
 }) {
   return (
-    <div className="inline-flex items-center gap-4 md:gap-5 border-b-2 border-cream/40 pb-1.5 pointer-events-auto">
+    <div className="inline-flex items-center gap-4 md:gap-5 border-b-2 border-cream/40 pb-1.5">
       <button
         type="button"
         onClick={onDecrease}
@@ -86,7 +86,7 @@ function BoomAddToCart({ onClick }: { onClick: () => void }) {
       type="button"
       onClick={onClick}
       aria-label="Add to cart"
-      className="relative w-[118px] h-[60px] md:w-[150px] md:h-[78px] shrink-0 cursor-pointer hover:scale-105 active:scale-95 transition-transform duration-200 pointer-events-auto"
+      className="relative w-[138px] h-[70px] md:w-[150px] md:h-[78px] shrink-0 cursor-pointer hover:scale-105 active:scale-95 transition-transform duration-200"
     >
       <svg viewBox="0 0 145 74" className="absolute inset-0 w-full h-full">
         <path
@@ -94,7 +94,7 @@ function BoomAddToCart({ onClick }: { onClick: () => void }) {
           fill="var(--color-pink)"
         />
       </svg>
-      <span className="relative z-10 flex items-center justify-center w-full h-full text-white text-[11px] md:text-[13px] font-quirk font-bold uppercase tracking-[0.06em] leading-none px-3 text-center">
+      <span className="relative z-10 flex items-center justify-center w-full h-full text-white text-[12.5px] md:text-[13px] font-quirk font-bold uppercase tracking-[0.06em] leading-none px-3 text-center">
         Add to Cart
       </span>
     </button>
@@ -241,9 +241,9 @@ export default function ProductShowcase({ products }: { products: Product[] }) {
         style={{ backgroundColor: SHOWCASE_EXTRAS[flavours[0]?.flavor]?.bgDark ?? "#114A22" }}
       >
         <div className="relative flex-1 z-10 pointer-events-none">
-          <div className="w-full max-w-[1400px] h-full mx-auto px-5 md:px-9 pt-[7vh] md:pt-0 flex flex-col md:grid md:grid-cols-[1fr_1.1fr_1fr] md:gap-14 lg:gap-20 md:items-center">
+          <div className="w-full max-w-[1400px] h-full mx-auto px-5 md:px-9 pt-[13vh] md:pt-0 flex flex-col md:grid md:grid-cols-[1fr_1.1fr_1fr] md:gap-14 lg:gap-20 md:items-center">
             {/* TITLE LANE — name, Hindi name, price + size (live from Shopify) */}
-            <div className="relative w-full flex items-center justify-center md:justify-start h-[16vh] md:basis-auto md:h-full order-1 md:order-1">
+            <div className="relative w-full flex items-center justify-center md:justify-start h-[17vh] md:basis-auto md:h-full order-1 md:order-1">
               {flavours.map((p, i) => (
                 <div
                   key={p.slug}
@@ -253,7 +253,7 @@ export default function ProductShowcase({ products }: { products: Product[] }) {
                   className="absolute inset-0 flex flex-col items-center md:items-start justify-center text-center md:text-left transition-[opacity,transform] duration-300 ease-out"
                   style={{ opacity: 0 }}
                 >
-                  <h3 className="text-[9vw] md:text-[3.2vw] font-quirk leading-[0.92] uppercase text-cream">
+                  <h3 className="text-[7.5vw] md:text-[2.7vw] font-quirk leading-[0.95] uppercase text-cream">
                     {p.name}
                   </h3>
                   {p.nameHi && (
@@ -273,7 +273,7 @@ export default function ProductShowcase({ products }: { products: Product[] }) {
             </div>
 
             {/* JAR LANE — real per-flavor rotation photography, frame-swapped on scroll */}
-            <div className="relative w-full flex items-center justify-center h-[36vh] md:basis-auto md:h-full order-2 md:order-2">
+            <div className="relative w-full flex items-center justify-center h-[32vh] md:basis-auto md:h-full order-2 md:order-2">
               {flavours.map((p, i) => {
                 const frameCount = frameCounts[i];
                 return (
@@ -305,8 +305,15 @@ export default function ProductShowcase({ products }: { products: Product[] }) {
               })}
             </div>
 
-            {/* DETAIL LANE — flavour title, description (desktop only), CTA/qty + Learn more */}
-            <div className="relative w-full flex items-start md:items-center h-[30vh] md:basis-auto md:h-full order-3 md:order-3">
+            {/* DETAIL LANE — flavour title (desktop only), description (desktop
+                only), CTA/qty + Learn more. pointer-events is intentionally
+                NOT set on any element in here — it's controlled entirely by
+                the ref-toggled inline style on the wrapper below, so only the
+                currently-active product's buttons/links are clickable. Adding
+                pointer-events-auto here would make all three stacked panes
+                clickable at once and every click would hit whichever one is
+                topmost in the DOM (a bug we hit once already — don't reintroduce it). */}
+            <div className="relative w-full flex items-start md:items-center h-[22vh] md:basis-auto md:h-full order-3 md:order-3">
               {flavours.map((p, i) => {
                 const qty = qtyForSlug(p.slug);
                 return (
@@ -319,7 +326,7 @@ export default function ProductShowcase({ products }: { products: Product[] }) {
                     style={{ opacity: 0 }}
                   >
                     <p
-                      className="font-quirk font-bold text-lg md:text-2xl uppercase tracking-[0.1em] mb-3 md:mb-5"
+                      className="hidden md:block font-quirk font-bold text-lg md:text-2xl uppercase tracking-[0.1em] mb-3 md:mb-5"
                       style={{ color: "#FFF3D7" }}
                     >
                       {p.tagline}
@@ -327,7 +334,7 @@ export default function ProductShowcase({ products }: { products: Product[] }) {
                     <p className="hidden md:block text-body leading-relaxed text-cream/60 max-w-xs md:max-w-sm mb-6">
                       {p.description}
                     </p>
-                    <div className="flex items-center gap-5 md:gap-7 pointer-events-auto">
+                    <div className="flex items-center gap-5 md:gap-7">
                       {qty > 0 ? (
                         <QtyStepper
                           qty={qty}
