@@ -243,7 +243,7 @@ export default function ProductShowcase({ products }: { products: Product[] }) {
         <div className="relative flex-1 z-10 pointer-events-none">
           <div className="w-full max-w-[1400px] h-full mx-auto px-5 md:px-9 pt-[13vh] md:pt-0 flex flex-col md:grid md:grid-cols-[1fr_1.1fr_1fr] md:gap-14 lg:gap-20 md:items-center">
             {/* TITLE LANE — name, Hindi name, price + size (live from Shopify) */}
-            <div className="relative w-full flex items-center justify-center md:justify-start h-[17vh] md:basis-auto md:h-full order-1 md:order-1">
+            <div className="relative w-full flex items-center justify-center md:justify-start h-[17vh] mb-8 md:mb-0 md:basis-auto md:h-full order-1 md:order-1">
               {flavours.map((p, i) => (
                 <div
                   key={p.slug}
