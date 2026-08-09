@@ -69,7 +69,7 @@ export default function Ingredients() {
   return (
     <section
       id="ingredients"
-      className="relative h-[70vh] md:h-[90vh] flex flex-col justify-center pt-16 pb-16 md:pb-[220px] bg-cream overflow-hidden cv-auto scroll-mt-[84px]"
+      className="relative h-[90vh] flex flex-col justify-center pt-16 pb-16 md:pb-[220px] bg-cream overflow-hidden cv-auto scroll-mt-[84px]"
     >
       {/* Hover overlays — full-bleed decorative ingredient scatter, one per
           line. Mobile gets its own purpose-cropped image per line (the
