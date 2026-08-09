@@ -66,6 +66,10 @@ function JarBoom({ price, onAdd }: { price: number; onAdd: () => void }) {
 export default function Shop() {
   const { add } = useCart();
   const [hovered, setHovered] = useState<string | null>(null);
+  // Once the visitor discovers the hover interaction on ANY jar, the tease
+  // animation below stops for good (all jars, not just the one hovered) —
+  // it's only meant to nudge people who haven't found it yet.
+  const [everHovered, setEverHovered] = useState(false);
   const active = jars.find((j) => j.flavor === hovered) ?? null;
 
   return (
@@ -177,7 +181,28 @@ export default function Shop() {
             />
           ))}
 
-          {jars.map((jar, jarIndex) => {
+          {/* Passive tease — the same colored cutout art (not a generic
+              rectangle), breathing in at low opacity with a very slight
+              scale-up before fading back out, one jar at a time. Reads as a
+              soft shimmer/glow on the jar itself since it follows the jar's
+              actual silhouette. Discovering the hover interaction on any jar
+              retires this for good — the visitor doesn't need the hint
+              anymore. */}
+          {!everHovered &&
+            jars.map((jar, jarIndex) => (
+              <Image
+                key={`tease-${jar.flavor}`}
+                src={CUTOUT_SRC[jar.flavor]}
+                alt=""
+                fill
+                unoptimized
+                aria-hidden="true"
+                className="object-contain pointer-events-none origin-center animate-jar-tease opacity-0"
+                style={{ animationDelay: `${jarIndex * 1.8}s` }}
+              />
+            ))}
+
+          {jars.map((jar) => {
             const product = getProduct(jar.slug);
             const isActive = hovered === jar.flavor;
             return (
@@ -190,7 +215,10 @@ export default function Shop() {
                   width: `${jar.hotspot.width}%`,
                   height: `${jar.hotspot.height}%`,
                 }}
-                onMouseEnter={() => setHovered(jar.flavor)}
+                onMouseEnter={() => {
+                  setHovered(jar.flavor);
+                  setEverHovered(true);
+                }}
                 onMouseLeave={() => setHovered((h) => (h === jar.flavor ? null : h))}
               >
                 <Link
@@ -198,27 +226,6 @@ export default function Shop() {
                   className="absolute inset-0"
                   aria-label={`View ${jar.title}`}
                 />
-
-                {/* Subtle passive shimmer — a light sweep that idles then
-                    crosses the jar every few seconds, staggered per jar so
-                    they don't all catch the eye at once. Purely a nudge
-                    toward the hover interaction, so it fades out the moment
-                    this jar is actually hovered. */}
-                <div
-                  className="absolute inset-0 overflow-hidden transition-opacity duration-300 pointer-events-none"
-                  style={{ opacity: isActive ? 0 : 1 }}
-                  aria-hidden="true"
-                >
-                  <div
-                    className="absolute inset-y-0 w-1/3 animate-jar-shimmer"
-                    style={{
-                      background:
-                        "linear-gradient(115deg, transparent 15%, rgba(255,255,255,0.9) 50%, transparent 85%)",
-                      mixBlendMode: "overlay",
-                      animationDelay: `${jarIndex * 1.4}s`,
-                    }}
-                  />
-                </div>
 
                 <div
                   className={`absolute top-0 transition-all duration-300 ${
