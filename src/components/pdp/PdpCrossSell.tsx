@@ -24,7 +24,7 @@ function CartIcon() {
 // "first highlighted card" treatment in the design. Stacked (image on top,
 // details below) on mobile so nothing collides in a narrow card; back to
 // the side-by-side layout on desktop where there's room.
-function HighlightedCard({ product }: { product: Product }) {
+export function HighlightedCard({ product }: { product: Product }) {
   const { add } = useCart();
   const accentColor = product.pdpAccentColor ?? PDP_ACCENT_COLOR[product.flavor];
   return (

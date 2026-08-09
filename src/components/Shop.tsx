@@ -7,6 +7,7 @@ import { ScrollReveal } from "@/components/primitives";
 import { SITE_CONTENT } from "@/lib/content";
 import { getProduct } from "@/lib/products";
 import { useCart } from "@/lib/cart-context";
+import { HighlightedCard } from "@/components/pdp/PdpCrossSell";
 
 const { eyebrowDevanagari, eyebrowEnglish, shopAllLabel, shopAllHref, marqueeText, jars } =
   SITE_CONTENT.shop;
@@ -96,7 +97,7 @@ export default function Shop() {
 
           <Link
             href={shopAllHref}
-            className={`text-btn inline-flex items-center gap-1.5 underline underline-offset-4 decoration-2 transition-colors duration-500 ${
+            className={`text-btn inline-flex items-center gap-1.5 md:underline md:underline-offset-4 md:decoration-2 transition-colors duration-500 ${
               active ? "text-cream decoration-cream" : "text-dark decoration-dark"
             }`}
           >
@@ -140,8 +141,10 @@ export default function Shop() {
           </h2>
         </div>
 
-        {/* Product composite — full photo + per-jar cutouts + hover hotspots */}
-        <div className="relative z-10 w-full aspect-[2400/1603] mt-2">
+        {/* Product composite — desktop only: full photo + per-jar cutouts +
+            hover hotspots. On mobile there's no hover to discover the cutout
+            with, so it's replaced below by a swipeable card slider instead. */}
+        <div className="hidden md:block relative z-10 w-full aspect-[2400/1603] mt-2">
           <Image
             src="/images/shop/full.webp"
             alt="Mirchi O Mirchi jars and boxes"
@@ -192,6 +195,21 @@ export default function Shop() {
                 >
                   {product && <JarBoom price={product.price} onAdd={() => add(jar.slug)} />}
                 </div>
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Mobile — swipeable product cards (same design as the PDP
+            cross-sell cards), sitting on top of the "Pick Your Mirchi"
+            marquee running behind them. */}
+        <div className="md:hidden relative z-10 flex gap-4 overflow-x-auto snap-x snap-mandatory pb-1 -mx-5 px-5 mt-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+          {jars.map((jar) => {
+            const product = getProduct(jar.slug);
+            if (!product) return null;
+            return (
+              <div key={jar.flavor} className="snap-center shrink-0 w-[85%]">
+                <HighlightedCard product={product} />
               </div>
             );
           })}
