@@ -15,7 +15,7 @@ export default function CtaBanner() {
     <section className="relative bg-cream py-10 md:py-14 cv-auto">
       <div className="w-full max-w-[1400px] mx-auto px-5 md:px-9">
         {/* Same dotted-divider pattern as the navbar's bottom border. */}
-        <div className="dotted-divider" />
+        <div className="dotted-divider text-green" />
 
         <div className="my-3 md:my-4">
           <ScrollReveal>
@@ -51,7 +51,7 @@ export default function CtaBanner() {
           </ScrollReveal>
         </div>
 
-        <div className="dotted-divider" />
+        <div className="dotted-divider text-green" />
       </div>
     </section>
   );

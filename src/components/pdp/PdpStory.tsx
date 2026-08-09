@@ -83,7 +83,7 @@ export default function PdpStory({ product }: { product: Product }) {
               the wave + text uniformly instead, so nothing distorts. */}
           <svg
             viewBox="0 0 1200 220"
-            className="w-full h-20 md:h-28"
+            className="w-full h-auto"
             style={{ overflow: "visible" }}
             aria-hidden="true"
           >
@@ -111,7 +111,7 @@ export default function PdpStory({ product }: { product: Product }) {
             </text>
           </svg>
 
-          <p className="text-body text-dark/80 max-w-md relative z-10 px-5 md:px-5">{product.storyText}</p>
+          <p className="text-body text-dark/80 max-w-2xl relative z-10 px-5 md:px-5">{product.storyText}</p>
         </div>
 
         {/* Secondary lifestyle photo — falls back to a color-tinted panel
