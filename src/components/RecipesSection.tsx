@@ -125,131 +125,147 @@ export default function RecipesSection({
       className={`relative py-16 md:py-24 overflow-hidden cv-auto ${variant === "home" ? "bg-red" : ""}`}
       style={variant === "pdp" ? { background: accentColor } : undefined}
     >
-      <div className="md:grid md:grid-cols-[380px_1fr] lg:grid-cols-[440px_1fr] md:items-center">
-        {/* LEFT column — padded to line up with the site's normal 1400px
-            container on desktop (same left inset as px-9 elsewhere), while
-            the right column below is left unconstrained so it can bleed
-            all the way to the browser's edge instead of clipping mid-slide. */}
-        <div
-          className="flex flex-col gap-6 md:gap-8 min-w-0 px-5 md:pr-10"
-          style={{ paddingLeft: "max(1.25rem, calc((100vw - 1400px) / 2 + 2.25rem))" }}
-        >
-          {variant === "home" ? (
-            <ScrollReveal className="flex items-center gap-2.5">
-              <span className="font-sura text-cream text-[15px] md:text-base">{eyebrowDevanagari}</span>
-              <span className="text-cream/50 text-sm">•</span>
-              <span className="font-sura text-cream text-[15px] md:text-base">{eyebrowEnglish}</span>
-            </ScrollReveal>
-          ) : (
-            <ScrollReveal>
-              <h2 className="text-h2 text-cream mb-3">{pdpHeading}</h2>
-              <p className="text-body leading-relaxed text-cream/80 max-w-md">{pdpSubheading}</p>
-            </ScrollReveal>
-          )}
+      <div className="max-w-[1400px] mx-auto px-5 md:px-9">
+        <div className="md:grid md:grid-cols-[2fr_3fr] gap-10 md:gap-14 lg:gap-20 md:items-center">
+          {/* LEFT column — section eyebrow/heading, ~40% of the row on
+              desktop. */}
+          <div className="flex flex-col gap-6 md:gap-8 min-w-0">
+            {variant === "home" ? (
+              <ScrollReveal className="flex items-center gap-2.5">
+                <span className="font-sura text-cream text-[15px] md:text-base">{eyebrowDevanagari}</span>
+                <span className="text-cream/50 text-sm">•</span>
+                <span className="font-sura text-cream text-[15px] md:text-base">{eyebrowEnglish}</span>
+              </ScrollReveal>
+            ) : (
+              <ScrollReveal>
+                <h2 className="text-h2 text-cream mb-3">{pdpHeading}</h2>
+                <p className="text-body leading-relaxed text-cream/80 max-w-md">{pdpSubheading}</p>
+              </ScrollReveal>
+            )}
 
-          {/* Mobile — swipeable video cards, current one filling most of
-              the width with the next one peeking at the edge. */}
-          <div
-            ref={scrollRef}
-            className="md:hidden flex gap-4 overflow-x-auto snap-x snap-mandatory pb-1 -mx-5 px-5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
-          >
-            {slides.map((s, i) => (
-              <div
-                key={s.title}
-                ref={(el) => {
-                  cardRefs.current[i] = el;
-                }}
-                data-index={i}
-                className="relative snap-center shrink-0 w-[78%] aspect-[9/16] overflow-hidden bg-cream/10"
-                onClickCapture={(e) => {
-                  if (i !== activeIndex) {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    scrollToCard(i);
-                  }
-                }}
-              >
-                <video
-                  ref={(el) => {
-                    mobileVideoRefs.current[s.title] = el;
-                  }}
-                  className="absolute inset-0 w-full h-full object-cover"
-                  src={s.video}
-                  controls={i === activeIndex}
-                  loop
-                  muted
-                  playsInline
-                  aria-hidden={i !== activeIndex}
-                />
+            {/* Mobile — dish name + description come before the video here
+                (opposite order from desktop), with the arrows sitting right
+                next to the dish name instead of below the description. */}
+            <ScrollReveal delay={0.05} className="md:hidden">
+              <div className="flex items-center justify-between gap-3">
+                <h3 className="text-h2 text-cream">{slide.title}</h3>
+                <div className="flex items-center gap-2 shrink-0">
+                  <ArrowButton direction="prev" onClick={goPrev} label="Previous recipe" />
+                  <ArrowButton direction="next" onClick={goNext} label="Next recipe" />
+                </div>
               </div>
-            ))}
-          </div>
-
-          <ScrollReveal delay={0.1}>
-            <h3 className="text-h2 text-cream mb-2">{slide.title}</h3>
-            <p className="text-body leading-relaxed text-cream/75 max-w-[42ch] mb-5">{slide.description}</p>
-            <div className="flex items-center gap-3 flex-wrap">
-              <div className="flex items-center gap-2.5">
-                <ArrowButton direction="prev" onClick={goPrev} label="Previous recipe" />
-                <ArrowButton direction="next" onClick={goNext} label="Next recipe" />
-              </div>
+              <p className="text-body leading-relaxed text-cream/75 mt-2">{slide.description}</p>
               {variant === "pdp" && (
                 <Link
                   href={ctaHref}
-                  className="text-btn inline-flex items-center gap-1.5 text-cream underline decoration-cream decoration-2 underline-offset-4 hover:text-cream/80 transition-colors"
+                  className="text-btn inline-flex items-center gap-1.5 text-cream underline decoration-cream decoration-2 underline-offset-4 hover:text-cream/80 transition-colors mt-3"
                 >
                   {ctaLabel}
                   <span aria-hidden="true">→</span>
                 </Link>
               )}
-            </div>
-          </ScrollReveal>
-        </div>
+            </ScrollReveal>
 
-        {/* RIGHT column — desktop only, cascading video slider. Deliberately
-            left without horizontal padding/max-width so it bleeds to the
-            true right edge of the viewport; overflow-hidden clips the
-            trailing clip there exactly like the reference design. Clicking
-            a smaller clip brings it into focus — with `layout` + a stable
-            per-dish key, it slides into the lead position instead of
-            jumping or flashing. */}
-        <div className="hidden md:flex relative h-[460px] lg:h-[580px] items-center overflow-hidden mt-10 md:mt-0">
-          <div className="flex items-center gap-6 lg:gap-8 h-full">
-            <AnimatePresence initial={false}>
-              {windowed.map(({ offset, idx, slide: s }) => {
-                const { heightPct, opacity } = OFFSETS[offset];
-                const isActive = offset === 0;
-                return (
-                  <motion.div
-                    key={s.title}
-                    layout
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity }}
-                    exit={{ opacity: 0 }}
-                    transition={{ layout: SLIDE_TRANSITION, opacity: { duration: 0.35 } }}
-                    style={{ height: `${heightPct}%`, aspectRatio: "9 / 16" }}
-                    className={`relative shrink-0 overflow-hidden ${isActive ? "" : "cursor-pointer"}`}
-                    onClick={isActive ? undefined : () => selectIndex(idx)}
-                    role={isActive ? undefined : "button"}
-                    tabIndex={isActive ? undefined : 0}
-                    aria-label={isActive ? undefined : `Show ${s.title}`}
+            {/* Mobile — swipeable video cards, current one filling most of
+                the width with the next one peeking at the edge. */}
+            <div
+              ref={scrollRef}
+              className="md:hidden flex gap-4 overflow-x-auto snap-x snap-mandatory pb-1 -mx-5 px-5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+            >
+              {slides.map((s, i) => (
+                <div
+                  key={s.title}
+                  ref={(el) => {
+                    cardRefs.current[i] = el;
+                  }}
+                  data-index={i}
+                  className="relative snap-center shrink-0 w-[62%] aspect-[9/16] overflow-hidden bg-cream/10"
+                  onClickCapture={(e) => {
+                    if (i !== activeIndex) {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      scrollToCard(i);
+                    }
+                  }}
+                >
+                  <video
+                    ref={(el) => {
+                      mobileVideoRefs.current[s.title] = el;
+                    }}
+                    className="absolute inset-0 w-full h-full object-cover"
+                    src={s.video}
+                    loop
+                    muted
+                    playsInline
+                    aria-hidden={i !== activeIndex}
+                  />
+                </div>
+              ))}
+            </div>
+
+            {/* Desktop — dish name, description, then the arrows below. */}
+            <ScrollReveal delay={0.1} className="hidden md:block">
+              <h3 className="text-h2 text-cream mb-2">{slide.title}</h3>
+              <p className="text-body leading-relaxed text-cream/75 max-w-[42ch] mb-5">{slide.description}</p>
+              <div className="flex items-center gap-3 flex-wrap">
+                <div className="flex items-center gap-2.5">
+                  <ArrowButton direction="prev" onClick={goPrev} label="Previous recipe" />
+                  <ArrowButton direction="next" onClick={goNext} label="Next recipe" />
+                </div>
+                {variant === "pdp" && (
+                  <Link
+                    href={ctaHref}
+                    className="text-btn inline-flex items-center gap-1.5 text-cream underline decoration-cream decoration-2 underline-offset-4 hover:text-cream/80 transition-colors"
                   >
-                    <video
-                      ref={(el) => {
-                        desktopVideoRefs.current[s.title] = el;
-                      }}
-                      className="absolute inset-0 w-full h-full object-cover"
-                      src={s.video}
-                      controls={isActive}
-                      loop
-                      muted
-                      playsInline
-                      aria-hidden={!isActive}
-                    />
-                  </motion.div>
-                );
-              })}
-            </AnimatePresence>
+                    {ctaLabel}
+                    <span aria-hidden="true">→</span>
+                  </Link>
+                )}
+              </div>
+            </ScrollReveal>
+          </div>
+
+          {/* RIGHT column — desktop only, cascading video slider, ~60% of
+              the row. Clicking a smaller clip brings it into focus — with
+              `layout` + a stable per-dish key, it slides into the lead
+              position instead of jumping or flashing. */}
+          <div className="hidden md:flex relative h-[440px] lg:h-[560px] items-center overflow-hidden">
+            <div className="flex items-center gap-6 lg:gap-8 h-full">
+              <AnimatePresence initial={false}>
+                {windowed.map(({ offset, idx, slide: s }) => {
+                  const { heightPct, opacity } = OFFSETS[offset];
+                  const isActive = offset === 0;
+                  return (
+                    <motion.div
+                      key={s.title}
+                      layout
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity }}
+                      exit={{ opacity: 0 }}
+                      transition={{ layout: SLIDE_TRANSITION, opacity: { duration: 0.35 } }}
+                      style={{ height: `${heightPct}%`, aspectRatio: "9 / 16" }}
+                      className={`relative shrink-0 overflow-hidden ${isActive ? "" : "cursor-pointer"}`}
+                      onClick={isActive ? undefined : () => selectIndex(idx)}
+                      role={isActive ? undefined : "button"}
+                      tabIndex={isActive ? undefined : 0}
+                      aria-label={isActive ? undefined : `Show ${s.title}`}
+                    >
+                      <video
+                        ref={(el) => {
+                          desktopVideoRefs.current[s.title] = el;
+                        }}
+                        className="absolute inset-0 w-full h-full object-cover"
+                        src={s.video}
+                        loop
+                        muted
+                        playsInline
+                        aria-hidden={!isActive}
+                      />
+                    </motion.div>
+                  );
+                })}
+              </AnimatePresence>
+            </div>
           </div>
         </div>
       </div>
