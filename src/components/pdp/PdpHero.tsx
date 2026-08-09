@@ -8,15 +8,6 @@ import { useCart } from "@/lib/cart-context";
 import { PDP_ACCENT_COLOR, PRODUCT_CARD_IMAGES, type Product } from "@/lib/products";
 import { MAX_QTY_PER_LINE } from "@/lib/discounts";
 
-// 360°-spin jar footage exists for the three single-flavour SKUs (not the
-// Combo Pack, which isn't a single jar) — filenames match the product slug
-// exactly, so this is just a membership check, not a path-building guess.
-const PRODUCTS_WITH_360_VIDEO = new Set([
-  "green-chilli-thecha",
-  "red-chilli-thecha",
-  "mixed-chilli-thecha",
-]);
-
 // Label — dotted leader line — value. Classic spec-sheet row, matching the
 // design's "Heat Level ⋯⋯⋯⋯⋯⋯⋯⋯ Medium - Hot" treatment exactly. The leader
 // line reuses the site's one shared dotted-line pattern (same as the navbar
@@ -47,8 +38,6 @@ function DetailRow({
 export default function PdpHero({ product }: { product: Product }) {
   const { add } = useCart();
   const [qty, setQty] = useState(1);
-  const [show360, setShow360] = useState(false);
-  const has360Video = PRODUCTS_WITH_360_VIDEO.has(product.slug);
   const { devanagariLabel } = SITE_CONTENT.productPage;
   const accentColor = product.pdpAccentColor ?? PDP_ACCENT_COLOR[product.flavor];
   const mainImage = product.mainImage ?? PRODUCT_CARD_IMAGES[product.slug] ?? product.image;
@@ -99,51 +88,6 @@ export default function PdpHero({ product }: { product: Product }) {
             <span className="absolute top-4 left-4 z-10 bg-dark text-cream text-[11px] font-bold uppercase tracking-[0.06em] px-2.5 py-1">
               Sold out
             </span>
-          )}
-
-          {has360Video && (
-            <>
-              {/* Only mounted (so only downloaded) once the shopper actually
-                  asks for it — same "don't pay the bytes until wanted"
-                  philosophy as the lazy-loaded process video elsewhere on
-                  the site. Autoplaying, muted, looped: this is pre-rendered
-                  360° footage, not a drag-to-spin control, so it just plays
-                  like a living photo once toggled on. */}
-              {show360 && (
-                <video
-                  key={product.slug}
-                  className="absolute inset-0 w-full h-full object-cover z-[5]"
-                  src={`/videos/360/${product.slug}.mp4`}
-                  autoPlay
-                  muted
-                  loop
-                  playsInline
-                  aria-label={`360° view of ${product.name}`}
-                />
-              )}
-              <button
-                type="button"
-                onClick={() => setShow360((v) => !v)}
-                className="absolute bottom-4 right-4 z-10 flex items-center gap-1.5 bg-dark/80 text-cream text-[11px] font-bold uppercase tracking-[0.06em] px-3 py-1.5 hover:bg-dark transition-colors cursor-pointer"
-                aria-pressed={show360}
-              >
-                <svg
-                  width="13"
-                  height="13"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  aria-hidden="true"
-                >
-                  <path d="M21 12a9 9 0 1 1-3.5-7.1" />
-                  <path d="M21 3v6h-6" />
-                </svg>
-                {show360 ? "Photo" : "360° View"}
-              </button>
-            </>
           )}
         </div>
 

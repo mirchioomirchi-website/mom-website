@@ -253,7 +253,7 @@ export default function ProductShowcase({ products }: { products: Product[] }) {
                   className="absolute inset-0 flex flex-col items-center md:items-start justify-center text-center md:text-left transition-[opacity,transform] duration-300 ease-out"
                   style={{ opacity: 0 }}
                 >
-                  <h3 className="text-[7.5vw] md:text-[2.7vw] font-quirk leading-[0.95] uppercase text-cream">
+                  <h3 className="text-[7.5vw] md:text-[2.7vw] font-quirk leading-[1.15] uppercase text-cream">
                     {p.name}
                   </h3>
                   {p.nameHi && (
