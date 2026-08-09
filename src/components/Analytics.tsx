@@ -22,7 +22,11 @@ import Script from "next/script";
 import { Suspense } from "react";
 import RouteChangeTracker from "./RouteChangeTracker";
 
-const GA_ID = process.env.NEXT_PUBLIC_GA_ID;
+// GA4 measurement IDs are embedded client-side in every page's HTML anyway
+// (not a secret), so a literal fallback here means analytics works even if
+// Vercel's env var isn't set yet — the env var still overrides this if you
+// ever want a different property (e.g. a separate staging GA property).
+const GA_ID = process.env.NEXT_PUBLIC_GA_ID || "G-QYRXTVL34W";
 const META_PIXEL_ID = process.env.NEXT_PUBLIC_META_PIXEL_ID;
 
 export default function Analytics() {

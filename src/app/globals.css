@@ -74,6 +74,25 @@
   ::-webkit-scrollbar { width: 5px; }
   ::-webkit-scrollbar-track { background: #FFF3D7; }
   ::-webkit-scrollbar-thumb { background: #B44800; border-radius: 3px; }
+
+  /* Consistent keyboard-focus ring sitewide. Most components rely on the
+     browser's own default outline (which varies a lot across
+     Chrome/Firefox/Safari) rather than an explicit style — this applies one
+     on-brand ring to any focused interactive element across the whole site
+     without needing to touch every individual component. :focus-visible
+     means it only shows for keyboard/assistive-tech navigation, never for a
+     mouse/touch click. Components that already set their own focus:ring-*
+     utility just layer on top of this — no conflict. */
+  a:focus-visible,
+  button:focus-visible,
+  input:focus-visible,
+  select:focus-visible,
+  textarea:focus-visible,
+  [tabindex]:focus-visible {
+    outline: 2px solid #9B1E15;
+    outline-offset: 2px;
+    border-radius: 2px;
+  }
 }
 
 /* ============================================

@@ -169,9 +169,21 @@ export default function RootLayout({
         <link rel="dns-prefetch" href="https://checkout.razorpay.com" />
       </head>
       <body className="bg-cream text-dark font-sans antialiased">
+        {/* Skip-to-content link — the first focusable element on every page.
+            Invisible until a keyboard user Tabs to it, then jumps straight
+            to #main-content so they don't have to tab through the entire
+            nav on every single page load. */}
+        <a
+          href="#main-content"
+          className="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-[999] focus:bg-red focus:text-cream focus:px-4 focus:py-2.5 focus:text-btn focus:font-bold"
+        >
+          Skip to content
+        </a>
         <Analytics />
         <CartProvider>
-          {children}
+          <div id="main-content" tabIndex={-1} className="outline-none">
+            {children}
+          </div>
           <MiniCart />
         </CartProvider>
         <WhatsAppFab />
