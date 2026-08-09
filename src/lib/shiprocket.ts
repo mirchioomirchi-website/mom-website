@@ -58,6 +58,28 @@ type CacheEntry = { value: PincodeServiceability; expiresAt: number };
 const pincodeCache = new Map<string, CacheEntry>();
 const CACHE_TTL_MS = 60 * 60 * 1000;
 
+// We currently only deliver within Mumbai (matches the FAQ + shipping
+// policy). Checked before ever calling Shiprocket — Shiprocket's
+// serviceability check is a general pan-India courier lookup and has no
+// concept of this business constraint, so a Delhi pincode would otherwise
+// come back "available" despite being outside what we actually fulfil
+// right now. Mumbai city + suburbs pincodes all start with "400"; widen
+// this (or make it a list of allowed prefixes) once delivery expands.
+const MUMBAI_PINCODE_PREFIX = "400";
+export const OUTSIDE_MUMBAI_MESSAGE =
+  "We currently deliver within Mumbai only (pincodes starting with 400). We're working on expanding — check back soon!";
+
+// Synchronous, no-network-call version of the same check — used as a final
+// server-side gate right before an order is actually created (in addition
+// to the async checkPincode() below, which the checkout UI calls live as
+// the customer types). Client-side validation can be raced or bypassed
+// entirely by a direct API call, so both order-creation routes re-check
+// this themselves rather than trusting the client got this far honestly.
+export function isMumbaiPincode(pincode: string): boolean {
+  const safe = pincode.replace(/[^0-9]/g, "");
+  return /^\d{6}$/.test(safe) && safe.startsWith(MUMBAI_PINCODE_PREFIX);
+}
+
 export async function checkPincode(
   pincode: string,
   weightKg = 0.3
@@ -65,6 +87,10 @@ export async function checkPincode(
   const safe = pincode.replace(/[^0-9]/g, "");
   if (!/^\d{6}$/.test(safe)) {
     return { available: false, reason: "Enter a valid 6-digit pincode." };
+  }
+
+  if (!safe.startsWith(MUMBAI_PINCODE_PREFIX)) {
+    return { available: false, reason: OUTSIDE_MUMBAI_MESSAGE };
   }
 
   // If Shiprocket isn't configured, default to "available" so checkout isn't

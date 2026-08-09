@@ -325,7 +325,7 @@ export default function CartPageClient() {
               </button>
 
               <p className="text-body-sm text-dark/60 mt-4">
-                Ships pan-India in 3–7 business days. ₹{SHIPPING_FLAT_RATE} flat shipping,
+                Ships within Mumbai in 1–2 business days. ₹{SHIPPING_FLAT_RATE} flat shipping,
                 free over ₹{SHIPPING_FREE_THRESHOLD}.
               </p>
 

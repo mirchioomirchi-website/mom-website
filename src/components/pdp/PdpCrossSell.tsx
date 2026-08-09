@@ -36,6 +36,9 @@ export function HighlightedCard({
 }) {
   const { add } = useCart();
   const accentColor = product.pdpAccentColor ?? PDP_ACCENT_COLOR[product.flavor];
+  // Same fail-open rule as PdpHero/ShopProductGrid — only ever `false` when
+  // Shopify itself reports the variant as sold out.
+  const soldOut = product.available === false;
   return (
     <div
       className="relative flex flex-col md:flex-row md:h-[380px] items-center justify-center gap-8 md:gap-12 overflow-hidden p-6 md:p-8 transition-transform duration-300 hover:scale-[1.01]"
@@ -50,9 +53,14 @@ export function HighlightedCard({
           src={product.mainImage ?? PRODUCT_CARD_IMAGES[product.slug] ?? product.image}
           alt={product.name}
           fill
-          className="object-contain"
+          className={`object-contain ${soldOut ? "opacity-50" : ""}`}
           sizes="200px"
         />
+        {soldOut && (
+          <span className="absolute top-0 left-0 bg-dark text-cream text-[11px] font-bold uppercase tracking-[0.06em] px-2.5 py-1">
+            Sold out
+          </span>
+        )}
       </div>
       <div className="relative z-10 flex flex-col items-center md:items-start text-center md:text-left gap-6 md:gap-5 min-w-0 w-full md:w-auto">
         <h3 className="text-h3 text-cream pointer-events-none">{product.name}</h3>
@@ -65,27 +73,37 @@ export function HighlightedCard({
         </p>
 
         <div className="hidden md:flex items-baseline gap-1.5 pointer-events-none">
-          <span className="text-h4 font-bold text-cream">₹{product.price}</span>
-          <span className="text-body-sm font-semibold text-cream/70 uppercase tracking-[0.06em]">/ {product.weight}</span>
+          <span className="text-h4 font-bold text-cream">{soldOut ? "Sold out" : `₹${product.price}`}</span>
+          {!soldOut && (
+            <span className="text-body-sm font-semibold text-cream/70 uppercase tracking-[0.06em]">/ {product.weight}</span>
+          )}
         </div>
 
         <button
           type="button"
+          disabled={soldOut}
           onClick={() => add(product.slug, 1, openCartOnAdd)}
-          className="hidden md:inline-flex text-btn font-bold relative items-center gap-2 bg-cream text-dark px-5 py-2.5 uppercase tracking-[0.06em] hover:bg-cream/90 transition-colors cursor-pointer"
+          className="hidden md:inline-flex text-btn font-bold relative items-center gap-2 bg-cream text-dark px-5 py-2.5 uppercase tracking-[0.06em] hover:bg-cream/90 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-cream"
         >
-          Add to Cart
-          <CartIcon />
+          {soldOut ? "Sold Out" : "Add to Cart"}
+          {!soldOut && <CartIcon />}
         </button>
 
         <button
           type="button"
+          disabled={soldOut}
           onClick={() => add(product.slug, 1, openCartOnAdd)}
-          className="md:hidden w-full inline-flex items-center justify-center gap-2 text-btn font-bold relative bg-cream text-dark px-5 py-3 uppercase tracking-[0.06em] hover:bg-cream/90 transition-colors cursor-pointer"
+          className="md:hidden w-full inline-flex items-center justify-center gap-2 text-btn font-bold relative bg-cream text-dark px-5 py-3 uppercase tracking-[0.06em] hover:bg-cream/90 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-cream"
         >
-          Add to Cart
-          <span aria-hidden="true">·</span>
-          ₹{product.price}
+          {soldOut ? (
+            "Sold Out"
+          ) : (
+            <>
+              Add to Cart
+              <span aria-hidden="true">·</span>
+              ₹{product.price}
+            </>
+          )}
         </button>
       </div>
     </div>
@@ -94,6 +112,7 @@ export function HighlightedCard({
 
 // A non-active product — image + name only, click to bring it into focus.
 function CollapsedCard({ product, onSelect }: { product: Product; onSelect: () => void }) {
+  const soldOut = product.available === false;
   return (
     <button
       type="button"
@@ -105,9 +124,14 @@ function CollapsedCard({ product, onSelect }: { product: Product; onSelect: () =
           src={product.mainImage ?? PRODUCT_CARD_IMAGES[product.slug] ?? product.image}
           alt={product.name}
           fill
-          className="object-contain"
+          className={`object-contain ${soldOut ? "opacity-50" : ""}`}
           sizes="150px"
         />
+        {soldOut && (
+          <span className="absolute top-0 left-0 bg-dark text-cream text-[10px] font-bold uppercase tracking-[0.06em] px-2 py-0.5">
+            Sold out
+          </span>
+        )}
       </div>
       <p className="text-lg md:text-xl font-semibold text-dark text-center">{product.name}</p>
     </button>

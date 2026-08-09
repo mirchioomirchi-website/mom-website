@@ -71,10 +71,13 @@ export async function pushRazorpayOrderToShopify(
     return { ok: false, reason: "No items in payment notes" };
   }
 
-  const { subtotal, discount, discountLabel, total: itemsTotal } = computeCartTotal(
-    items,
-    notes.coupon_code
-  );
+  const {
+    subtotal,
+    discount,
+    discountLabel,
+    couponCode: appliedCouponCode,
+    total: itemsTotal,
+  } = computeCartTotal(items, notes.coupon_code);
   const shipping = computeShipping({ itemsSubtotal: subtotal });
 
   const expectedTotal = itemsTotal + shipping.price;
@@ -116,6 +119,7 @@ export async function pushRazorpayOrderToShopify(
     shippingPriceRupees: shipping.price,
     discountRupees: discount,
     discountLabel,
+    appliedCouponCode,
     totalRupees: paidRupees,
     razorpayPaymentId: input.razorpayPaymentId,
     razorpayOrderId: input.razorpayOrderId,

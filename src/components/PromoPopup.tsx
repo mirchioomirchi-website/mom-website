@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { motion, AnimatePresence } from "motion/react";
 import { useDiscountSignup, signupCoupon, SIGNUP_COUPON_CODE } from "@/lib/use-discount-signup";
 
@@ -158,11 +159,16 @@ export default function PromoPopup() {
                         {status === "submitting" ? "Sending…" : `Get my ${signupCoupon.pct}% off`}
                       </button>
                       {status === "error" && (
-                        <p className="text-body-sm text-yellow">{errorMsg}</p>
+                        <p role="alert" className="text-body-sm text-yellow">{errorMsg}</p>
                       )}
                     </form>
                     <p className="text-[0.7rem] text-cream/50 mt-4">
-                      No spam. Unsubscribe anytime.
+                      By submitting, you agree to get WhatsApp/SMS updates on new
+                      batches, drops, and offers. No spam, unsubscribe anytime. See our{" "}
+                      <Link href="/privacy" className="underline hover:text-cream/80">
+                        Privacy Policy
+                      </Link>
+                      .
                     </p>
                   </>
                 )}

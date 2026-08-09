@@ -96,7 +96,7 @@ function renderCustomerHtml(input: OrderEmailInput) {
       <tr><td style="padding:10px 0;font-weight:600;color:#000">Total</td><td style="padding:10px 0;text-align:right;font-weight:600;color:#000">${rupees(amountInPaise)}</td></tr>
     </table>
     ${address ? `<p style="font-size:14px;color:#444;margin:0 0 8px"><strong style="color:#000">Shipping to:</strong></p><p style="font-size:14px;color:#444;margin:0 0 24px;line-height:1.6">${escapeHtml(address)}</p>` : ""}
-    <p style="font-size:14px;color:#666;line-height:1.6;margin:0 0 16px">You'll get another email with the tracking number once your jars hit the courier — 3–7 working days pan-India.</p>
+    <p style="font-size:14px;color:#666;line-height:1.6;margin:0 0 16px">You'll get another email with the tracking number once your jars hit the courier — 1–2 working days, Mumbai delivery.</p>
     <p style="margin:0 0 24px">
       <a href="${SITE_URL}/orders/track" style="display:inline-block;background:#9B1E15;color:#fff;text-decoration:none;padding:12px 22px;font-size:13px;letter-spacing:0.05em;text-transform:uppercase;font-weight:600">Track this order →</a>
     </p>

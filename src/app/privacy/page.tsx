@@ -24,6 +24,7 @@ export default function PrivacyPage() {
           ],
           bullets: [
             "Contact + shipping details you give us at checkout: name, email, phone, address, city, state, pincode.",
+            "Phone number you submit through a \"get 5% off\" signup (the banner or popup asking for your mobile number) — collected only when you voluntarily submit it, used to send you WhatsApp/SMS updates about new batches, drops, and offers, and to log/honour the discount code you were given.",
             "Payment metadata returned by Razorpay (payment ID, order ID, status). We do NOT store card numbers, UPI IDs, or CVVs — those are handled entirely by Razorpay.",
             "Anonymous analytics events (page views, add-to-cart, purchase) via Google Analytics and Meta Pixel — used to understand which pages and products perform best.",
             "Standard server logs (IP, browser, timestamp) retained for security and abuse prevention.",
@@ -36,7 +37,7 @@ export default function PrivacyPage() {
             "Sending order confirmations, shipping updates, and receipts.",
             "Customer support for questions about an order you placed.",
             "Aggregate, non-identifying analytics to improve the site, copy, and product mix.",
-            "Marketing emails only if you opt in (newsletter signup) — and you can unsubscribe anytime via the link in every email.",
+            "Marketing messages only if you opt in — by submitting your phone number via a discount signup (WhatsApp/SMS) or joining our newsletter (email) — and you can unsubscribe anytime via the link in every email or by replying STOP to any WhatsApp/SMS message.",
           ],
         },
         {
@@ -48,7 +49,7 @@ export default function PrivacyPage() {
             "Razorpay — to process payments (PCI-DSS compliant).",
             "Shipping partners — to deliver your order (name, address, phone only).",
             "Google Analytics + Meta Pixel — anonymous, aggregated usage data.",
-            "Vercel (hosting), Sanity (content management), and Shopify (catalog) — standard infrastructure providers under their own data agreements.",
+            "Vercel (hosting), Sanity (content management), Shopify (catalog + order records), and Resend (transactional email delivery) — standard infrastructure providers under their own data agreements.",
           ],
         },
         {
@@ -63,7 +64,7 @@ export default function PrivacyPage() {
             "Ask us what we have on file about you.",
             "Ask us to correct it.",
             "Ask us to delete it (subject to our legal duty to keep order/tax records for the period required by Indian law).",
-            "Opt out of marketing emails at any time.",
+            "Opt out of marketing emails, WhatsApp, or SMS at any time.",
           ],
           paragraphs: [
             "Email contact@mirchiomirchi.com with your request. We respond within 14 working days.",

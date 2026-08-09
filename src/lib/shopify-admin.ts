@@ -187,6 +187,12 @@ export type CreatePaidOrderInput = {
   shippingPriceRupees: number;
   discountRupees: number; // amount of automatic discount (e.g. 10% off)
   discountLabel?: string; // e.g. "Cart 10% discount"
+  // The literal coupon code that was applied (e.g. "SIGNUP5"), distinct from
+  // discountLabel's human-readable text. Only set for discountType==="coupon"
+  // (never for the automatic threshold discount). Written as a `coupon-<code>`
+  // order tag, which hasUsedCoupon() reads back to enforce the per-customer
+  // cap on single-use codes.
+  appliedCouponCode?: string;
   totalRupees: number; // authoritative total = lines + shipping − discount
   razorpayPaymentId: string;
   razorpayOrderId: string;
@@ -302,6 +308,14 @@ function toMailingAddress(addr: AdminAddressInput) {
   };
 }
 
+// Builds the `coupon-<CODE>` order tag, or an empty array if no coupon
+// applied — spread directly into a tags array.
+function couponTag(code: string | undefined): string[] {
+  if (!code) return [];
+  const safe = code.replace(/[^A-Za-z0-9_-]/g, "").slice(0, 32);
+  return safe ? [`coupon-${safe}`] : [];
+}
+
 function toLineItems(lines: AdminOrderLineInput[]) {
   return lines.map((l) => {
     // Prefer variant linking (lets Shopify decrement inventory automatically).
@@ -394,7 +408,13 @@ export async function createPaidOrder(
     email: input.email.slice(0, 255),
     phone: input.phone.slice(0, 32),
     note: `Razorpay payment ${input.razorpayPaymentId} (order ${input.razorpayOrderId})${input.extraNote ?? ""}`,
-    tags: [tag, "razorpay", "headless-checkout", ...(input.extraTags ?? [])],
+    tags: [
+      tag,
+      "razorpay",
+      "headless-checkout",
+      ...couponTag(input.appliedCouponCode),
+      ...(input.extraTags ?? []),
+    ],
     lineItems,
     shippingAddress,
     billingAddress,
@@ -495,7 +515,7 @@ export async function createPendingOrder(
     email: input.email.slice(0, 255),
     phone: input.phone.slice(0, 32),
     note: `Cash on Delivery — internal ref ${input.codReference}`,
-    tags: [tag, "cod", "headless-checkout"],
+    tags: [tag, "cod", "headless-checkout", ...couponTag(input.appliedCouponCode)],
     lineItems,
     shippingAddress,
     billingAddress,
@@ -688,4 +708,204 @@ export async function getRazorpayPaymentIdForOrder(
   // Fallback: parse from note "Razorpay payment pay_XXX (order order_YYY)"
   const noteMatch = (order.note || "").match(/Razorpay payment (\S+)/);
   return noteMatch ? noteMatch[1] : null;
+}
+
+// ── Public: phone-signup persistence ("get 5% off" banner/popup) ──────────
+//
+// Previously the only record of a phone-signup was a one-off email to the
+// founder's inbox — not durable, not queryable, easy to lose in a crowded
+// inbox. This upserts a Shopify Customer instead, which is: (a) already the
+// system of record for everything else in this store, (b) queryable from
+// Shopify Admin (Customers → search/filter/export/segment), and (c) the
+// exact data model this endpoint's coupon-cap check (hasUsedCoupon) also
+// reads from — so a phone-signup customer and a later checkout by the same
+// phone naturally reconcile into one record.
+//
+// Idempotent by phone: Shopify only allows one customer per phone number, so
+// a repeat signup (same person, banner today + popup next week) updates the
+// existing customer's tags instead of erroring.
+
+const CUSTOMER_BY_PHONE_QUERY = /* GraphQL */ `
+  query CustomerByPhone($q: String!) {
+    customers(first: 1, query: $q) {
+      nodes {
+        id
+        tags
+      }
+    }
+  }
+`;
+
+type CustomerByPhoneResp = {
+  customers: { nodes: Array<{ id: string; tags: string[] }> };
+};
+
+const CUSTOMER_CREATE_MUTATION = /* GraphQL */ `
+  mutation PhoneSignupCustomerCreate($input: CustomerInput!) {
+    customerCreate(input: $input) {
+      customer {
+        id
+      }
+      userErrors {
+        field
+        message
+      }
+    }
+  }
+`;
+
+const CUSTOMER_UPDATE_TAGS_MUTATION = /* GraphQL */ `
+  mutation PhoneSignupCustomerUpdate($input: CustomerInput!) {
+    customerUpdate(input: $input) {
+      customer {
+        id
+      }
+      userErrors {
+        field
+        message
+      }
+    }
+  }
+`;
+
+type CustomerMutationResp = {
+  customer: { id: string } | null;
+  userErrors: Array<{ field?: string[]; message: string }>;
+};
+
+const SIGNUP5_LABEL = "SIGNUP5";
+
+// Normalises to the 10-digit Indian mobile number → E.164. Returns null if
+// the input isn't a valid Indian mobile number.
+function toE164India(rawPhone: string): string | null {
+  const digits = rawPhone.replace(/\D/g, "").slice(-10);
+  return /^[6-9]\d{9}$/.test(digits) ? `+91${digits}` : null;
+}
+
+export async function upsertPhoneSignupCustomer(input: {
+  phone: string;
+  source: string;
+}): Promise<{ ok: boolean; alreadyExisted: boolean; reason?: string }> {
+  if (!shopifyAdminConfigured) {
+    return { ok: false, alreadyExisted: false, reason: "Shopify Admin not configured" };
+  }
+  const e164 = toE164India(input.phone);
+  if (!e164) {
+    return { ok: false, alreadyExisted: false, reason: "Invalid phone number" };
+  }
+  const source = (input.source || "banner").replace(/[^A-Za-z0-9_-]/g, "").slice(0, 50) || "banner";
+  const sourceTag = `phone-signup-${source}`;
+
+  const { data: existingData } = await adminFetch<CustomerByPhoneResp>(
+    CUSTOMER_BY_PHONE_QUERY,
+    { q: `phone:${e164}` }
+  );
+  const existing = existingData?.customers.nodes[0];
+
+  if (existing) {
+    const tags = new Set(existing.tags);
+    tags.add("phone-signup");
+    tags.add(sourceTag);
+    // Already tagged from a previous submission — nothing to update.
+    if (tags.size === existing.tags.length) {
+      return { ok: true, alreadyExisted: true };
+    }
+    const { data, errors } = await adminFetch<{ customerUpdate: CustomerMutationResp }>(
+      CUSTOMER_UPDATE_TAGS_MUTATION,
+      { input: { id: existing.id, tags: Array.from(tags) } }
+    );
+    const userErrs = data?.customerUpdate.userErrors ?? [];
+    if (userErrs.length > 0 || errors.length > 0) {
+      return {
+        ok: false,
+        alreadyExisted: true,
+        reason: userErrs.map((e) => e.message).join("; ") || errors.join("; "),
+      };
+    }
+    return { ok: true, alreadyExisted: true };
+  }
+
+  const { data, errors } = await adminFetch<{ customerCreate: CustomerMutationResp }>(
+    CUSTOMER_CREATE_MUTATION,
+    {
+      input: {
+        phone: e164,
+        tags: ["phone-signup", sourceTag],
+        note: `Signed up for 5% off (${SIGNUP5_LABEL}) via the "${source}" surface on mirchiomirchi.com.`,
+        smsMarketingConsent: {
+          marketingState: "SUBSCRIBED",
+          marketingOptInLevel: "SINGLE_OPT_IN",
+        },
+      },
+    }
+  );
+  const userErrs = data?.customerCreate.userErrors ?? [];
+  if (userErrs.length > 0 || errors.length > 0) {
+    return {
+      ok: false,
+      alreadyExisted: false,
+      reason: userErrs.map((e) => e.message).join("; ") || errors.join("; "),
+    };
+  }
+  return { ok: true, alreadyExisted: false };
+}
+
+// ── Public: per-customer coupon-cap check ─────────────────────────────────
+//
+// Enforces "one use per customer" on single-use codes like SIGNUP5. Every
+// order created with a coupon carries a `coupon-<CODE>` tag (see couponTag()
+// above) — this searches for an existing order with that tag matching the
+// customer's email or phone. Checked server-side right before an order is
+// created (both the Razorpay-order route and the COD route), same as the
+// stock and Mumbai-pincode checks — never trust the client to have honestly
+// tracked whether it already showed this customer a "code applied" state.
+//
+// Fails OPEN (returns false = "hasn't used it") on any Shopify Admin error,
+// same reasoning as the pincode/stock checks: a founder's Shopify hiccup
+// should never be the reason a paying customer can't check out. Worst case
+// here is a rare double-use of a 5% code, not a broken storefront.
+
+const ORDERS_EXIST_QUERY = /* GraphQL */ `
+  query OrdersExist($q: String!) {
+    orders(first: 1, query: $q) {
+      nodes {
+        id
+      }
+    }
+  }
+`;
+
+type OrdersExistResp = { orders: { nodes: Array<{ id: string }> } };
+
+async function anyOrderMatches(query: string): Promise<boolean> {
+  const { data } = await adminFetch<OrdersExistResp>(ORDERS_EXIST_QUERY, { q: query });
+  return (data?.orders.nodes.length ?? 0) > 0;
+}
+
+export async function hasUsedCoupon(params: {
+  email?: string;
+  phone?: string;
+  code: string;
+}): Promise<boolean> {
+  if (!shopifyAdminConfigured) return false;
+  const safeCode = params.code.replace(/[^A-Za-z0-9_-]/g, "").slice(0, 32);
+  if (!safeCode) return false;
+  const tag = `coupon-${safeCode}`;
+
+  const email = (params.email || "").trim().slice(0, 150);
+  const phoneDigits = (params.phone || "").replace(/\D/g, "").slice(-10);
+
+  try {
+    if (/^\S+@\S+\.\S+$/.test(email)) {
+      const safeEmail = email.replace(/"/g, "");
+      if (await anyOrderMatches(`tag:${tag} email:"${safeEmail}"`)) return true;
+    }
+    if (/^[6-9]\d{9}$/.test(phoneDigits)) {
+      if (await anyOrderMatches(`tag:${tag} phone:"${phoneDigits}"`)) return true;
+    }
+  } catch (err) {
+    console.error("[shopify-admin] hasUsedCoupon check failed", err);
+    return false;
+  }
+  return false;
 }

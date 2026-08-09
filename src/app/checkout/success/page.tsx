@@ -50,8 +50,8 @@ export default async function CheckoutSuccessPage({
           <h1 className="text-h1 text-red mb-5">Your mirchi is on the way.</h1>
           <p className="text-body text-dark/80 mb-8">
             We&apos;ve got your order. You&apos;ll receive a confirmation email
-            shortly, and a shipping update once it ships (3–7 business days
-            pan-India).
+            shortly, and a shipping update once it ships (1–2 business days,
+            Mumbai delivery).
             {isCod && " Keep the order amount ready in cash for the delivery."}
           </p>
 

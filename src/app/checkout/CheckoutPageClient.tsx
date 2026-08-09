@@ -660,7 +660,7 @@ export default function CheckoutPageClient() {
                     </button>
                   </div>
                   {appliedCoupon !== "" && !couponValid && (
-                    <p className="text-body-sm text-red mt-2">
+                    <p role="alert" className="text-body-sm text-red mt-2">
                       &ldquo;{appliedCoupon}&rdquo; isn&apos;t a code we recognize.
                     </p>
                   )}
@@ -698,7 +698,7 @@ export default function CheckoutPageClient() {
               </div>
 
               {submitError && (
-                <p className="text-body-sm text-red bg-red/10 px-4 py-3 mt-5">
+                <p role="alert" className="text-body-sm text-red bg-red/10 px-4 py-3 mt-5">
                   {submitError}
                 </p>
               )}
@@ -715,6 +715,18 @@ export default function CheckoutPageClient() {
                 {paymentMethod === "cod"
                   ? "Pay in cash when your jars arrive. You'll get an email confirmation now and a tracking link as soon as we ship."
                   : "Pay securely with UPI, debit/credit card, netbanking or wallets via Razorpay. You'll get an email confirmation the moment payment is captured."}
+              </p>
+
+              <p className="text-[0.72rem] text-dark/50 mt-3">
+                By placing this order you agree to our{" "}
+                <Link href="/terms" className="underline hover:text-dark">
+                  Terms
+                </Link>{" "}
+                and{" "}
+                <Link href="/privacy" className="underline hover:text-dark">
+                  Privacy Policy
+                </Link>
+                . We use your shipping details only to fulfil and update you on this order.
               </p>
 
               <Link
@@ -765,7 +777,7 @@ function Field({
         {label}
       </span>
       {children}
-      {error && <span className="block text-body-sm text-red mt-1">{error}</span>}
+      {error && <span role="alert" className="block text-body-sm text-red mt-1">{error}</span>}
     </label>
   );
 }
@@ -832,7 +844,7 @@ function PincodeStatusLine({
       </p>
     );
   }
-  return <p className="text-body-sm text-red font-semibold">{status.reason}</p>;
+  return <p role="alert" className="text-body-sm text-red font-semibold">{status.reason}</p>;
 }
 
 function PaymentOption({

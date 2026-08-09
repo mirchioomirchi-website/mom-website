@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { trackGenerateLead } from "@/lib/analytics-events";
 import { SITE_CONTENT } from "@/lib/content";
 
@@ -170,6 +171,14 @@ export default function ContactForm() {
       >
         {status === "sending" ? "Sending…" : submitLabel}
       </button>
+
+      <p className="text-[0.72rem] text-dark/50">
+        We&apos;ll only use these details to respond to your message. See our{" "}
+        <Link href="/privacy" className="underline hover:text-dark/70">
+          Privacy Policy
+        </Link>
+        .
+      </p>
     </form>
   );
 }

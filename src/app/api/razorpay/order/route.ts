@@ -4,6 +4,8 @@ import { computeGrandTotal, RAZORPAY_MAX_ORDER_RUPEES } from "@/lib/discounts";
 import { getUnavailableSlugs } from "@/lib/products-source";
 import { getProduct } from "@/lib/products";
 import { isRateLimited, getClientIp } from "@/lib/rate-limit";
+import { isMumbaiPincode, OUTSIDE_MUMBAI_MESSAGE } from "@/lib/shiprocket";
+import { hasUsedCoupon } from "@/lib/shopify-admin";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -69,6 +71,19 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
   }
 
+  // Server-side re-check — the checkout UI already blocks non-Mumbai
+  // pincodes live via /api/pincode, but that's client-side and can be raced
+  // or bypassed by a direct API call. The checkout page always sends the
+  // shipping pincode through in `notes.pincode`, so if it's present we
+  // enforce it here too, right before a Razorpay order is even created. If
+  // it's absent (e.g. the legacy standalone-amount path with no shipping
+  // step), we fail open rather than block a flow that never carried the
+  // data in the first place.
+  const notedPincode = body.notes?.pincode;
+  if (typeof notedPincode === "string" && notedPincode && !isMumbaiPincode(notedPincode)) {
+    return NextResponse.json({ error: OUTSIDE_MUMBAI_MESSAGE }, { status: 400 });
+  }
+
   // --- Server-side amount derivation (PRIMARY path) --------------------------
   // When `items` is provided, we IGNORE any client-supplied `amount` and
   // compute the authoritative total from the product catalogue. This prevents
@@ -113,6 +128,7 @@ export async function POST(req: Request) {
       discount,
       discountType,
       discountLabel,
+      couponCode: appliedCouponCode,
       shipping,
       grandTotal,
       lineCount,
@@ -130,6 +146,25 @@ export async function POST(req: Request) {
         { status: 400 }
       );
     }
+
+    // Per-customer coupon cap — same reasoning and mechanism as the COD
+    // route's check: single-use codes like SIGNUP5 are honour-system at
+    // entry, this is the actual server-side enforcement, checked before we
+    // even ask Razorpay for an order so a repeat use never gets that far.
+    if (appliedCouponCode) {
+      const alreadyUsed = await hasUsedCoupon({
+        email: body.notes?.email,
+        phone: body.notes?.phone,
+        code: appliedCouponCode,
+      });
+      if (alreadyUsed) {
+        return NextResponse.json(
+          { error: `You've already used ${appliedCouponCode}. It's valid once per customer.` },
+          { status: 400 }
+        );
+      }
+    }
+
     rupees = grandTotal;
     // Kept compact — Razorpay caps notes at 15 keys total, and the shipping
     // contact fields (name/email/phone/address/city/state/pincode) plus

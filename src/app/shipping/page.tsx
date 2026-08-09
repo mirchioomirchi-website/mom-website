@@ -14,12 +14,12 @@ export default function ShippingPage() {
       eyebrow="Legal"
       title="Shipping Policy"
       updated="May 12, 2026"
-      intro="We ship pan-India from Mumbai. Every jar is sealed, padded, and packed by hand. Below is what to expect after you place an order."
+      intro="We currently deliver within Mumbai only. Every jar is sealed, padded, and packed by hand. Below is what to expect after you place an order."
       sections={[
         {
           heading: "1. Where we ship",
           paragraphs: [
-            "All Indian states and union territories — including remote pin codes that our courier partners service. We are not shipping internationally yet.",
+            "We currently deliver within Mumbai only (pincodes starting with 400). We're working on expanding to the rest of India — check back soon. Enter your pincode at checkout to confirm we deliver to you.",
           ],
         },
         {
@@ -27,9 +27,7 @@ export default function ShippingPage() {
           bullets: [
             "Order placed before 2pm IST on a working day → dispatched the same day.",
             "Order placed after 2pm or on a Sunday / public holiday → dispatched the next working day.",
-            "Metro cities: typically 3–4 working days from dispatch.",
-            "Rest of India: typically 4–7 working days from dispatch.",
-            "Remote pin codes: up to 9 working days.",
+            "Orders usually arrive within 1–2 working days of dispatch, anywhere in Mumbai.",
           ],
         },
         {
@@ -41,7 +39,7 @@ export default function ShippingPage() {
         {
           heading: "4. Shipping cost",
           paragraphs: [
-            "Shipping is calculated based on weight and your pin code, and shown at checkout before payment. We pass our actual courier cost through — no markup.",
+            "Shipping is a flat ₹70 within Mumbai, free on orders over ₹999, shown at checkout before payment.",
           ],
         },
         {

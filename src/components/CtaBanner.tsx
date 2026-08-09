@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { ScrollReveal } from "@/components/primitives";
 import { SITE_CONTENT } from "@/lib/content";
 import { useDiscountSignup, signupCoupon, SIGNUP_COUPON_CODE } from "@/lib/use-discount-signup";
@@ -112,10 +113,16 @@ export default function CtaBanner() {
                         </button>
                       </div>
                       {status === "error" && (
-                        <p className="text-body-sm text-red">{errorMsg}</p>
+                        <p role="alert" className="text-body-sm text-red">{errorMsg}</p>
                       )}
                       <p className="text-[0.72rem] text-dark/50 text-center md:text-right">
-                        New-batch updates + drops. No spam, unsubscribe anytime.
+                        By submitting, you agree to get WhatsApp/SMS updates on new
+                        batches, drops, and offers from Mirchi O Mirchi. No spam,
+                        unsubscribe anytime. See our{" "}
+                        <Link href="/privacy" className="underline hover:text-dark/70">
+                          Privacy Policy
+                        </Link>
+                        .
                       </p>
                     </form>
                   )}

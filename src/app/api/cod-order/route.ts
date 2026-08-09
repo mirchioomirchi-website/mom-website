@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import crypto from "crypto";
 import {
   createPendingOrder,
+  hasUsedCoupon,
   shopifyAdminConfigured,
   type AdminOrderLineInput,
 } from "@/lib/shopify-admin";
@@ -10,6 +11,7 @@ import { computeGrandTotal, SHIPPING_FREE_THRESHOLD, COD_MAX_ORDER_RUPEES } from
 import { getUnavailableSlugs } from "@/lib/products-source";
 import { sendCriticalAlert } from "@/lib/email";
 import { isRateLimited, getClientIp } from "@/lib/rate-limit";
+import { isMumbaiPincode, OUTSIDE_MUMBAI_MESSAGE } from "@/lib/shiprocket";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -150,6 +152,27 @@ export async function POST(req: Request) {
       { status: 400 }
     );
   }
+  // Server-side re-check — the checkout UI already blocks non-Mumbai
+  // pincodes live, but that's client-side and can be raced or bypassed by a
+  // direct API call, so this is the check that actually matters.
+  if (!isMumbaiPincode(pincode)) {
+    return NextResponse.json({ error: OUTSIDE_MUMBAI_MESSAGE }, { status: 400 });
+  }
+
+  // Per-customer coupon cap — single-use codes like SIGNUP5 are honour-system
+  // at the point of entry (anyone can type the code), so this is the actual
+  // enforcement: reject if this email or phone already has an order tagged
+  // with this coupon. Checked here rather than left to the client so it
+  // can't be bypassed by simply not showing the "already used" state.
+  if (totals.couponCode) {
+    const alreadyUsed = await hasUsedCoupon({ email, phone, code: totals.couponCode });
+    if (alreadyUsed) {
+      return NextResponse.json(
+        { error: `You've already used ${totals.couponCode}. It's valid once per customer.` },
+        { status: 400 }
+      );
+    }
+  }
 
   // Deterministic idempotency key. Same items + same address + same hour →
   // same key. Prevents accidental double-orders from a double-click.
@@ -193,6 +216,7 @@ export async function POST(req: Request) {
     shippingPriceRupees: totals.shipping,
     discountRupees: totals.discount,
     discountLabel: totals.discountLabel,
+    appliedCouponCode: totals.couponCode,
     totalRupees: totals.grandTotal,
     codReference,
   });

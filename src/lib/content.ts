@@ -287,8 +287,6 @@ export const SITE_CONTENT = {
         "Three flavours. Six real ingredients each. Zero fillers. Pick one, or get all three.",
     },
     allProductsLabel: "All Products",
-    // Static, decorative — no delivery/PIN backend exists yet, matches the
-    // design reference without wiring up functionality that isn't real.
     availabilityLabel: "Availability",
     deliverToLabel: "Deliver to:",
     deliverToCta: "Enter PIN code",

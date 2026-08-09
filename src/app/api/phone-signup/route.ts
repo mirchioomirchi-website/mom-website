@@ -1,13 +1,15 @@
 import { NextResponse } from "next/server";
 import { Resend } from "resend";
 import { isRateLimited, getClientIp } from "@/lib/rate-limit";
+import { upsertPhoneSignupCustomer } from "@/lib/shopify-admin";
 
 // Captures a phone number from the "get new-batch updates + 5% off" signup
-// (CtaBanner + the promo popup both post here). There's no phone-based CRM
-// wired into this codebase, so — same pattern as /api/newsletter — every
-// submission is logged and emailed to the founder's inbox as the durable
-// record. If a proper CRM/spreadsheet sync is wanted later, this is the one
-// place that needs to change.
+// (CtaBanner + the promo popup both post here). The durable record is a
+// Shopify Customer (tagged "phone-signup" + the surface it came from) via
+// upsertPhoneSignupCustomer() — queryable from Shopify Admin, and idempotent
+// per phone number. We also keep the admin-email notification as a
+// belt-and-suspenders alert; if the Shopify write fails for some reason, the
+// email still lands so nothing is silently lost.
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -56,11 +58,21 @@ export async function POST(req: Request) {
     );
   }
 
+  // Durable record: upsert a Shopify Customer for this phone number. Best
+  // effort — a Shopify Admin hiccup shouldn't block the customer from
+  // getting their discount code, so we log and continue to the email
+  // notification rather than failing the whole request.
+  const shopifyResult = await upsertPhoneSignupCustomer({ phone, source });
+  if (!shopifyResult.ok) {
+    console.error("[phone-signup] Shopify customer upsert failed", shopifyResult.reason);
+  }
+
   if (!KEY) {
     console.log("[phone-signup] no RESEND_API_KEY — signup logged only:", {
       ip,
       phone,
       source,
+      shopifyCustomerSaved: shopifyResult.ok,
     });
     return NextResponse.json({ ok: true });
   }
@@ -73,11 +85,15 @@ export async function POST(req: Request) {
       subject: `[Phone signup] ${phone}`,
       html: `<p>New phone number signup (new-batch updates + 5% off code)</p>
         <p><strong>${escapeHtml(phone)}</strong></p>
-        <p style="color:#666;font-size:12px">Source: ${escapeHtml(source)} · IP ${escapeHtml(ip)}</p>`,
+        <p style="color:#666;font-size:12px">Source: ${escapeHtml(source)} · IP ${escapeHtml(ip)} · Saved to Shopify: ${shopifyResult.ok ? "yes" : "NO — check logs"}</p>`,
     });
     return NextResponse.json({ ok: true });
   } catch (err) {
     console.error("[phone-signup] send failed", err);
+    // The Shopify customer record (if it succeeded above) still exists even
+    // though the notification email failed, so this isn't a total loss —
+    // but we still surface an error so the client can retry and the founder
+    // isn't relying solely on Shopify Admin to notice new signups.
     return NextResponse.json(
       { error: "Couldn't submit right now — try again in a moment." },
       { status: 502 }

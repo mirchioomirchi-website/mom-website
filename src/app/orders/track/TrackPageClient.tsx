@@ -166,7 +166,7 @@ export default function TrackPageClient() {
                   </label>
 
                   {error && (
-                    <p className="text-body-sm text-red bg-red/10 px-4 py-3 mb-6">
+                    <p role="alert" className="text-body-sm text-red bg-red/10 px-4 py-3 mb-6">
                       {error}
                     </p>
                   )}

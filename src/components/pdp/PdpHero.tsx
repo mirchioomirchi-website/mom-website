@@ -66,7 +66,7 @@ export default function PdpHero({ product }: { product: Product }) {
               fill
               priority
               sizes="(max-width: 768px) 100vw, 50vw"
-              className="object-cover"
+              className={`object-cover ${soldOut ? "opacity-50" : ""}`}
             />
           ) : (
             <div
@@ -79,10 +79,15 @@ export default function PdpHero({ product }: { product: Product }) {
                   alt={product.name}
                   fill
                   priority
-                  className="object-contain opacity-95"
+                  className={`object-contain ${soldOut ? "opacity-50" : "opacity-95"}`}
                 />
               </div>
             </div>
+          )}
+          {soldOut && (
+            <span className="absolute top-4 left-4 z-10 bg-dark text-cream text-[11px] font-bold uppercase tracking-[0.06em] px-2.5 py-1">
+              Sold out
+            </span>
           )}
         </div>
 
@@ -112,7 +117,7 @@ export default function PdpHero({ product }: { product: Product }) {
               alt={product.name}
               fill
               priority
-              className="object-contain"
+              className={`object-contain ${soldOut ? "opacity-50" : ""}`}
             />
           </div>
 

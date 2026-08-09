@@ -61,6 +61,13 @@ export type CartTotal = {
   discount: number;
   discountType: DiscountType;
   discountLabel?: string;
+  // The normalized coupon code that actually applied (e.g. "SIGNUP5") —
+  // only set when discountType === "coupon". Distinct from discountLabel
+  // (a human-readable string like "5% off · New-batch signup") — this is
+  // the literal code, used wherever code identity matters: the Shopify
+  // order tag written at order-creation time and the per-user coupon-cap
+  // lookup (hasUsedCoupon) that reads that tag back.
+  couponCode?: string;
   // False only when a code was supplied and it doesn't match anything in
   // COUPONS — lets the UI show "code not recognized" without blocking
   // checkout (an unrecognized code is simply treated as no coupon).
@@ -103,10 +110,12 @@ export function computeCartTotal(
   let discount = 0;
   let discountType: DiscountType = "none";
   let discountLabel: string | undefined;
+  let appliedCouponCode: string | undefined;
   if (couponDiscount > 0 && couponDiscount >= autoDiscount) {
     discount = couponDiscount;
     discountType = "coupon";
     discountLabel = `${coupon!.pct}% off · ${coupon!.label}`;
+    appliedCouponCode = normalizedCode;
   } else if (autoDiscount > 0) {
     discount = autoDiscount;
     discountType = "auto";
@@ -120,6 +129,7 @@ export function computeCartTotal(
     discount,
     discountType,
     discountLabel,
+    couponCode: appliedCouponCode,
     couponValid,
     total: subtotal - discount,
     lineCount,
@@ -164,6 +174,7 @@ export function computeGrandTotal(
     discount: cart.discount,
     discountType: cart.discountType,
     discountLabel: cart.discountLabel,
+    couponCode: cart.couponCode,
     couponValid: cart.couponValid,
     itemsTotal: cart.total,
     shipping: shipping.price,

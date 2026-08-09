@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { ScrollReveal } from "@/components/primitives";
@@ -53,37 +54,165 @@ function PinIcon() {
   );
 }
 
+type PincodeStatus =
+  | { state: "idle" }
+  | { state: "checking" }
+  | { state: "available"; codAvailable: boolean }
+  | { state: "unavailable"; reason: string };
+
 export default function ShopProductGrid({ products }: { products: Product[] }) {
   const { add } = useCart();
   const flavours = products.filter((p) => !p.isCombo);
 
+  // "Availability" — real filter now that Product.available reflects live
+  // Shopify stock. Defaults to showing everything (sold-out items still
+  // visible with their sold-out treatment) since hiding products by default
+  // could look like the catalogue shrank.
+  const [availabilityFilter, setAvailabilityFilter] = useState<"all" | "in-stock">("all");
+  const visibleFlavours =
+    availabilityFilter === "in-stock"
+      ? flavours.filter((p) => p.available !== false)
+      : flavours;
+
+  // "Enter PIN code" — reuses the same Mumbai-aware /api/pincode endpoint the
+  // checkout page's live serviceability check calls, so the answer here is
+  // never out of sync with what checkout will actually allow.
+  const [showPincodeInput, setShowPincodeInput] = useState(false);
+  const [pincode, setPincode] = useState("");
+  const [pincodeStatus, setPincodeStatus] = useState<PincodeStatus>({ state: "idle" });
+  const lastChecked = useRef("");
+
+  useEffect(() => {
+    const pin = pincode.replace(/[^0-9]/g, "");
+    if (!/^\d{6}$/.test(pin)) {
+      // Same reset-to-idle guard used by the checkout page's identical
+      // pincode-check effect — only fires when state actually needs to
+      // change (guarded above), not on every render.
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setPincodeStatus((prev) => (prev.state === "idle" ? prev : { state: "idle" }));
+      lastChecked.current = "";
+      return;
+    }
+    if (lastChecked.current === pin) return;
+    lastChecked.current = pin;
+
+    const controller = new AbortController();
+    setPincodeStatus({ state: "checking" });
+    const t = setTimeout(async () => {
+      try {
+        const res = await fetch(`/api/pincode?pincode=${pin}`, { signal: controller.signal });
+        if (!res.ok) {
+          setPincodeStatus({ state: "available", codAvailable: true });
+          return;
+        }
+        const data = (await res.json()) as
+          | { available: true; codAvailable: boolean }
+          | { available: false; reason: string };
+        if (data.available) {
+          setPincodeStatus({ state: "available", codAvailable: data.codAvailable });
+        } else {
+          setPincodeStatus({ state: "unavailable", reason: data.reason });
+        }
+      } catch {
+        setPincodeStatus({ state: "available", codAvailable: true });
+      }
+    }, 400);
+    return () => {
+      clearTimeout(t);
+      controller.abort();
+    };
+  }, [pincode]);
+
   return (
     <section className="relative bg-cream pt-14 md:pt-20 pb-24 md:pb-32 cv-auto">
       <div className="max-w-[1400px] mx-auto px-5 md:px-9">
-        {/* Header row — title left, decorative availability/delivery info
-            right (no delivery-PIN backend exists yet, so these are static
-            display only, matching the design without faking functionality). */}
+        {/* Header row — title left, Availability filter + PIN-code
+            serviceability check right. */}
         <ScrollReveal>
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8 md:mb-12">
             <h2 className="text-h3 font-bold text-dark">{allProductsLabel}</h2>
-            <div className="flex items-center gap-6 text-body-sm text-dark/70">
-              <span className="inline-flex items-center gap-1.5">
-                {availabilityLabel}
-                <ChevronDown />
-              </span>
-              <span className="inline-flex items-center gap-1.5">
-                <PinIcon />
-                {deliverToLabel}
-                <span className="underline underline-offset-2 text-dark font-semibold">
-                  {deliverToCta}
+            <div className="flex flex-col md:flex-row md:items-center gap-3 md:gap-6 text-body-sm text-dark/70">
+              <div className="relative inline-flex items-center gap-1.5">
+                <label htmlFor="shop-availability-filter" className="sr-only">
+                  {availabilityLabel}
+                </label>
+                <select
+                  id="shop-availability-filter"
+                  value={availabilityFilter}
+                  onChange={(e) =>
+                    setAvailabilityFilter(e.target.value === "in-stock" ? "in-stock" : "all")
+                  }
+                  className="appearance-none bg-transparent pr-5 text-body-sm text-dark/70 outline-none cursor-pointer"
+                >
+                  <option value="all">{availabilityLabel}: All</option>
+                  <option value="in-stock">{availabilityLabel}: In stock only</option>
+                </select>
+                <span className="pointer-events-none absolute right-0">
+                  <ChevronDown />
                 </span>
-              </span>
+              </div>
+
+              <div className="relative">
+                <button
+                  type="button"
+                  onClick={() => setShowPincodeInput((v) => !v)}
+                  aria-expanded={showPincodeInput}
+                  className="inline-flex items-center gap-1.5 cursor-pointer"
+                >
+                  <PinIcon />
+                  {deliverToLabel}
+                  <span className="underline underline-offset-2 text-dark font-semibold">
+                    {pincodeStatus.state === "available" || pincodeStatus.state === "unavailable"
+                      ? pincode
+                      : deliverToCta}
+                  </span>
+                </button>
+
+                {showPincodeInput && (
+                  <div className="absolute right-0 top-full mt-2 z-20 bg-cream border border-dark/10 shadow-lg p-4 w-64">
+                    <label htmlFor="shop-pincode-input" className="sr-only">
+                      Enter your pincode
+                    </label>
+                    <input
+                      id="shop-pincode-input"
+                      type="text"
+                      inputMode="numeric"
+                      maxLength={6}
+                      value={pincode}
+                      onChange={(e) => setPincode(e.target.value.replace(/[^0-9]/g, ""))}
+                      placeholder="6-digit pincode"
+                      autoFocus
+                      className="w-full bg-cream-dark border-0 px-3 py-2 text-body-sm text-dark placeholder:text-dark/40 outline-none focus:ring-2 focus:ring-green/40"
+                    />
+                    <p role="status" className="text-body-sm mt-2 min-h-5">
+                      {pincodeStatus.state === "checking" && (
+                        <span className="text-dark/50">Checking…</span>
+                      )}
+                      {pincodeStatus.state === "available" && (
+                        <span className="text-green">
+                          We deliver here
+                          {pincodeStatus.codAvailable ? " — COD available." : " (online payment only)."}
+                        </span>
+                      )}
+                      {pincodeStatus.state === "unavailable" && (
+                        <span className="text-red">{pincodeStatus.reason}</span>
+                      )}
+                    </p>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </ScrollReveal>
 
+        {visibleFlavours.length === 0 && (
+          <p className="text-body text-dark/60 py-16 text-center">
+            Nothing in stock right now with this filter — check back soon, or view all products.
+          </p>
+        )}
+
         <div className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-10">
-          {flavours.map((product, i) => {
+          {visibleFlavours.map((product, i) => {
             const style = FLAVOR_STYLE[product.flavor];
             const soldOut = product.available === false;
             return (
