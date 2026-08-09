@@ -136,7 +136,7 @@ export const PRODUCTS: Product[] = [
     description:
       "All three flavours — Green, Mixed, Red — together. Save ₹98 vs buying separately.",
     longDescription:
-      "Can't pick a favourite? You don't have to. The Combo Pack gives you all three flavours in one go — fresh green, bold red and fiery mixed — at a price that beats buying separately. Great gift, great trial set, great answer to the question 'which one is the spiciest?'",
+      "All three flavours — Green, Red and Mixed — hand-pounded the same way, in one pack. Can't pick a favourite? Now you don't have to.",
     price: 799,
     originalPrice: 899,
     weight: "3 × 250g",
