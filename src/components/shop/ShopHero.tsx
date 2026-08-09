@@ -17,7 +17,7 @@ const { heading, subheading } = SITE_CONTENT.shopPage.hero;
 export default function ShopHero() {
   return (
     <section className="relative bg-red overflow-hidden md:h-screen flex flex-col cv-auto">
-      <div className="shrink-0 pt-[190px] md:pt-[150px] pb-8 md:pb-0 px-5 text-center max-w-[560px] md:max-w-[1200px] mx-auto">
+      <div className="shrink-0 pt-[150px] md:pt-[150px] pb-8 md:pb-0 px-5 text-center max-w-[560px] md:max-w-[1200px] mx-auto">
         <ScrollReveal>
           <h1 className="text-h1 text-[3.25rem] md:text-[5rem] text-cream mb-4 md:mb-6">
             {heading}

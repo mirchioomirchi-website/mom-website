@@ -9,15 +9,15 @@ export default function Hero() {
   const [line1, line2] = SITE_CONTENT.hero.taglineLines;
 
   return (
-    <section className="relative bg-cream overflow-hidden min-h-screen flex flex-col">
-      <div className="flex-1 flex items-center w-full max-w-[1400px] mx-auto px-5 md:px-9 pt-28 md:pt-36 pb-8 md:pb-10">
+    <section className="relative bg-cream overflow-hidden min-h-[90vh] md:min-h-screen flex flex-col">
+      <div className="flex-1 flex items-center w-full max-w-[1400px] mx-auto px-5 md:px-9 pt-16 md:pt-36 pb-8 md:pb-10">
         {/* ───────────────────── MOBILE (< md) ───────────────────── */}
         <div className="md:hidden flex flex-col items-center text-center w-full">
           <motion.p
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-            className="font-quirk font-bold text-red text-[0.95rem] tracking-[0.01em] mb-6"
+            className="font-quirk font-bold text-red text-[0.95rem] tracking-[0.01em] mb-9"
           >
             {SITE_CONTENT.hero.eyebrow}
           </motion.p>
@@ -26,7 +26,7 @@ export default function Hero() {
             initial={{ opacity: 0, y: 24 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
-            className="relative w-[78%] max-w-[340px] mx-auto"
+            className="relative w-[88%] max-w-[380px] mx-auto"
           >
             <Image
               src="/home hero name - mobile.svg"
@@ -40,7 +40,7 @@ export default function Hero() {
             {/* Character — centered over the wordmark stack */}
             <div
               className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
-              style={{ width: "58%" }}
+              style={{ width: "62%" }}
             >
               <CharacterIllustration />
             </div>
@@ -50,7 +50,7 @@ export default function Hero() {
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7, delay: 0.35, ease: [0.16, 1, 0.3, 1] }}
-            className="text-body text-dark/90 mt-7 max-w-[300px]"
+            className="text-body text-dark/90 mt-10 max-w-[300px]"
           >
             <span className="block">{line1}</span>
             <span className="block">{line2}</span>
