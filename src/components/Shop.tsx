@@ -187,7 +187,14 @@ export default function Shop() {
               soft shimmer/glow on the jar itself since it follows the jar's
               actual silhouette. Discovering the hover interaction on any jar
               retires this for good — the visitor doesn't need the hint
-              anymore. */}
+              anymore.
+
+              transformOrigin is pinned to each jar's own hotspot center
+              (not the image's default center) — scaling around the whole
+              canvas's center would grow *and* shift the jar sideways since
+              the jar isn't centered in the full 2400x1603 photo, which is
+              what caused the doubled/ghosted edge look. Scaling from the
+              jar's own center keeps it anchored in place while it grows. */}
           {!everHovered &&
             jars.map((jar, jarIndex) => (
               <Image
@@ -197,8 +204,13 @@ export default function Shop() {
                 fill
                 unoptimized
                 aria-hidden="true"
-                className="object-contain pointer-events-none origin-center animate-jar-tease opacity-0"
-                style={{ animationDelay: `${jarIndex * 1.8}s` }}
+                className="object-contain pointer-events-none animate-jar-tease opacity-0"
+                style={{
+                  transformOrigin: `${jar.hotspot.left + jar.hotspot.width / 2}% ${
+                    jar.hotspot.top + jar.hotspot.height / 2
+                  }%`,
+                  animationDelay: `${jarIndex * 1.8}s`,
+                }}
               />
             ))}
 

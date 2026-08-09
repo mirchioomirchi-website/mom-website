@@ -233,9 +233,10 @@
    shimmer because it's the actual colored jar silhouette breathing, not an
    abstract shape crossing a hotspot box. */
 @keyframes jar-tease {
-  0%, 62%   { opacity: 0;    transform: scale(1); }
-  72%       { opacity: 0.42; transform: scale(1.025); }
-  85%       { opacity: 0.16; transform: scale(1.008); }
+  0%, 55%   { opacity: 0;    transform: scale(1); }
+  66%       { opacity: 0.55; transform: scale(1.03); }
+  78%       { opacity: 0.55; transform: scale(1.03); }
+  92%       { opacity: 0;    transform: scale(1); }
   100%      { opacity: 0;    transform: scale(1); }
 }
 
