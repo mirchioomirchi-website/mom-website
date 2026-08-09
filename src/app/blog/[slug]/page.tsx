@@ -135,16 +135,23 @@ export default async function BlogPostPage({
     datePublished: post.publishedAt,
     dateModified: post.publishedAt,
     author: { "@type": "Person", name: post.author || "Team MOM" },
-    publisher: {
-      "@type": "Organization",
-      name: "Mirchi O Mirchi",
-      logo: {
-        "@type": "ImageObject",
-        url: `${SITE_URL}/images/mom-logo-white.webp`,
-      },
-    },
+    // References the Organization declared once in the root layout's JSON-LD
+    // (present in this same page's <head>) instead of repeating the full
+    // object on every article — see the comment above ORGANIZATION_ID in
+    // layout.tsx for why.
+    publisher: { "@id": `${SITE_URL}/#organization` },
     image: post.coverImage ? urlForImage(post.coverImage) : `${SITE_URL}/images/jar-mixed-final.webp`,
     mainEntityOfPage: { "@type": "WebPage", "@id": `${SITE_URL}/blog/${post.slug}` },
+  };
+
+  const breadcrumbJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "Home", item: SITE_URL },
+      { "@type": "ListItem", position: 2, name: "Blog", item: `${SITE_URL}/blog` },
+      { "@type": "ListItem", position: 3, name: post.title, item: `${SITE_URL}/blog/${post.slug}` },
+    ],
   };
 
   return (
@@ -154,6 +161,10 @@ export default async function BlogPostPage({
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: safeJsonLd(articleJsonLd) }}
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: safeJsonLd(breadcrumbJsonLd) }}
         />
         <article className="max-w-3xl mx-auto px-5 md:px-9">
           <ScrollReveal>

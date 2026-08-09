@@ -4,7 +4,20 @@ import "./globals.css";
 import dynamic from "next/dynamic";
 import { CartProvider } from "@/lib/cart-context";
 import Analytics from "@/components/Analytics";
-import { SITE_URL, SITE_NAME, SITE_LEGAL_NAME, DEFAULT_OG_IMAGE, safeJsonLd } from "@/lib/site";
+import {
+  SITE_URL,
+  SITE_NAME,
+  SITE_LEGAL_NAME,
+  SITE_REGISTERED_ADDRESS,
+  SITE_SUPPORT_EMAIL,
+  SITE_SUPPORT_PHONE,
+  SITE_SAME_AS,
+  SITE_AREA_SERVED,
+  DEFAULT_OG_IMAGE,
+  DEFAULT_OG_IMAGE_WIDTH,
+  DEFAULT_OG_IMAGE_HEIGHT,
+  safeJsonLd,
+} from "@/lib/site";
 
 const MiniCart = dynamic(() => import("@/components/MiniCart"));
 const WhatsAppFab = dynamic(() => import("@/components/WhatsAppFab"));
@@ -100,7 +113,14 @@ export const metadata: Metadata = {
     siteName: SITE_NAME,
     type: "website",
     locale: "en_IN",
-    images: [{ url: OG_IMAGE, width: 1200, height: 1200, alt: "Mirchi O Mirchi thecha jars" }],
+    images: [
+      {
+        url: OG_IMAGE,
+        width: DEFAULT_OG_IMAGE_WIDTH,
+        height: DEFAULT_OG_IMAGE_HEIGHT,
+        alt: "Mirchi O Mirchi — Green, Mixed, and Red Chilli Thecha jars",
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
@@ -125,22 +145,65 @@ export const metadata: Metadata = {
   },
 };
 
+// @id anchors so the Organization and WebSite entities can be referenced
+// (not re-declared) from every other JSON-LD block on the site — Product,
+// Article, BreadcrumbList, FAQPage, etc. all point back at these same two
+// URIs via `{"@id": ...}` instead of repeating the full Organization object.
+// That's what actually makes this a connected knowledge graph rather than a
+// pile of disconnected schema blocks, which is what both Google's Knowledge
+// Graph and AI answer engines use to disambiguate "which brand is this."
+const ORGANIZATION_ID = `${SITE_URL}/#organization`;
+const WEBSITE_ID = `${SITE_URL}/#website`;
+
 const organizationJsonLd = {
   "@context": "https://schema.org",
   "@type": "Organization",
+  "@id": ORGANIZATION_ID,
   name: SITE_NAME,
   legalName: SITE_LEGAL_NAME,
   url: SITE_URL,
-  logo: `${SITE_URL}/MOM_logo.svg`,
+  logo: {
+    "@type": "ImageObject",
+    url: `${SITE_URL}/images/mom-logo-white.webp`,
+    width: 500,
+    height: 218,
+  },
+  image: `${SITE_URL}${DEFAULT_OG_IMAGE}`,
   description:
     "Handcrafted Indian thecha. Three bold flavours. No fillers. No shortcuts.",
+  slogan: "Bold Flavour. Real Thecha.",
+  areaServed: {
+    "@type": "City",
+    name: SITE_AREA_SERVED,
+  },
+  address: {
+    "@type": "PostalAddress",
+    streetAddress: SITE_REGISTERED_ADDRESS,
+    addressLocality: "Pune",
+    addressRegion: "Maharashtra",
+    addressCountry: "IN",
+  },
+  contactPoint: [
+    {
+      "@type": "ContactPoint",
+      contactType: "customer service",
+      email: SITE_SUPPORT_EMAIL,
+      telephone: SITE_SUPPORT_PHONE,
+      areaServed: "IN",
+      availableLanguage: ["English", "Hindi", "Marathi"],
+    },
+  ],
+  sameAs: SITE_SAME_AS,
 };
 
 const websiteJsonLd = {
   "@context": "https://schema.org",
   "@type": "WebSite",
+  "@id": WEBSITE_ID,
   name: SITE_NAME,
   url: SITE_URL,
+  inLanguage: "en-IN",
+  publisher: { "@id": ORGANIZATION_ID },
   potentialAction: {
     "@type": "SearchAction",
     target: `${SITE_URL}/shop?q={search_term_string}`,

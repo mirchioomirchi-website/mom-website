@@ -4,29 +4,51 @@ import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import { ScrollReveal } from "@/components/primitives";
 import { listBlogPosts, urlForImage } from "@/lib/blog";
-import { SITE_URL } from "@/lib/site";
+import {
+  SITE_URL,
+  DEFAULT_OG_IMAGE,
+  DEFAULT_OG_IMAGE_WIDTH,
+  DEFAULT_OG_IMAGE_HEIGHT,
+} from "@/lib/site";
 
 export const revalidate = 60;
+
+const TITLE = "Blog — Mirchi O Mirchi";
+const DESCRIPTION =
+  "Stories about thecha, Maharashtrian food culture, and the ingredients behind every jar.";
 
 export async function generateMetadata(): Promise<Metadata> {
   // Until the first post lands, keep the index out of Google's results — an
   // empty listing page hurts SEO and reads as broken to crawlers.
   const posts = await listBlogPosts();
   const isEmpty = posts.length === 0;
+  const ogImage = `${SITE_URL}${DEFAULT_OG_IMAGE}`;
   return {
-    title: "Blog — Mirchi O Mirchi",
-    description:
-      "Stories about thecha, Maharashtrian food culture, and the ingredients behind every jar.",
+    title: TITLE,
+    description: DESCRIPTION,
     alternates: { canonical: `${SITE_URL}/blog` },
     robots: isEmpty ? { index: false, follow: true } : undefined,
     openGraph: {
-      title: "Blog — Mirchi O Mirchi",
-      description:
-        "Stories about thecha, Maharashtrian food culture, and the ingredients behind every jar.",
+      title: TITLE,
+      description: DESCRIPTION,
       url: `${SITE_URL}/blog`,
       type: "website",
       locale: "en_IN",
       siteName: "Mirchi O Mirchi",
+      images: [
+        {
+          url: ogImage,
+          width: DEFAULT_OG_IMAGE_WIDTH,
+          height: DEFAULT_OG_IMAGE_HEIGHT,
+          alt: "Mirchi O Mirchi",
+        },
+      ],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: TITLE,
+      description: DESCRIPTION,
+      images: [ogImage],
     },
   };
 }

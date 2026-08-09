@@ -26,7 +26,26 @@ export const SITE_SUPPORT_HOURS = "Mon–Sat · 10:00 AM – 7:00 PM IST";
 export const SITE_DESCRIPTION =
   "Handcrafted Indian thecha. Three bold flavours. No fillers. No shortcuts.";
 export const SITE_LOCALE = "en_IN";
-export const DEFAULT_OG_IMAGE = "/images/jar-mixed-final.webp";
+
+// Landscape (1200×630, the universal safe ratio for Twitter/X, LinkedIn,
+// Slack, WhatsApp, and Facebook link unfurls) hero shot of all three jars —
+// used as the fallback OG/Twitter image on every page that doesn't set a
+// more specific one (PDPs use their own product photo instead). Generated
+// from the real shop-page hero background photography, not a stock/AI image.
+export const DEFAULT_OG_IMAGE = "/images/og-default.webp";
+export const DEFAULT_OG_IMAGE_WIDTH = 1200;
+export const DEFAULT_OG_IMAGE_HEIGHT = 630;
+
+// Real, currently-live brand social profiles only — never add a placeholder
+// or aspirational link here. Read by the root Organization JSON-LD's
+// `sameAs` (the standard way to tell Google/AI knowledge graphs "this
+// Instagram account and this website are the same entity").
+export const SITE_SAME_AS: string[] = ["https://www.instagram.com/mirchiomirchi.in"];
+
+// Where the brand actually ships, in plain language — used in the
+// Organization JSON-LD `areaServed` and in llms.txt. Keep in sync with
+// isMumbaiPincode() in shiprocket.ts if the delivery area ever expands.
+export const SITE_AREA_SERVED = "Mumbai, Maharashtra, India";
 
 // Safely serialise a JSON-LD object for embedding inside a <script> tag via
 // dangerouslySetInnerHTML. JSON.stringify by itself does NOT escape
