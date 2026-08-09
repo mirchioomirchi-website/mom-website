@@ -54,9 +54,22 @@ export default function RecipesSection({
   const [activeIndex, setActiveIndex] = useState(0);
   const slide = slides[activeIndex];
 
-  const goPrev = () => setActiveIndex((i) => (i - 1 + slides.length) % slides.length);
-  const goNext = () => setActiveIndex((i) => (i + 1) % slides.length);
-  const selectIndex = (i: number) => setActiveIndex(i);
+  // Mobile carousel refs — declared up front so `selectIndex` below (used by
+  // both the desktop click-to-select and the shared prev/next arrows) can
+  // scroll the mobile track into sync too, regardless of which breakpoint
+  // triggered the change.
+  const scrollRef = useRef<HTMLDivElement | null>(null);
+  const cardRefs = useRef<Array<HTMLDivElement | null>>([]);
+  const scrollToCard = (i: number) => {
+    cardRefs.current[i]?.scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" });
+  };
+
+  const selectIndex = (i: number) => {
+    setActiveIndex(i);
+    scrollToCard(i);
+  };
+  const goPrev = () => selectIndex((activeIndex - 1 + slides.length) % slides.length);
+  const goNext = () => selectIndex((activeIndex + 1) % slides.length);
 
   // The `autoPlay` attribute only fires once, at mount — flipping it as a
   // prop on an already-mounted <video> does nothing. So whenever the active
@@ -81,12 +94,9 @@ export default function RecipesSection({
     sync(desktopVideoRefs.current);
   }, [slide.title]);
 
-  // Mobile carousel — tracks whichever card is most centered in the
-  // horizontal scroller (same convention as PdpCrossSell), so a tap on a
-  // card that isn't centered yet just scrolls it into focus first.
-  const scrollRef = useRef<HTMLDivElement | null>(null);
-  const cardRefs = useRef<Array<HTMLDivElement | null>>([]);
-
+  // Tracks whichever card is most centered in the horizontal scroller (same
+  // convention as PdpCrossSell), so a tap on a card that isn't centered yet
+  // just scrolls it into focus first.
   useEffect(() => {
     const root = scrollRef.current;
     if (!root) return;
@@ -104,10 +114,6 @@ export default function RecipesSection({
     cardRefs.current.forEach((el) => el && observer.observe(el));
     return () => observer.disconnect();
   }, []);
-
-  const scrollToCard = (i: number) => {
-    cardRefs.current[i]?.scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" });
-  };
 
   // Windowed, offset-ordered — index 0 of this array is always the active
   // dish. Rendering in THIS order (rather than the slides' fixed order) is
@@ -179,7 +185,8 @@ export default function RecipesSection({
                     cardRefs.current[i] = el;
                   }}
                   data-index={i}
-                  className="relative snap-center shrink-0 w-[62%] aspect-[9/16] overflow-hidden bg-cream/10"
+                  className="relative snap-center shrink-0 w-[62%] aspect-[9/16] overflow-hidden bg-cream/10 transition-opacity duration-300"
+                  style={{ opacity: i === activeIndex ? 1 : 0.6 }}
                   onClickCapture={(e) => {
                     if (i !== activeIndex) {
                       e.preventDefault();
@@ -226,10 +233,19 @@ export default function RecipesSection({
           </div>
 
           {/* RIGHT column — desktop only, cascading video slider, ~60% of
-              the row. Clicking a smaller clip brings it into focus — with
-              `layout` + a stable per-dish key, it slides into the lead
-              position instead of jumping or flashing. */}
-          <div className="hidden md:flex relative h-[440px] lg:h-[560px] items-center overflow-hidden">
+              the row. The negative right margin exactly cancels the
+              container's own right inset (px-9, plus half the leftover
+              space once the page is wider than the 1400px container), so
+              this column's box — and the overflow-hidden clip point along
+              with it — reaches the true edge of the viewport instead of
+              stopping at the container's padding. Clicking a smaller clip
+              brings it into focus — with `layout` + a stable per-dish key,
+              it slides into the lead position instead of jumping or
+              flashing. */}
+          <div
+            className="hidden md:flex relative h-[440px] lg:h-[560px] items-center overflow-hidden"
+            style={{ marginRight: "calc(-1 * (max(0px, (100vw - 1400px) / 2) + 2.25rem))" }}
+          >
             <div className="flex items-center gap-6 lg:gap-8 h-full">
               <AnimatePresence initial={false}>
                 {windowed.map(({ offset, idx, slide: s }) => {
