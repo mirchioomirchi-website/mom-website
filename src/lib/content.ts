@@ -72,6 +72,7 @@ export const SITE_CONTENT = {
       {
         direction: "ltr" as const,
         overlay: "/images/ingredients/ingridients overlay - 1.png",
+        overlayMobile: "/images/ingredients/mobile/ingridients overlay - 1.png",
         items: [
           { en: "Red Chillies", dev: "लाल मिर्च" },
           { en: "Green Chillies", dev: "हरी मिर्च" },
@@ -80,6 +81,7 @@ export const SITE_CONTENT = {
       {
         direction: "rtl" as const,
         overlay: "/images/ingredients/ingridients overlay - 2.png",
+        overlayMobile: "/images/ingredients/mobile/ingridients overlay - 2.png",
         items: [
           { en: "Fresh Garlic", dev: "ताजा लहसुन" },
           { en: "Coriander", dev: "धनिया" },
@@ -88,6 +90,7 @@ export const SITE_CONTENT = {
       {
         direction: "ltr" as const,
         overlay: "/images/ingredients/ingridients overlay - 3.png",
+        overlayMobile: "/images/ingredients/mobile/ingridients overlay - 3.png",
         items: [
           { en: "Rock Salt", dev: "नमक" },
           { en: "Lemon Juice", dev: "नींबू का रस" },
@@ -96,6 +99,7 @@ export const SITE_CONTENT = {
       {
         direction: "rtl" as const,
         overlay: "/images/ingredients/ingridients overlay - 4.png",
+        overlayMobile: "/images/ingredients/mobile/ingridients overlay - 4.png",
         items: [
           { en: "Olive Oil", dev: "जैतून का तेल" },
           { en: "Cumin", dev: "जीरा" },

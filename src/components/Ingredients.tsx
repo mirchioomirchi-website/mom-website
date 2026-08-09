@@ -69,9 +69,13 @@ export default function Ingredients() {
   return (
     <section
       id="ingredients"
-      className="relative h-[90vh] flex flex-col justify-center pt-16 pb-[220px] bg-cream overflow-hidden cv-auto scroll-mt-[84px]"
+      className="relative h-[70vh] md:h-[90vh] flex flex-col justify-center pt-16 pb-16 md:pb-[220px] bg-cream overflow-hidden cv-auto scroll-mt-[84px]"
     >
-      {/* Hover overlays — full-bleed decorative ingredient scatter, one per line */}
+      {/* Hover overlays — full-bleed decorative ingredient scatter, one per
+          line. Mobile gets its own purpose-cropped image per line (the
+          desktop art reads too small/awkward scaled straight down), swapped
+          in via CSS visibility rather than conditional rendering so both
+          stay preloaded and the opacity crossfade doesn't pop. */}
       {LINES.map((line, i) => (
         <div
           key={line.overlay}
@@ -79,18 +83,29 @@ export default function Ingredients() {
           style={{ opacity: hovered === i ? 1 : 0 }}
           aria-hidden="true"
         >
-          <Image
-            src={line.overlay}
-            alt=""
-            fill
-            unoptimized
-            className="object-cover"
-          />
+          <div className="md:hidden relative w-full h-full">
+            <Image
+              src={line.overlayMobile}
+              alt=""
+              fill
+              unoptimized
+              className="object-cover"
+            />
+          </div>
+          <div className="hidden md:block relative w-full h-full">
+            <Image
+              src={line.overlay}
+              alt=""
+              fill
+              unoptimized
+              className="object-cover"
+            />
+          </div>
         </div>
       ))}
 
       {/* Eyebrow */}
-      <div className="relative w-full max-w-[1400px] mx-auto px-5 md:px-9 mb-10 md:mb-16 text-center">
+      <div className="relative w-full max-w-[1400px] mx-auto px-5 md:px-9 mb-14 md:mb-16 text-center">
         <ScrollReveal className="inline-flex items-center gap-2.5">
           <span className="font-sura text-pink text-[15px] md:text-base">
             {SITE_CONTENT.ingredients.eyebrowDevanagari}
@@ -115,7 +130,7 @@ export default function Ingredients() {
               ref={(el) => {
                 trackRefs.current[i] = el;
               }}
-              className={`flex whitespace-nowrap font-sura leading-[1.5] py-1.5 md:py-2 text-[24px] md:text-[32px] lg:text-[36px] text-dark/70 select-none transition-opacity duration-300 ease-out ${
+              className={`flex whitespace-nowrap font-sura leading-[1.5] py-1.5 md:py-2 text-[28px] md:text-[32px] lg:text-[36px] text-dark/70 select-none transition-opacity duration-300 ease-out ${
                 line.direction === "ltr" ? "animate-marquee-ltr" : "animate-marquee-rtl"
               } ${hovered !== null && hovered !== i ? "opacity-20" : "opacity-100"}`}
             >
