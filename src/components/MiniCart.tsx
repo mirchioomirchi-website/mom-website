@@ -7,6 +7,13 @@ import { motion, AnimatePresence } from "motion/react";
 import { useCart } from "@/lib/cart-context";
 import { PRODUCTS, PRODUCT_CARD_IMAGES } from "@/lib/products";
 import { CART_DISCOUNT_THRESHOLD, CART_DISCOUNT_PCT } from "@/lib/discounts";
+import { SITE_WHATSAPP_NUMBER } from "@/lib/site";
+
+// Same "order via chat" preset used by both the empty-cart and full-cart
+// WhatsApp links below — kept in one place so the two never drift.
+const WHATSAPP_ORDER_HREF = `https://wa.me/${SITE_WHATSAPP_NUMBER}?text=${encodeURIComponent(
+  "Hi Mirchi O Mirchi — I want to order 🌶️"
+)}`;
 
 /* ── Trash icon ── */
 function TrashIcon() {
@@ -260,7 +267,7 @@ export default function MiniCart() {
                     {/* WhatsApp */}
                     <div className="text-center pb-6">
                       <a
-                        href="https://wa.me/918850816448?text=Hi%20Mirchi%20O%20Mirchi%20%E2%80%94%20I%20want%20to%20order%20%F0%9F%8C%B6%EF%B8%8F"
+                        href={WHATSAPP_ORDER_HREF}
                         target="_blank" rel="noopener noreferrer"
                         className="text-[0.78rem] text-dark no-underline"
                       >
@@ -337,7 +344,7 @@ export default function MiniCart() {
                   {/* WhatsApp */}
                   <div className="text-center">
                     <a
-                      href="https://wa.me/918850816448?text=Hi%20Mirchi%20O%20Mirchi%20%E2%80%94%20I%20want%20to%20order%20%F0%9F%8C%B6%EF%B8%8F"
+                      href={WHATSAPP_ORDER_HREF}
                       target="_blank" rel="noopener noreferrer"
                       className="text-[0.78rem] text-dark no-underline"
                     >

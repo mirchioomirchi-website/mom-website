@@ -132,9 +132,9 @@ export const PRODUCTS: Product[] = [
     slug: "combo-pack",
     name: "Combo Pack",
     flavor: "combo",
-    tagline: "Three Heats. Save ₹100.",
+    tagline: "Three Heats. Save ₹98.",
     description:
-      "All three flavours — Green, Mixed, Red — together. Save ₹100 vs buying separately.",
+      "All three flavours — Green, Mixed, Red — together. Save ₹98 vs buying separately.",
     longDescription:
       "Can't pick a favourite? You don't have to. The Combo Pack gives you all three flavours in one go — fresh green, bold red and fiery mixed — at a price that beats buying separately. Great gift, great trial set, great answer to the question 'which one is the spiciest?'",
     price: 799,
@@ -168,10 +168,10 @@ export function getRelatedProducts(slug: string): Product[] {
 // every place that needs a small product thumbnail stays in sync, with a
 // dedicated combo-pack shot instead of falling back to a single jar.
 export const PRODUCT_CARD_IMAGES: Record<string, string> = {
-  "green-chilli-thecha": "/images/green chilli.png",
-  "red-chilli-thecha": "/images/red chilli.png",
-  "mixed-chilli-thecha": "/images/mixed chilli.png",
-  "combo-pack": "/images/combo products.png",
+  "green-chilli-thecha": "/images/green chilli.webp",
+  "red-chilli-thecha": "/images/red chilli.webp",
+  "mixed-chilli-thecha": "/images/mixed chilli.webp",
+  "combo-pack": "/images/combo products.webp",
 };
 
 // PDP-only accent colors. `product.color` (the bright candy hexes used for

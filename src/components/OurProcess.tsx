@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { ScrollReveal } from "@/components/primitives";
 import { SITE_CONTENT } from "@/lib/content";
@@ -7,6 +8,33 @@ import { SITE_CONTENT } from "@/lib/content";
 export default function OurProcess() {
   const { eyebrowDevanagari, eyebrowEnglish, heading, steps, cta, ctaHref } =
     SITE_CONTENT.ourProcess;
+
+  // mortar.mp4 is a 21MB clip — with plain `autoPlay` the browser starts
+  // fetching/buffering it near page load regardless of scroll position,
+  // which is real bandwidth wasted on mobile if the visitor never scrolls
+  // this far. `preload="none"` below stops that eager fetch; this
+  // IntersectionObserver only starts loading + playing once the section
+  // actually scrolls into view, still autoplaying at that point exactly
+  // like before.
+  const videoRef = useRef<HTMLVideoElement | null>(null);
+  const [shouldPlay, setShouldPlay] = useState(false);
+
+  useEffect(() => {
+    const el = videoRef.current;
+    if (!el || shouldPlay) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) setShouldPlay(true);
+      },
+      { rootMargin: "200px 0px" }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [shouldPlay]);
+
+  useEffect(() => {
+    if (shouldPlay) videoRef.current?.play().catch(() => {});
+  }, [shouldPlay]);
 
   return (
     <section className="relative bg-cream py-16 md:py-24 overflow-hidden cv-auto">
@@ -29,13 +57,17 @@ export default function OurProcess() {
           </h2>
         </ScrollReveal>
 
-        {/* Video — real multi-angle mortar footage, autoplay/loop/muted, no controls */}
+        {/* Video — real multi-angle mortar footage, loop/muted, no controls.
+            Lazy-loaded: preload="none" + IntersectionObserver above means
+            this doesn't fetch until it's about to scroll into view, then
+            autoplays from there exactly as before. */}
         <ScrollReveal delay={0.1} className="[grid-area:video] my-2 md:my-10">
           <div className="relative w-full aspect-video md:aspect-[5/2] overflow-hidden bg-dark/5">
             <video
+              ref={videoRef}
               className="absolute inset-0 w-full h-full object-cover"
               src="/videos/mortar.mp4"
-              autoPlay
+              preload="none"
               loop
               muted
               playsInline
