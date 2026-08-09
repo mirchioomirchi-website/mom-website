@@ -9,7 +9,7 @@ import { getProduct } from "@/lib/products";
 import { useCart } from "@/lib/cart-context";
 import { HighlightedCard } from "@/components/pdp/PdpCrossSell";
 
-const { eyebrowDevanagari, eyebrowEnglish, shopAllLabel, shopAllHref, marqueeText, jars } =
+const { eyebrowDevanagari, eyebrowEnglish, mobileHeading, shopAllLabel, shopAllHref, marqueeText, jars } =
   SITE_CONTENT.shop;
 
 const CUTOUT_SRC: Record<string, string> = {
@@ -75,9 +75,12 @@ export default function Shop() {
       style={{ backgroundColor: active ? active.bgDark : "#FFF3D7" }}
     >
       <div className="relative w-full max-w-[1400px] mx-auto px-5 md:px-9 pt-10 md:pt-14 pb-16 md:pb-24">
-        {/* Top row — eyebrow + Shop All link, always on top */}
+        {/* Top row — eyebrow + Shop All link, always on top. Desktop keeps
+            the Devanagari/English eyebrow pairing; mobile swaps it for a
+            plain section title since there's no hover state to pair with a
+            small eyebrow there. */}
         <div className="relative z-40 flex items-center justify-between mb-6 md:mb-10">
-          <ScrollReveal className="flex items-center gap-2.5">
+          <ScrollReveal className="hidden md:flex items-center gap-2.5">
             <span
               className={`font-sura text-[15px] md:text-base transition-colors duration-500 ${active ? "text-cream" : "text-pink"}`}
             >
@@ -95,6 +98,10 @@ export default function Shop() {
             </span>
           </ScrollReveal>
 
+          <ScrollReveal className="md:hidden">
+            <h2 className="text-h2 text-pink">{mobileHeading}</h2>
+          </ScrollReveal>
+
           <Link
             href={shopAllHref}
             className={`text-btn inline-flex items-center gap-1.5 md:underline md:underline-offset-4 md:decoration-2 transition-colors duration-500 ${
@@ -106,10 +113,12 @@ export default function Shop() {
           </Link>
         </div>
 
-        {/* Background marquee — "Pick Your Mirchi" tiled behind the photo, fades
-            out on hover in favour of the active jar's title */}
+        {/* Background marquee — "Pick Your Mirchi" tiled behind the photo,
+            fades out on hover in favour of the active jar's title. Desktop
+            only — mobile now has its own plain section title up top and no
+            hover state, so the marquee has nothing to react to there. */}
         <div
-          className="absolute inset-0 z-0 flex flex-col justify-center gap-6 md:gap-10 transition-opacity duration-500 pointer-events-none"
+          className="hidden md:flex absolute inset-0 z-0 flex-col justify-center gap-6 md:gap-10 transition-opacity duration-500 pointer-events-none"
           style={{ opacity: active ? 0 : 1 }}
           aria-hidden="true"
         >
@@ -131,9 +140,10 @@ export default function Shop() {
           ))}
         </div>
 
-        {/* Active jar title — replaces the marquee up top while hovering */}
+        {/* Active jar title — desktop only, replaces the marquee up top
+            while hovering. Mobile has no hover state to trigger this. */}
         <div
-          className="absolute left-0 right-0 top-24 md:top-32 z-20 text-center transition-opacity duration-500 pointer-events-none"
+          className="hidden md:block absolute left-0 right-0 top-24 md:top-32 z-20 text-center transition-opacity duration-500 pointer-events-none"
           style={{ opacity: active ? 1 : 0 }}
         >
           <h2 className="text-h2 text-cream">

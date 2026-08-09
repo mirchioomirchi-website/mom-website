@@ -195,6 +195,9 @@ export const SITE_CONTENT = {
   shop: {
     eyebrowDevanagari: "खरीदें",
     eyebrowEnglish: "Shop",
+    // Mobile-only replacement for the eyebrow row — desktop keeps the
+    // Devanagari/English eyebrow pairing above, mobile shows this instead.
+    mobileHeading: "Pick your mirchi",
     shopAllLabel: "Shop All",
     shopAllHref: "/shop",
     marqueeText: "Pick Your Mirchi",
