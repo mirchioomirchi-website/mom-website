@@ -102,7 +102,7 @@ export default function CtaBanner() {
                           onChange={(e) => setPhone(e.target.value)}
                           placeholder="Your 10-digit mobile number"
                           aria-label="Your 10-digit mobile number"
-                          className="flex-1 min-w-0 bg-cream border-0 px-4 py-3 text-body-sm text-dark placeholder:text-dark/40 outline-none focus:ring-2 focus:ring-green/40"
+                          className="flex-1 min-w-0 bg-cream border-0 px-4 py-3 text-body-sm text-dark placeholder:text-dark/60 outline-none focus:ring-2 focus:ring-green/40"
                         />
                         <button
                           type="submit"
@@ -115,7 +115,7 @@ export default function CtaBanner() {
                       {status === "error" && (
                         <p role="alert" className="text-body-sm text-red">{errorMsg}</p>
                       )}
-                      <p className="text-[0.72rem] text-dark/50 text-center md:text-right">
+                      <p className="text-[0.72rem] text-dark/60 text-center md:text-right">
                         Updates on new batches, drops, and offers from Mirchi O
                         Mirchi. See our{" "}
                         <Link href="/privacy" className="underline hover:text-dark/70">

@@ -197,12 +197,12 @@ export default function CartPageClient() {
                               <button
                                 type="button"
                                 onClick={() => remove(line.slug)}
-                                className="text-body-sm text-dark/50 hover:text-red transition-colors shrink-0 cursor-pointer"
+                                className="text-body-sm text-dark/60 hover:text-red transition-colors shrink-0 cursor-pointer"
                               >
                                 Remove
                               </button>
                             </div>
-                            <p className="text-body-sm text-dark/50 mb-4">{product.weight}</p>
+                            <p className="text-body-sm text-dark/60 mb-4">{product.weight}</p>
 
                             <div className="flex items-center justify-between mt-auto">
                               <div className="flex items-center gap-4">

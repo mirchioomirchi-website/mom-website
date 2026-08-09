@@ -61,7 +61,7 @@ export default async function CheckoutSuccessPage({
             </p>
           )}
           {payment_id && (
-            <p className="text-body-sm text-dark/50 mb-8 break-all">
+            <p className="text-body-sm text-dark/60 mb-8 break-all">
               Payment ID: <span className="text-dark/70">{payment_id}</span>
             </p>
           )}

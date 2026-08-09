@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "motion/react";
 import { useDiscountSignup, signupCoupon, SIGNUP_COUPON_CODE } from "@/lib/use-discount-signup";
+import { useModalA11y } from "@/lib/use-modal-a11y";
 
 // Shows once per browser, 10 seconds after landing — a hard page load
 // (refresh, direct link, new tab), not every client-side route change,
@@ -44,15 +45,7 @@ export default function PromoPopup() {
     if (status === "done") markSeen();
   }, [status]);
 
-  useEffect(() => {
-    if (!visible) return;
-    function onKey(e: KeyboardEvent) {
-      if (e.key === "Escape") dismiss();
-    }
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [visible]);
+  const dialogRef = useModalA11y(visible, dismiss);
 
   async function handleCopy() {
     try {
@@ -85,7 +78,14 @@ export default function PromoPopup() {
             transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
             className="fixed inset-0 z-[401] flex items-center justify-center p-5 pointer-events-none"
           >
-            <div className="dotted-frame text-yellow p-3 md:p-4 w-full max-w-md pointer-events-auto">
+            <div
+              ref={dialogRef}
+              role="dialog"
+              aria-modal="true"
+              aria-label="New-batch signup discount"
+              tabIndex={-1}
+              className="dotted-frame text-yellow p-3 md:p-4 w-full max-w-md pointer-events-auto outline-none"
+            >
               <div className="relative bg-green px-7 py-9 md:px-9 md:py-10 text-center">
                 <button
                   type="button"
@@ -149,7 +149,7 @@ export default function PromoPopup() {
                         onChange={(e) => setPhone(e.target.value)}
                         placeholder="Your 10-digit mobile number"
                         aria-label="Your 10-digit mobile number"
-                        className="w-full bg-cream border-0 px-4 py-3 text-body-sm text-dark placeholder:text-dark/40 outline-none focus:ring-2 focus:ring-yellow text-center"
+                        className="w-full bg-cream border-0 px-4 py-3 text-body-sm text-dark placeholder:text-dark/60 outline-none focus:ring-2 focus:ring-yellow text-center"
                       />
                       <button
                         type="submit"

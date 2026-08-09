@@ -56,7 +56,7 @@ export default function ShopCombo() {
                 <p className="flex items-baseline gap-2">
                   <span className="text-h4 font-bold text-green">₹{product.price}</span>
                   {product.originalPrice && (
-                    <span className="text-body-sm text-dark/40 line-through">
+                    <span className="text-body-sm text-dark/60 line-through">
                       ₹{product.originalPrice}
                     </span>
                   )}

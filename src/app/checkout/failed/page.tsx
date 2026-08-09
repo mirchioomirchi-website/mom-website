@@ -58,7 +58,7 @@ export default async function CheckoutFailedPage({
             </p>
           )}
           {reason && (
-            <p className="text-body-sm text-dark/50 mb-8 break-all">
+            <p className="text-body-sm text-dark/60 mb-8 break-all">
               Reason: <span className="text-dark/70">{reason}</span>
             </p>
           )}

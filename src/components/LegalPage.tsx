@@ -32,7 +32,7 @@ export default function LegalPage({
           <ScrollReveal>
             <p className="text-tag text-red uppercase tracking-[0.08em] mb-4">{eyebrow}</p>
             <h1 className="text-h1 text-red mb-4">{title}</h1>
-            <p className="text-tag text-dark/50 uppercase tracking-[0.06em] mb-10">
+            <p className="text-tag text-dark/60 uppercase tracking-[0.06em] mb-10">
               Last updated · {updated}
             </p>
 

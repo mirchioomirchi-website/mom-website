@@ -101,7 +101,7 @@ export default async function BlogIndex() {
                     <div className="p-6">
                       <time
                         dateTime={post.publishedAt}
-                        className="text-body-sm text-dark/50 uppercase tracking-[0.06em]"
+                        className="text-body-sm text-dark/60 uppercase tracking-[0.06em]"
                       >
                         {new Date(post.publishedAt).toLocaleDateString("en-IN", {
                           day: "numeric",

@@ -78,7 +78,7 @@ const { hero, lostOrder, form } = SITE_CONTENT.trackPage;
 // Underline-field styling shared with the /contact form — the site's
 // established minimal-input pattern (transparent bg, green rule).
 const fieldClass =
-  "w-full bg-transparent border-0 border-b-2 border-green py-3 text-lg text-dark placeholder:text-dark/40 outline-none focus:border-red transition-colors";
+  "w-full bg-transparent border-0 border-b-2 border-green py-3 text-lg text-dark placeholder:text-dark/60 outline-none focus:border-red transition-colors";
 
 export default function TrackPageClient() {
   const [orderName, setOrderName] = useState("");
@@ -212,7 +212,7 @@ export default function TrackPageClient() {
                 <div className="bg-cream-dark p-8 md:p-9">
                   <div className="flex items-baseline justify-between mb-6">
                     <div>
-                      <p className="text-tag text-dark/50 uppercase tracking-[0.06em]">Order</p>
+                      <p className="text-tag text-dark/60 uppercase tracking-[0.06em]">Order</p>
                       <p className="text-h4 font-bold text-dark">{result.orderName}</p>
                     </div>
                     <span className="text-tag font-bold text-red uppercase tracking-[0.06em]">
@@ -257,7 +257,7 @@ export default function TrackPageClient() {
 
                   <div className="mt-7 pt-6">
                     <div className="dotted-divider text-dark/20 mb-6" />
-                    <p className="text-tag text-dark/50 uppercase tracking-[0.06em] mb-2">
+                    <p className="text-tag text-dark/60 uppercase tracking-[0.06em] mb-2">
                       Items
                     </p>
                     <ul className="space-y-1 text-body-sm text-dark/70">

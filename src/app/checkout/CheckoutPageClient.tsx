@@ -623,7 +623,7 @@ export default function CheckoutPageClient() {
                           >
                             {p.name}
                           </p>
-                          <p className="text-body-sm text-dark/50">{p.weight}</p>
+                          <p className="text-body-sm text-dark/60">{p.weight}</p>
                         </div>
                         <span className="text-body-sm font-bold text-dark">
                           ₹{p.price * line.qty}
@@ -648,7 +648,7 @@ export default function CheckoutPageClient() {
                         }
                       }}
                       placeholder="Discount code"
-                      className="flex-1 min-w-0 bg-cream border-0 px-3 py-2.5 text-body-sm text-dark placeholder:text-dark/40 outline-none focus:ring-2 focus:ring-green/40"
+                      className="flex-1 min-w-0 bg-cream border-0 px-3 py-2.5 text-body-sm text-dark placeholder:text-dark/60 outline-none focus:ring-2 focus:ring-green/40"
                     />
                     <button
                       type="button"
@@ -717,7 +717,7 @@ export default function CheckoutPageClient() {
                   : "Pay securely with UPI, debit/credit card, netbanking or wallets via Razorpay. You'll get an email confirmation the moment payment is captured."}
               </p>
 
-              <p className="text-[0.72rem] text-dark/50 mt-3">
+              <p className="text-[0.72rem] text-dark/60 mt-3">
                 By placing this order you agree to our{" "}
                 <Link href="/terms" className="underline hover:text-dark">
                   Terms
@@ -806,7 +806,7 @@ function Row({
           accent
             ? "text-green font-semibold"
             : muted
-            ? "text-dark/50"
+            ? "text-dark/60"
             : "text-dark/70"
         }
       >
@@ -814,7 +814,7 @@ function Row({
       </span>
       <span
         className={`font-semibold ${
-          accent ? "text-green" : muted ? "text-dark/50" : "text-dark"
+          accent ? "text-green" : muted ? "text-dark/60" : "text-dark"
         }`}
       >
         {value}
@@ -834,7 +834,7 @@ function PincodeStatusLine({
 }) {
   if (status.state === "idle") return null;
   if (status.state === "checking") {
-    return <p className="text-body-sm text-dark/50">Checking serviceability…</p>;
+    return <p className="text-body-sm text-dark/60">Checking serviceability…</p>;
   }
   if (status.state === "available") {
     return (

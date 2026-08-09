@@ -8,6 +8,7 @@ import { useCart } from "@/lib/cart-context";
 import { PRODUCTS, PRODUCT_CARD_IMAGES } from "@/lib/products";
 import { CART_DISCOUNT_THRESHOLD, CART_DISCOUNT_PCT } from "@/lib/discounts";
 import { SITE_WHATSAPP_NUMBER } from "@/lib/site";
+import { useModalA11y } from "@/lib/use-modal-a11y";
 
 // Same "order via chat" preset used by both the empty-cart and full-cart
 // WhatsApp links below — kept in one place so the two never drift.
@@ -115,7 +116,7 @@ function QuickAddRow({ slug }: { slug: string }) {
         <p className="font-quirk font-semibold text-[0.88rem] text-dark mb-0.5">
           {product.name}
         </p>
-        <p className="text-[0.72rem] text-dark/50">
+        <p className="text-[0.72rem] text-dark/60">
           ₹{product.price} /{product.weight.replace("g", "G")}
         </p>
       </div>
@@ -145,11 +146,7 @@ export default function MiniCart() {
 
   const isEmpty = lines.length === 0;
 
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") closeMini(); };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [closeMini]);
+  const drawerRef = useModalA11y(miniOpen, closeMini);
 
   useEffect(() => {
     document.body.style.overflow = miniOpen ? "hidden" : "";
@@ -172,17 +169,22 @@ export default function MiniCart() {
           {/* Drawer */}
           <motion.div
             key="drawer"
+            ref={drawerRef}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="mini-cart-title"
+            tabIndex={-1}
             initial={{ x: "100%" }} animate={{ x: 0 }} exit={{ x: "100%" }}
             transition={{ duration: 0.38, ease: [0.4, 0, 0.2, 1] }}
-            className="fixed top-0 right-0 bottom-0 w-[420px] max-w-[100vw] z-[300] bg-cream flex flex-col"
+            className="fixed top-0 right-0 bottom-0 w-[420px] max-w-[100vw] z-[300] bg-cream flex flex-col outline-none"
             style={{ boxShadow: "-12px 0 60px rgba(26,13,4,0.2)" }}
           >
             {/* ── HEADER ── */}
             <div className="shrink-0 px-6 pt-5 pb-4">
               <div className="flex items-center justify-between">
-                <p className="font-quirk font-bold text-base text-dark m-0 tracking-[0.02em]">
+                <p id="mini-cart-title" className="font-quirk font-bold text-base text-dark m-0 tracking-[0.02em]">
                   Your Cart
-                  <span className="font-normal text-dark/50 ml-2">
+                  <span className="font-normal text-dark/60 ml-2">
                     · {itemCount} {itemCount === 1 ? "Item" : "Items"}
                   </span>
                 </p>
@@ -190,7 +192,7 @@ export default function MiniCart() {
                   type="button"
                   onClick={closeMini}
                   aria-label="Close cart"
-                  className="bg-transparent border-none cursor-pointer text-dark/40 hover:text-dark text-[1.2rem] leading-none p-1 transition-colors"
+                  className="bg-transparent border-none cursor-pointer text-dark/60 hover:text-dark text-[1.2rem] leading-none p-1 transition-colors"
                 >
                   ✕
                 </button>
@@ -212,7 +214,7 @@ export default function MiniCart() {
                     <h3 className="font-quirk font-bold text-[1.6rem] text-dark mb-2">
                       Your Cart is Empty
                     </h3>
-                    <p className="text-[0.85rem] text-dark/50 mb-6">
+                    <p className="text-[0.85rem] text-dark/60 mb-6">
                       No thecha means no flavour.
                     </p>
                     <Link

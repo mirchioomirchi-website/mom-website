@@ -7,6 +7,7 @@ import { AnimatePresence, motion } from "motion/react";
 import { useCart } from "@/lib/cart-context";
 import { SITE_WHATSAPP_NUMBER } from "@/lib/site";
 import { NAV_SCROLL_OFFSET } from "@/components/SmoothScroll";
+import { useModalA11y } from "@/lib/use-modal-a11y";
 
 const NAV_LINKS = [
   { label: "Shop",        href: "/shop" },
@@ -75,6 +76,7 @@ export default function Navigation() {
   const [navHidden, setNavHidden] = useState(false);
   const lastScrollY = useRef(0);
   const { itemCount, openCart } = useCart();
+  const bulkDialogRef = useModalA11y(bulkOpen, () => setBulkOpen(false));
 
   // Hide the bar on scroll-down, bring it back on the very next scroll-up —
   // a small threshold keeps trackpad/momentum jitter from flickering it,
@@ -276,11 +278,16 @@ export default function Navigation() {
               className="fixed inset-0 z-[200] bg-dark/50 backdrop-blur-sm cursor-pointer"
             />
             <motion.div
+              ref={bulkDialogRef}
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="bulk-orders-title"
+              tabIndex={-1}
               initial={{ opacity: 0, scale: 0.94, y: 16 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.94, y: 16 }}
               transition={{ type: "spring", stiffness: 380, damping: 28 }}
-              className="fixed top-1/2 left-1/2 z-[201] -translate-x-1/2 -translate-y-1/2 bg-cream border-[1.5px] border-cream-dark py-12 px-10 max-w-[440px] w-[90vw] text-center shadow-[0_24px_64px_rgba(26,13,4,0.18)]"
+              className="fixed top-1/2 left-1/2 z-[201] -translate-x-1/2 -translate-y-1/2 bg-cream border-[1.5px] border-cream-dark py-12 px-10 max-w-[440px] w-[90vw] text-center shadow-[0_24px_64px_rgba(26,13,4,0.18)] outline-none"
             >
               <button
                 type="button"
@@ -293,7 +300,7 @@ export default function Navigation() {
 
               <div className="text-4xl mb-3.5">🌶️</div>
 
-              <h3 className="text-h4 font-bold text-dark mb-2.5">Bulk Orders</h3>
+              <h3 id="bulk-orders-title" className="text-h4 font-bold text-dark mb-2.5">Bulk Orders</h3>
               <p className="text-body text-dark/65 leading-relaxed mb-7">
                 Weddings, corporates, gifting — we do it all. Drop us a message on WhatsApp and we&apos;ll get you sorted.
               </p>

@@ -10,6 +10,15 @@ export default function Hero() {
 
   return (
     <section className="relative bg-cream overflow-hidden min-h-[90vh] md:min-h-screen flex flex-col">
+      {/* The wordmark above is a styled SVG <Image>, not live type, so
+          without this the page has no <h1> at all — the homepage's single
+          most important on-page signal for "what is this page about," and
+          the first stop for screen-reader users navigating by heading.
+          Visually hidden (matches the SVG one-for-one) rather than shown
+          twice on screen. */}
+      <h1 className="sr-only">
+        {SITE_CONTENT.hero.wordmarkAlt} — {line1} {line2}
+      </h1>
       <div className="flex-1 flex items-center w-full max-w-[1400px] mx-auto px-5 md:px-9 pt-16 md:pt-36 pb-8 md:pb-10">
         {/* ───────────────────── MOBILE (< md) ───────────────────── */}
         <div className="md:hidden flex flex-col items-center text-center w-full">

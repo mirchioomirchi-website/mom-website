@@ -339,11 +339,21 @@ export const SITE_CONTENT = {
         "Question about an order? Wholesale enquiry? Press? We respond to every email within one working day.",
     },
     form: {
+      // Persistent visible labels (added alongside the existing lowercase
+      // placeholders, same label+placeholder pairing already used on the
+      // order-tracking form below) — a placeholder alone disappears the
+      // instant someone starts typing, which loses the field's purpose for
+      // anyone glancing back at a half-filled form.
+      nameLabel: "Name",
       namePlaceholder: "your name",
+      emailLabel: "Email",
       emailPlaceholder: "your email",
+      queryTypeLabel: "What's this about?",
       queryTypePlaceholder: "query type",
       queryOptions: ["Order help", "Wholesale / B2B", "Press / collab", "Something else"],
+      subjectLabel: "Subject",
       subjectPlaceholder: "subject (optional)",
+      messageLabel: "Message",
       messagePlaceholder: "message",
       submitLabel: "Send Message",
     },

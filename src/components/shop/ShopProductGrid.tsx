@@ -202,11 +202,11 @@ export default function ShopProductGrid({ products }: { products: Product[] }) {
                       onChange={(e) => setPincode(e.target.value.replace(/[^0-9]/g, ""))}
                       placeholder="6-digit pincode"
                       autoFocus
-                      className="w-full bg-cream-dark border-0 px-3 py-2 text-body-sm text-dark placeholder:text-dark/40 outline-none focus:ring-2 focus:ring-green/40"
+                      className="w-full bg-cream-dark border-0 px-3 py-2 text-body-sm text-dark placeholder:text-dark/60 outline-none focus:ring-2 focus:ring-green/40"
                     />
                     <p role="status" className="text-body-sm mt-2 min-h-5">
                       {pincodeStatus.state === "checking" && (
-                        <span className="text-dark/50">Checking…</span>
+                        <span className="text-dark/60">Checking…</span>
                       )}
                       {pincodeStatus.state === "available" && (
                         <span className="text-green">
@@ -276,7 +276,7 @@ export default function ShopProductGrid({ products }: { products: Product[] }) {
                     <p className="flex items-baseline gap-2">
                       <span className={`text-lg md:text-2xl font-bold ${style.text}`}>₹{product.price}</span>
                       {product.originalPrice && (
-                        <span className="text-sm md:text-xl text-dark/40 line-through">
+                        <span className="text-sm md:text-xl text-dark/60 line-through">
                           ₹{product.originalPrice}
                         </span>
                       )}

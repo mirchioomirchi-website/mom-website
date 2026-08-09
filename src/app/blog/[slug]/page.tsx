@@ -76,7 +76,7 @@ const portableComponents: PortableTextComponents = {
             loading="lazy"
           />
           {value.alt && (
-            <figcaption className="text-body-sm text-dark/50 mt-3 text-center">
+            <figcaption className="text-body-sm text-dark/60 mt-3 text-center">
               {value.alt}
             </figcaption>
           )}
@@ -177,7 +177,7 @@ export default async function BlogPostPage({
               </Link>
               <time
                 dateTime={post.publishedAt}
-                className="block text-tag text-dark/50 uppercase tracking-[0.06em] mt-6"
+                className="block text-tag text-dark/60 uppercase tracking-[0.06em] mt-6"
               >
                 {new Date(post.publishedAt).toLocaleDateString("en-IN", {
                   day: "numeric",

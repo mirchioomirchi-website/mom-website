@@ -8,20 +8,28 @@ import { SITE_CONTENT } from "@/lib/content";
 type Status = "idle" | "sending" | "sent" | "error";
 
 const {
+  nameLabel,
   namePlaceholder,
+  emailLabel,
   emailPlaceholder,
+  queryTypeLabel,
   queryTypePlaceholder,
   queryOptions,
+  subjectLabel,
   subjectPlaceholder,
+  messageLabel,
   messagePlaceholder,
   submitLabel,
 } = SITE_CONTENT.contactPage.form;
 
-// Shared underline-field styling — transparent background, green rule,
-// placeholder-as-label (design reference has no separate label row, just a
-// muted placeholder sitting on the line).
+// Shared underline-field styling — transparent background, green rule.
 const fieldClass =
-  "w-full bg-transparent border-0 border-b-2 border-green py-3 text-lg text-dark placeholder:text-dark/50 outline-none focus:border-red transition-colors";
+  "w-full bg-transparent border-0 border-b-2 border-green py-3 text-lg text-dark placeholder:text-dark/60 outline-none focus:border-red transition-colors";
+
+// Persistent visible label above each field — same pattern already used on
+// the order-tracking form (TrackPageClient.tsx), so the two forms on the
+// site look and behave consistently.
+const labelClass = "block text-xl font-bold text-dark mb-2";
 
 function ChevronDown() {
   return (
@@ -94,37 +102,41 @@ export default function ContactForm() {
         aria-hidden="true"
       />
 
-      <input
-        type="text"
-        name="name"
-        required
-        maxLength={100}
-        autoComplete="name"
-        placeholder={namePlaceholder}
-        aria-label={namePlaceholder}
-        className={fieldClass}
-      />
+      <label className="block">
+        <span className={labelClass}>{nameLabel}</span>
+        <input
+          type="text"
+          name="name"
+          required
+          maxLength={100}
+          autoComplete="name"
+          placeholder={namePlaceholder}
+          className={fieldClass}
+        />
+      </label>
 
-      <input
-        type="email"
-        name="email"
-        required
-        inputMode="email"
-        maxLength={150}
-        autoComplete="email"
-        placeholder={emailPlaceholder}
-        aria-label={emailPlaceholder}
-        className={fieldClass}
-      />
+      <label className="block">
+        <span className={labelClass}>{emailLabel}</span>
+        <input
+          type="email"
+          name="email"
+          required
+          inputMode="email"
+          maxLength={150}
+          autoComplete="email"
+          placeholder={emailPlaceholder}
+          className={fieldClass}
+        />
+      </label>
 
-      <div className="relative">
+      <label className="block relative">
+        <span className={labelClass}>{queryTypeLabel}</span>
         <select
           name="queryType"
           defaultValue=""
-          aria-label={queryTypePlaceholder}
-          className={`${fieldClass} appearance-none pr-8 ${"cursor-pointer"}`}
+          className={`${fieldClass} appearance-none pr-8 cursor-pointer`}
         >
-          <option value="" disabled className="text-dark/50">
+          <option value="" disabled className="text-dark/60">
             {queryTypePlaceholder}
           </option>
           {queryOptions.map((opt) => (
@@ -133,30 +145,34 @@ export default function ContactForm() {
             </option>
           ))}
         </select>
-        <span className="pointer-events-none absolute right-0 top-1/2 -translate-y-1/2 text-green">
+        <span className="pointer-events-none absolute right-0 bottom-3 text-green">
           <ChevronDown />
         </span>
-      </div>
+      </label>
 
-      <input
-        type="text"
-        name="subject"
-        maxLength={150}
-        placeholder={subjectPlaceholder}
-        aria-label={subjectPlaceholder}
-        className={fieldClass}
-      />
+      <label className="block">
+        <span className={labelClass}>{subjectLabel}</span>
+        <input
+          type="text"
+          name="subject"
+          maxLength={150}
+          placeholder={subjectPlaceholder}
+          className={fieldClass}
+        />
+      </label>
 
-      <textarea
-        name="message"
-        required
-        minLength={5}
-        maxLength={4000}
-        rows={1}
-        placeholder={messagePlaceholder}
-        aria-label={messagePlaceholder}
-        className={`${fieldClass} resize-none`}
-      />
+      <label className="block">
+        <span className={labelClass}>{messageLabel}</span>
+        <textarea
+          name="message"
+          required
+          minLength={5}
+          maxLength={4000}
+          rows={1}
+          placeholder={messagePlaceholder}
+          className={`${fieldClass} resize-none`}
+        />
+      </label>
 
       {error && (
         <p role="alert" className="text-body-sm text-red bg-red/10 px-4 py-3">
@@ -172,7 +188,7 @@ export default function ContactForm() {
         {status === "sending" ? "Sending…" : submitLabel}
       </button>
 
-      <p className="text-[0.72rem] text-dark/50">
+      <p className="text-[0.72rem] text-dark/60">
         We&apos;ll only use these details to respond to your message. See our{" "}
         <Link href="/privacy" className="underline hover:text-dark/70">
           Privacy Policy
