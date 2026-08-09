@@ -201,7 +201,14 @@ export default function Navigation() {
                         ? "rotate(45deg) translateY(7px)"
                         : i === 2 && menuOpen
                           ? "rotate(-45deg) translateY(-7px)"
-                          : "none",
+                          // The middle bar doesn't just fade — it also
+                          // collapses to zero width. Opacity alone left a
+                          // faint sliver of it visible between the two
+                          // rotated bars; scaling it away too makes sure
+                          // there's nothing left to show regardless.
+                          : i === 1 && menuOpen
+                            ? "scaleX(0)"
+                            : "none",
                     opacity: i === 1 && menuOpen ? 0 : 1,
                   }}
                 />
