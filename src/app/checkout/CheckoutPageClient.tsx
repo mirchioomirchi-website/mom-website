@@ -8,8 +8,9 @@ import { useRouter } from "next/navigation";
 import SmoothScroll from "@/components/SmoothScroll";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
+import PdpCrossSell from "@/components/pdp/PdpCrossSell";
 import { useCart } from "@/lib/cart-context";
-import { getProduct, PRODUCT_CARD_IMAGES, PDP_ACCENT_COLOR } from "@/lib/products";
+import { PRODUCTS, getProduct, PRODUCT_CARD_IMAGES, PDP_ACCENT_COLOR } from "@/lib/products";
 import {
   computeCartTotal,
   computeShipping,
@@ -110,6 +111,13 @@ export default function CheckoutPageClient() {
   function handleApplyCoupon() {
     setAppliedCoupon(couponInput.trim());
   }
+
+  // Quick-add — everything not already in the cart, same card layout as the
+  // PDP's "You should also try" section.
+  const quickAddProducts = useMemo(() => {
+    const inCart = new Set(lines.map((l) => l.slug));
+    return PRODUCTS.filter((p) => !inCart.has(p.slug));
+  }, [lines]);
 
   const itemSummary = useMemo(
     () =>
@@ -710,6 +718,11 @@ export default function CheckoutPageClient() {
           </form>
         </div>
       </main>
+
+      {quickAddProducts.length > 0 && (
+        <PdpCrossSell relatedProducts={quickAddProducts} heading="Quick add" />
+      )}
+
       <Footer />
     </SmoothScroll>
   );

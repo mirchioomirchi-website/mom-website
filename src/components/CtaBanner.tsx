@@ -3,39 +3,28 @@
 import { useState } from "react";
 import { ScrollReveal } from "@/components/primitives";
 import { SITE_CONTENT } from "@/lib/content";
-import { SITE_WHATSAPP_NUMBER } from "@/lib/site";
-import { COUPONS } from "@/lib/discounts";
+import { useDiscountSignup, signupCoupon, SIGNUP_COUPON_CODE } from "@/lib/use-discount-signup";
 
 // The coupon itself lives in discounts.ts (the single source of truth the
-// checkout/order endpoints validate against) — reading pct/label from there
+// checkout/order endpoints validate against) — reading pct from there
 // instead of hardcoding "5%" here means this banner can never drift out of
 // sync with what the code actually gives at checkout.
-const WHATSAPP_COUPON_CODE = "WHATSAPP5";
-const whatsappCoupon = COUPONS[WHATSAPP_COUPON_CODE];
+const heading = `Claim your ${signupCoupon.pct}% off`;
 
 const { bodyMobile, bodyDesktopLines } = SITE_CONTENT.ctaBanner;
-const heading = `Claim your ${whatsappCoupon.pct}% off`;
-
-// The code is embedded in the pre-filled WhatsApp message itself, so it's
-// saved in the customer's chat history as a durable reference even after
-// they navigate away from the site.
-const WHATSAPP_HREF = `https://wa.me/${SITE_WHATSAPP_NUMBER}?text=${encodeURIComponent(
-  `Hi Mirchi O Mirchi — I'd like to join your WhatsApp community for updates and offers \u{1F336}️ (my ${whatsappCoupon.pct}% off code: ${WHATSAPP_COUPON_CODE})`
-)}`;
 
 export default function CtaBanner() {
-  const [revealed, setRevealed] = useState(false);
+  const { phone, setPhone, status, errorMsg, submit } = useDiscountSignup("banner");
   const [copied, setCopied] = useState(false);
 
   async function handleCopy() {
     try {
-      await navigator.clipboard.writeText(WHATSAPP_COUPON_CODE);
+      await navigator.clipboard.writeText(SIGNUP_COUPON_CODE);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch {
-      // Clipboard API unavailable (e.g. non-secure context) — the code is
-      // already visible on-screen and in the WhatsApp message, so this is a
-      // convenience feature only, not the only way to get the code.
+      // Clipboard API unavailable — the code is already visible on-screen,
+      // this is a convenience feature only.
     }
   }
 
@@ -53,8 +42,8 @@ export default function CtaBanner() {
                   {heading}
                 </h2>
 
-                <div className="flex flex-col items-center md:items-end gap-5 w-full md:w-auto">
-                  <p className="text-body text-dark/80 text-center md:text-right max-w-sm md:max-w-md">
+                <div className="flex flex-col items-center md:items-end gap-5 w-full md:w-auto md:max-w-sm">
+                  <p className="text-body text-dark/80 text-center md:text-right">
                     <span className="md:hidden">{bodyMobile}</span>
                     <span className="hidden md:block">
                       {bodyDesktopLines.map((line) => (
@@ -65,14 +54,14 @@ export default function CtaBanner() {
                     </span>
                   </p>
 
-                  {revealed ? (
-                    <div className="w-full md:w-auto flex flex-col items-center md:items-end gap-2">
+                  {status === "done" ? (
+                    <div className="w-full flex flex-col items-center md:items-end gap-2">
                       <p className="text-body-sm text-dark/70 text-center md:text-right">
-                        Your code — use it at checkout:
+                        You&apos;re in! Here&apos;s your code — use it at checkout:
                       </p>
                       <div className="flex items-center gap-2 w-full md:w-auto">
                         <span className="text-btn font-bold bg-cream text-green px-5 py-3 tracking-[0.06em] flex-1 md:flex-none text-center">
-                          {WHATSAPP_COUPON_CODE}
+                          {SIGNUP_COUPON_CODE}
                         </span>
                         <button
                           type="button"
@@ -84,16 +73,38 @@ export default function CtaBanner() {
                       </div>
                     </div>
                   ) : (
-                    <a
-                      href={WHATSAPP_HREF}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      onClick={() => setRevealed(true)}
-                      className="text-btn inline-flex items-center justify-center gap-2 bg-green text-cream px-8 py-3.5 hover:bg-green/90 transition-colors w-full md:w-auto"
+                    <form
+                      onSubmit={(e) => {
+                        e.preventDefault();
+                        void submit();
+                      }}
+                      className="w-full flex flex-col items-center md:items-end gap-2"
                     >
-                      Join on WhatsApp
-                      <span aria-hidden="true">→</span>
-                    </a>
+                      <div className="flex w-full gap-2">
+                        <input
+                          type="tel"
+                          inputMode="numeric"
+                          maxLength={10}
+                          value={phone}
+                          onChange={(e) => setPhone(e.target.value)}
+                          placeholder="Your 10-digit mobile number"
+                          className="flex-1 min-w-0 bg-cream border-0 px-4 py-3 text-body-sm text-dark placeholder:text-dark/40 outline-none focus:ring-2 focus:ring-green/40"
+                        />
+                        <button
+                          type="submit"
+                          disabled={status === "submitting"}
+                          className="text-btn font-bold bg-green text-cream px-6 py-3 hover:bg-green/90 transition-colors cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed shrink-0"
+                        >
+                          {status === "submitting" ? "Sending…" : "Get code"}
+                        </button>
+                      </div>
+                      {status === "error" && (
+                        <p className="text-body-sm text-red">{errorMsg}</p>
+                      )}
+                      <p className="text-[0.72rem] text-dark/50 text-center md:text-right">
+                        New-batch updates + drops. No spam, unsubscribe anytime.
+                      </p>
+                    </form>
                   )}
                 </div>
               </div>

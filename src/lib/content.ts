@@ -192,14 +192,14 @@ export const SITE_CONTENT = {
     ],
   },
 
-  // ─── CTA banner (WhatsApp community) ──────────────────────────────────────
+  // ─── CTA banner (phone-number signup) ─────────────────────────────────────
+  // heading is built dynamically in CtaBanner.tsx from the live coupon %
+  // (see src/lib/discounts.ts), not read from here, so it can't drift.
   ctaBanner: {
-    heading: "Claim your 5% off",
     bodyMobile:
-      "We announce new batches, limited drops, and recipe ideas on WhatsApp first.",
+      "Drop your number for new batches, limited drops, and recipe ideas first.",
     // Rendered as two explicit lines on desktop — do not join into one string.
-    bodyDesktopLines: ["We announce new batches, limited drops,", "and recipe ideas on WhatsApp first. Join us there."],
-    ctaLabel: "Join on WhatsApp",
+    bodyDesktopLines: ["Drop your number for new batches,", "limited drops, and recipe ideas first."],
   },
 
   // ─── Footer ───────────────────────────────────────────────────────────────

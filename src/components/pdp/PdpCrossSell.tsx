@@ -107,8 +107,13 @@ function CollapsedCard({ product, onSelect }: { product: Product; onSelect: () =
 
 export default function PdpCrossSell({
   relatedProducts,
+  heading,
 }: {
   relatedProducts: Product[];
+  // Defaults to the PDP's own "You should also try" — pass a different
+  // string to reuse this same card layout elsewhere (e.g. checkout's
+  // "Quick add" section).
+  heading?: string;
 }) {
   const related = relatedProducts;
   const [activeIndex, setActiveIndex] = useState(0);
@@ -174,7 +179,9 @@ export default function PdpCrossSell({
     <section className="relative bg-cream py-16 md:py-24 cv-auto">
       <div className="max-w-[1400px] mx-auto px-5 md:px-5">
         <ScrollReveal>
-          <h2 className="text-h2 text-green mb-8 md:mb-10">{SITE_CONTENT.productPage.crossSell.heading}</h2>
+          <h2 className="text-h2 text-green mb-8 md:mb-10">
+            {heading ?? SITE_CONTENT.productPage.crossSell.heading}
+          </h2>
         </ScrollReveal>
 
         {/* Mobile — swipeable carousel: the active card fills the view with

@@ -8,6 +8,7 @@ import { SITE_URL, SITE_NAME, SITE_LEGAL_NAME, DEFAULT_OG_IMAGE, safeJsonLd } fr
 
 const MiniCart = dynamic(() => import("@/components/MiniCart"));
 const WhatsAppFab = dynamic(() => import("@/components/WhatsAppFab"));
+const PromoPopup = dynamic(() => import("@/components/PromoPopup"));
 
 // All three brand typefaces load through next/font/local — one consistent
 // mechanism (subsetting, preload, font-display, automatic fallback metrics)
@@ -174,6 +175,7 @@ export default function RootLayout({
           <MiniCart />
         </CartProvider>
         <WhatsAppFab />
+        <PromoPopup />
         <div className="grain-overlay" />
       </body>
     </html>

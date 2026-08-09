@@ -9,7 +9,7 @@ type OrderItem = { slug: string; qty: number };
 
 type OrderBody = {
   items?: OrderItem[];
-  // Optional coupon code entered at checkout (e.g. "WHATSAPP5"). Re-validated
+  // Optional coupon code entered at checkout (e.g. "SIGNUP5"). Re-validated
   // here from scratch — the client's discount preview is never trusted.
   couponCode?: string;
   // Legacy single-amount path for the RazorpayCheckout standalone widget.

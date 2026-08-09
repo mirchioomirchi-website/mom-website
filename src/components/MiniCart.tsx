@@ -252,7 +252,7 @@ export default function MiniCart() {
                     {/* Auto discount nudge — small, informational only (no
                         button, nothing to click — the discount applies by
                         itself at checkout once the threshold is hit). */}
-                    <p className="text-[0.72rem] text-dark/55 text-center px-2 mb-4">
+                    <p className="text-body-sm font-semibold text-dark/70 text-center px-2 mb-4">
                       Spend ₹{CART_DISCOUNT_THRESHOLD}+ and get {CART_DISCOUNT_PCT}% off
                       automatically at checkout.
                     </p>

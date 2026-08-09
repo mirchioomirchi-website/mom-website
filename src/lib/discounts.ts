@@ -10,8 +10,11 @@ import { PRODUCTS } from "@/lib/products";
 // ── Automatic cart discount ────────────────────────────────────────────────
 // Applied automatically once the pre-discount item subtotal reaches the
 // threshold — no code needed. Change either number to launch a different
-// promo (e.g. 15% off ₹1500) with no other file needing to change.
-export const CART_DISCOUNT_THRESHOLD = 1000;
+// promo (e.g. 15% off ₹1500) with no other file needing to change. Kept
+// equal to SHIPPING_FREE_THRESHOLD below on purpose — one number, one
+// story ("spend ₹999+, get free shipping AND 10% off") — but they're
+// independent constants, so they can be split again later if needed.
+export const CART_DISCOUNT_THRESHOLD = 999;
 export const CART_DISCOUNT_PCT = 10;
 
 // ── Coupon codes ────────────────────────────────────────────────────────────
@@ -19,14 +22,12 @@ export const CART_DISCOUNT_PCT = 10;
 // place that applies/validates a coupon reads from this object, so adding a
 // row is the only change needed to add a new promo code to the site.
 //
-// NOTE ON "WHATSAPP5": the website has no way to verify someone actually
-// joined the WhatsApp community (that would require WhatsApp Business
-// Platform / Cloud API automation, which is a separate integration outside
-// this codebase) — so this is an honour-system code, shown directly on the
-// CtaBanner once someone clicks through. That's the same model most small
-// D2C brands use for a "join our list" code.
+// NOTE ON "SIGNUP5": given to anyone who submits their phone number on the
+// CtaBanner or the promo popup (/api/phone-signup). The site has no way to
+// verify identity beyond that submission, so — like most small D2C
+// "join our list" codes — it's honour-system from there.
 export const COUPONS: Record<string, { pct: number; label: string }> = {
-  WHATSAPP5: { pct: 5, label: "WhatsApp community" },
+  SIGNUP5: { pct: 5, label: "New-batch signup" },
 };
 
 // ── Shipping ────────────────────────────────────────────────────────────────
