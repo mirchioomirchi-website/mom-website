@@ -106,7 +106,7 @@ export default function ProductShowcase({ products }: { products: Product[] }) {
   const N = flavours.length;
   const segWidth = N > 0 ? 1 / N : 1;
   const centers = flavours.map((_, i) => i * segWidth + segWidth / 2);
-  const rgbDark = flavours.map((p) => hexToRgb(SHOWCASE_EXTRAS[p.flavor]?.bgDark ?? p.color));
+  const rgbDark = flavours.map((p) => hexToRgb(SHOWCASE_EXTRAS[p.flavor]?.bgDark ?? "#1A0D04"));
   const frameCounts = flavours.map((p) => SHOWCASE_EXTRAS[p.flavor]?.frames ?? 1);
 
   const outerRef = useRef<HTMLDivElement>(null);

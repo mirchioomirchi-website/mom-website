@@ -100,7 +100,7 @@ export default function CheckoutPageClient() {
       lines
         .map((l) => {
           const p = getProduct(l.slug);
-          return p ? `${p.shortName} ×${l.qty}` : null;
+          return p ? `${p.name} ×${l.qty}` : null;
         })
         .filter(Boolean)
         .join(", "),
@@ -575,7 +575,7 @@ export default function CheckoutPageClient() {
                     if (!p) return null;
                     return (
                       <li key={line.slug} className="flex items-center gap-3">
-                        <div className="relative w-14 h-14 shrink-0 rounded-md bg-cream overflow-hidden">
+                        <div className="relative w-14 h-14 shrink-0 bg-cream overflow-hidden">
                           <Image
                             src={PRODUCT_CARD_IMAGES[line.slug] ?? p.image}
                             alt={p.name}
@@ -591,7 +591,7 @@ export default function CheckoutPageClient() {
                             className="text-sm font-bold truncate"
                             style={{ color: PDP_ACCENT_COLOR[p.flavor] }}
                           >
-                            {p.shortName}
+                            {p.name}
                           </p>
                           <p className="text-body-sm text-dark/50">{p.weight}</p>
                         </div>

@@ -72,7 +72,7 @@ export default function ContactForm() {
 
   if (status === "sent") {
     return (
-      <div role="status" aria-live="polite" className="bg-green/10 rounded-xl p-7 md:p-8 text-center">
+      <div role="status" aria-live="polite" className="bg-green/10 p-7 md:p-8 text-center">
         <p className="text-tag text-green uppercase tracking-[0.08em] mb-2">Message sent</p>
         <p className="text-body text-dark/80">
           Got it. We&apos;ll get back to you within one working day.
@@ -158,7 +158,7 @@ export default function ContactForm() {
       />
 
       {error && (
-        <p role="alert" className="text-body-sm text-red bg-red/10 rounded-lg px-4 py-3">
+        <p role="alert" className="text-body-sm text-red bg-red/10 px-4 py-3">
           {error}
         </p>
       )}
@@ -166,7 +166,7 @@ export default function ContactForm() {
       <button
         type="submit"
         disabled={status === "sending"}
-        className="text-btn font-bold rounded-lg inline-flex items-center justify-center gap-2 bg-green text-cream px-8 py-4 hover:bg-green/90 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+        className="text-btn font-bold inline-flex items-center justify-center gap-2 bg-green text-cream px-8 py-4 hover:bg-green/90 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
       >
         {status === "sending" ? "Sending…" : submitLabel}
       </button>

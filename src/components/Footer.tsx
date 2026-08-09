@@ -39,7 +39,7 @@ function SocialIcon() {
       target="_blank"
       rel="noopener noreferrer"
       aria-label="Mirchi O Mirchi on Instagram"
-      className="w-11 h-11 rounded-md flex items-center justify-center text-green hover:bg-green hover:text-cream transition-colors duration-300"
+      className="w-11 h-11 flex items-center justify-center text-green hover:bg-green hover:text-cream transition-colors duration-300"
     >
       <InstagramGlyph />
     </a>
@@ -116,12 +116,12 @@ export default function Footer() {
             the Shop / Explore columns above so Legal sits directly under
             Explore rather than pinned to the far edge. */}
         <div className="md:hidden grid grid-cols-2 gap-8 mb-10">
-          <Link href={trackOrderLink.href} className="inline-flex items-center gap-1.5 font-medium text-green">
+          <Link href={trackOrderLink.href} className="font-quirk inline-flex items-center gap-1.5 font-medium text-green">
             {trackOrderLink.name}
             <span aria-hidden="true">→</span>
           </Link>
           <details className="group">
-            <summary className="list-none flex items-center gap-1.5 font-medium text-green cursor-pointer select-none">
+            <summary className="font-quirk list-none flex items-center gap-1.5 font-medium text-green cursor-pointer select-none">
               Legal
               <svg
                 width="12"

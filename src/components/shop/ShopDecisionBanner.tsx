@@ -31,7 +31,7 @@ export default function ShopDecisionBanner() {
             {columns.map((col) => (
               <div
                 key={col.slug}
-                className="snap-center shrink-0 w-[85%] bg-pink rounded-lg flex flex-col items-center text-center gap-3 px-6 py-10"
+                className="snap-center shrink-0 w-[85%] bg-pink flex flex-col items-center text-center gap-3 px-6 py-10"
               >
                 <h3 className="text-h4 font-bold text-cream">{col.question}</h3>
                 <p className="text-body text-cream/75">{col.detail}</p>

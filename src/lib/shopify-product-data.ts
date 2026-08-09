@@ -21,6 +21,7 @@ export type ShopifyProductData = {
   title: string;
   descriptionHtml: string;
   price: number | null;
+  compareAtPrice: number | null;
   available: boolean;
   mainImage: string | null;
   nameHi: string | null;
@@ -55,6 +56,7 @@ const ALL_PRODUCTS_FULL_QUERY = /* GraphQL */ `
           nodes {
             id
             price
+            compareAtPrice
             availableForSale
           }
         }
@@ -122,7 +124,12 @@ type AllProductsFullResp = {
         preview: { image: { url: string } | null } | null;
       } | null;
       variants: {
-        nodes: Array<{ id: string; price: string; availableForSale: boolean }>;
+        nodes: Array<{
+          id: string;
+          price: string;
+          compareAtPrice: string | null;
+          availableForSale: boolean;
+        }>;
       };
       nameHi: MetafieldValue;
       heatLevel: MetafieldValue;
@@ -178,6 +185,7 @@ async function fetchAllShopifyProducts(): Promise<
       title: p.title,
       descriptionHtml: p.descriptionHtml,
       price: variant ? Number(variant.price) : null,
+      compareAtPrice: variant?.compareAtPrice ? Number(variant.compareAtPrice) : null,
       available: variant?.availableForSale ?? true,
       mainImage: p.featuredMedia?.preview?.image?.url ?? null,
       nameHi: p.nameHi?.value ?? null,

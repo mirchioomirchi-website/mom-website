@@ -17,7 +17,7 @@ export default function ContactFormSection() {
           </ScrollReveal>
 
           <ScrollReveal delay={0.08}>
-            <div className="bg-cream-dark rounded-2xl p-8 md:p-9">
+            <div className="bg-cream-dark p-8 md:p-9">
               <p className="text-tag font-bold text-red mb-2">{infoPanel.emailLabel}</p>
               <a
                 href={`mailto:${SITE_SUPPORT_EMAIL}`}

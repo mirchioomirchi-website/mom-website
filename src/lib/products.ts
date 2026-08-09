@@ -2,7 +2,6 @@
 export type Product = {
   slug: string;
   name: string;
-  shortName: string;
   flavor: "green" | "mixed" | "red" | "combo";
   tagline: string;
   description: string;
@@ -11,18 +10,11 @@ export type Product = {
   originalPrice?: number;
   weight: string;
   image: string;
-  color: string;
-  accentRgb: string;
   speech: string;
   ingredients: string[];
-  pairings: string[];
-  spiceLevel: number; // 1-5
-  badge?: string;
   isCombo?: boolean;
-  comboItems?: string[];
   // ── PDP-specific fields ──────────────────────────────────────────────
   // Free-text heat label shown on the product page (e.g. "Medium - Hot").
-  // Distinct from the numeric spiceLevel used for the chili-icon indicator.
   heatLevel: string;
   // Punchy brand-voice paragraph used in the PDP "story" section — separate
   // from longDescription (which is the factual jar-copy in the hero).
@@ -51,7 +43,6 @@ export const PRODUCTS: Product[] = [
   {
     slug: "green-chilli-thecha",
     name: "Green Chilli Thecha",
-    shortName: "Green Chilli",
     flavor: "green",
     tagline: "Fresh. Garlicky. Addictive.",
     description:
@@ -62,8 +53,6 @@ export const PRODUCTS: Product[] = [
     originalPrice: 399,
     weight: "250g",
     image: "/images/jar-green-final.webp",
-    color: "#7BB55E",
-    accentRgb: "123, 181, 94",
     speech: "Classy. Sassy. Thodi bad-assy.",
     ingredients: [
       "Fresh green chillies",
@@ -73,15 +62,6 @@ export const PRODUCTS: Product[] = [
       "Lemon juice",
       "Rock salt & cumin",
     ],
-    pairings: [
-      "Hot Bhakri",
-      "Dal-Rice",
-      "Paratha",
-      "Cheese toast",
-      "Maggi",
-    ],
-    spiceLevel: 4,
-    badge: "Bestseller",
     heatLevel: "Mild - Medium",
     storyText:
       "This one keeps it fresh. Spoon it over rice, fold it into curd, or eat it straight off a hot bhakri — Green Chilli Thecha is for whoever asked for 'more garlic, less rules.'",
@@ -89,7 +69,6 @@ export const PRODUCTS: Product[] = [
   {
     slug: "red-chilli-thecha",
     name: "Red Chilli Thecha",
-    shortName: "Red Chilli",
     flavor: "red",
     tagline: "Bold. Fiery. Garlicky.",
     description:
@@ -100,8 +79,6 @@ export const PRODUCTS: Product[] = [
     originalPrice: 399,
     weight: "250g",
     image: "/images/jar-red-final.webp",
-    color: "#E53935",
-    accentRgb: "229, 57, 53",
     speech: "Too hot to handle, baby.",
     ingredients: [
       "Fresh red chillies",
@@ -111,14 +88,6 @@ export const PRODUCTS: Product[] = [
       "Lemon juice",
       "Rock salt & cumin",
     ],
-    pairings: [
-      "Dosa",
-      "Roti",
-      "Pulao",
-      "Avocado Toast",
-      "Anything boring",
-    ],
-    spiceLevel: 5,
     heatLevel: "Medium - Hot",
     storyText:
       "This one doesn't play safe. Stir it into dal-chawal, smear it on a sandwich, or eat it off the spoon — Red Chilli Thecha is for whoever asked for 'more spicy.'",
@@ -128,7 +97,6 @@ export const PRODUCTS: Product[] = [
   {
     slug: "mixed-chilli-thecha",
     name: "Mixed Chilli Thecha",
-    shortName: "Mixed Chilli",
     flavor: "mixed",
     tagline: "Punchy. Complex. Full Power.",
     description:
@@ -139,8 +107,6 @@ export const PRODUCTS: Product[] = [
     originalPrice: 399,
     weight: "250g",
     image: "/images/jar-mixed-final.webp",
-    color: "#FF9A1E",
-    accentRgb: "255, 154, 30",
     speech: "Mirchi lagi toh? IDGAFlying Chappal!",
     ingredients: [
       "Fresh green chillies",
@@ -151,14 +117,6 @@ export const PRODUCTS: Product[] = [
       "Lemon juice",
       "Rock salt & cumin",
     ],
-    pairings: [
-      "Vada Pav",
-      "Misal",
-      "Steamed rice with dal",
-      "Eggs",
-      "Maggi",
-    ],
-    spiceLevel: 4,
     heatLevel: "Medium - Hot",
     storyText:
       "This one doesn't pick sides. Stir it into misal, load it onto vada pav, or eat it off the spoon — Mixed Chilli Thecha is for whoever asked for 'both, actually.'",
@@ -166,7 +124,6 @@ export const PRODUCTS: Product[] = [
   {
     slug: "combo-pack",
     name: "Combo Pack",
-    shortName: "Combo Pack",
     flavor: "combo",
     tagline: "Three Heats. Save ₹100.",
     description:
@@ -177,28 +134,13 @@ export const PRODUCTS: Product[] = [
     originalPrice: 899,
     weight: "3 × 250g",
     image: "/images/jar-mixed-final.webp",
-    color: "#F5197F",
-    accentRgb: "245, 25, 127",
     speech: "Why pick? Take all three.",
     ingredients: [
       "1 × Green Chilli Thecha (250g)",
       "1 × Mixed Chilli Thecha (250g)",
       "1 × Red Chilli Thecha (250g)",
     ],
-    pairings: [
-      "A full pantry refresh",
-      "A perfect housewarming gift",
-      "Recipe experiments",
-      "Spice lovers",
-    ],
-    spiceLevel: 5,
-    badge: "Best Value",
     isCombo: true,
-    comboItems: [
-      "/images/jar-green-final.webp",
-      "/images/jar-mixed-final.webp",
-      "/images/jar-red-final.webp",
-    ],
     heatLevel: "Mild - Hot",
     storyText:
       "Can't pick a favourite? Don't. Keep all three within arm's reach — on the table, in the fridge, wherever flavour's needed — Combo Pack is for whoever asked for 'why choose.'",

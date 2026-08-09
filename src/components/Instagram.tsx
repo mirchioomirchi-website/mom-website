@@ -133,7 +133,7 @@ export default function Instagram({
             target="_blank"
             rel="noopener noreferrer"
             aria-label="Mirchi O Mirchi on Instagram"
-            className={`pointer-events-auto w-11 h-11 md:w-12 md:h-12 rounded-xl flex items-center justify-center transition-colors duration-300 ${
+            className={`pointer-events-auto w-11 h-11 md:w-12 md:h-12 flex items-center justify-center transition-colors duration-300 ${
               isYellow
                 ? "text-red hover:bg-red hover:text-yellow"
                 : "text-cream hover:bg-cream hover:text-red"

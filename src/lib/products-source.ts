@@ -3,9 +3,9 @@
 // field that has a matching metafield/native field — name, Hindi name,
 // description, price, heat level, volume, flavour title/description,
 // ingredients, accent color, and all three PDP photos. The static catalogue
-// only supplies brand copy Shopify doesn't have yet (pairings, spice icon
-// count, candy-hex `color` used off the PDP) and acts as the fallback if
-// Shopify is unreachable or a specific metafield hasn't been filled in.
+// only supplies brand copy Shopify doesn't have yet (candy-hex `color` used
+// off the PDP) and acts as the fallback if Shopify is unreachable or a
+// specific metafield hasn't been filled in.
 //
 // USE THIS FROM SERVER COMPONENTS ONLY. Client components must keep using
 // PRODUCTS from "@/lib/products" so they don't import the Shopify Admin
@@ -34,6 +34,10 @@ function mergeProduct(p: Product, live: ShopifyProductData | undefined): Product
     description: live.descriptionHtml || p.description,
     longDescription: live.descriptionHtml || p.longDescription,
     price: live.available && live.price ? Math.round(live.price) : p.price,
+    originalPrice:
+      live.compareAtPrice && live.compareAtPrice > (live.price ?? 0)
+        ? Math.round(live.compareAtPrice)
+        : p.originalPrice,
     heatLevel: live.heatLevel ?? p.heatLevel,
     weight: live.volumeLabel ?? p.weight,
     tagline: live.flavourTitle ?? p.tagline,

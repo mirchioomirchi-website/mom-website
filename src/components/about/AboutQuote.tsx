@@ -14,10 +14,7 @@ export default function AboutQuote() {
       <div className="max-w-[1400px] mx-auto px-5 md:px-9">
         <ScrollReveal>
           <div className="dotted-frame relative text-red p-3 md:p-4 mx-4 md:mx-0">
-            <div
-              className="relative rounded-md px-10 md:px-20 py-16 md:py-16 text-center overflow-hidden"
-              style={{ background: "#FFB300" }}
-            >
+            <div className="relative bg-yellow px-10 md:px-20 py-16 md:py-16 text-center overflow-hidden">
               <span
                 aria-hidden="true"
                 className="absolute top-2 left-4 md:top-4 md:left-8 text-red/60 text-6xl md:text-7xl font-serif leading-none select-none"

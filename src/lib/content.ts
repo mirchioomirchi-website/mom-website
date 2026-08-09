@@ -11,20 +11,6 @@
 //   editable from Shopify without ever touching code.
 
 export const SITE_CONTENT = {
-  // ─── Top-of-page marquee ──────────────────────────────────────────────────
-  marquee: {
-    items: [
-      "Green Chilli Thecha",
-      "Small Batches",
-      "Red Chilli Thecha",
-      "Stone-ground",
-      "Mixed Chilli Thecha",
-      "Real Ingredients",
-      "Handcrafted in Maharashtra",
-      "Six Real Ingredients",
-    ],
-  },
-
   // ─── Hero ─────────────────────────────────────────────────────────────────
   // Wordmark is now the "/home hero name.svg" (desktop) / "/home hero name -
   // mobile.svg" (mobile) art — eyebrow/wordmarkAlt exist for accessible text,
@@ -34,34 +20,6 @@ export const SITE_CONTENT = {
     eyebrow: "Hand Crafted Maharashtrian Thecha",
     // Rendered as two explicit lines — do not join into one string.
     taglineLines: ["Fresh thecha. Full flavour dhamaka.", "Just like your grandmother made it."],
-  },
-
-  // ─── Meet MOM (the three character avatars) ───────────────────────────────
-  meetMOM: {
-    eyebrow: "Meet MOM",
-    headingHtml:
-      "She's got opinions. She's got <em class='text-mom-pink'>flavour</em>. And she's definitely not asking for <em class='text-mom-orange'>permission</em>.",
-    body: "Three women. Three attitudes. Three flavours. Each one represents a side of MOM you know — bold, unapologetic, and impossible to ignore.",
-    characters: [
-      {
-        name: "Green Chilli",
-        trait: "Classy. Sassy. Bad-assy.",
-        image: "/images/character-3.webp",
-        bg: "#CDDC39",
-      },
-      {
-        name: "Mixed Chilli",
-        trait: "Traditional. Powerful. Complex.",
-        image: "/images/character-2.webp",
-        bg: "#FFB300",
-      },
-      {
-        name: "Red Chilli",
-        trait: "Fierce. Fiery. Fearless.",
-        image: "/images/character-1.webp",
-        bg: "#F5197F",
-      },
-    ],
   },
 
   // ─── Ingredients (what's inside) ──────────────────────────────────────────
@@ -143,26 +101,6 @@ export const SITE_CONTENT = {
         description: "Spoon. Jar. Done. We've all been there. No shame.",
         video: "/videos/thecha-grilled-cheese.mp4",
       },
-    ],
-  },
-
-  // ─── Quality (Real vs Fake) ───────────────────────────────────────────────
-  quality: {
-    eyebrow: "The Difference",
-    heading: "Real vs. Fake.",
-    subheading:
-      "What makes our thecha different? Start with what's inside.",
-    momLabel: "The Real Stuff",
-    momTitle: "MOM",
-    othersLabel: "The Other Stuff",
-    othersTitle: "Others",
-    rows: [
-      { feature: "Ingredients", mom: "6 real ingredients", others: "20+ chemicals & fillers" },
-      { feature: "Preservatives", mom: "Zero", others: "Sodium benzoate, etc." },
-      { feature: "Process", mom: "Stone-ground, small batch", others: "Factory mass-produced" },
-      { feature: "Oil", mom: "Olive oil", others: "Refined / palm oil" },
-      { feature: "Shelf Life", mom: "Natural (3-6 months)", others: "Artificial (12-24 months)" },
-      { feature: "Taste", mom: "Traditional Kolhapuri recipe", others: "Like a lab made it" },
     ],
   },
 

@@ -162,7 +162,7 @@ export default function TrackPageClient() {
                 <form
                   onSubmit={handleSubmit}
                   noValidate
-                  className="bg-cream-dark rounded-2xl p-8 md:p-9"
+                  className="bg-cream-dark p-8 md:p-9"
                 >
                   <label className="block mb-8">
                     <span className="block text-xl font-bold text-dark mb-2">
@@ -191,7 +191,7 @@ export default function TrackPageClient() {
                   </label>
 
                   {error && (
-                    <p className="text-body-sm text-red bg-red/10 rounded-lg px-4 py-3 mb-6">
+                    <p className="text-body-sm text-red bg-red/10 px-4 py-3 mb-6">
                       {error}
                     </p>
                   )}
@@ -199,7 +199,7 @@ export default function TrackPageClient() {
                   <button
                     type="submit"
                     disabled={loading}
-                    className="text-btn font-bold rounded-lg inline-flex items-center justify-center gap-2 bg-green text-cream px-8 py-3.5 hover:bg-green/90 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+                    className="text-btn font-bold inline-flex items-center justify-center gap-2 bg-green text-cream px-8 py-3.5 hover:bg-green/90 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
                   >
                     {loading ? "Looking it up…" : form.submitLabel}
                   </button>
@@ -209,7 +209,7 @@ export default function TrackPageClient() {
 
             {result && (
               <ScrollReveal delay={0.04} className="mt-10">
-                <div className="bg-cream-dark rounded-2xl p-8 md:p-9">
+                <div className="bg-cream-dark p-8 md:p-9">
                   <div className="flex items-baseline justify-between mb-6">
                     <div>
                       <p className="text-tag text-dark/50 uppercase tracking-[0.06em]">Order</p>
@@ -249,7 +249,7 @@ export default function TrackPageClient() {
                       href={result.trackingUrl}
                       target="_blank"
                       rel="noreferrer"
-                      className="block w-full text-center text-btn font-bold rounded-lg bg-green text-cream px-8 py-3.5 hover:bg-green/90 transition-colors"
+                      className="block w-full text-center text-btn font-bold bg-green text-cream px-8 py-3.5 hover:bg-green/90 transition-colors"
                     >
                       Open carrier tracking ↗
                     </a>

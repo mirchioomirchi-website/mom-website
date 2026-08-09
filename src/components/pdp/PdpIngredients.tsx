@@ -39,8 +39,8 @@ export default function PdpIngredients({ product }: { product: Product }) {
             style={{ color: accentColor }}
           >
             <div
-              className="relative rounded-md px-7 md:px-16 py-10 md:py-14"
-              style={{ background: "#FFB300", color: accentColor }}
+              className="relative bg-yellow px-7 md:px-16 py-10 md:py-14"
+              style={{ color: accentColor }}
             >
               <MirchiCorner className="absolute top-4 left-4 md:top-6 md:left-6" />
               <MirchiCorner className="absolute top-4 right-4 md:top-6 md:right-6 -scale-x-100" />

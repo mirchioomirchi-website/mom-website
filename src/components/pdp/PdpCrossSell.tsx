@@ -29,7 +29,7 @@ export function HighlightedCard({ product }: { product: Product }) {
   const accentColor = product.pdpAccentColor ?? PDP_ACCENT_COLOR[product.flavor];
   return (
     <div
-      className="relative flex flex-col md:flex-row md:h-[380px] items-center justify-center gap-8 md:gap-12 rounded-lg overflow-hidden p-6 md:p-8 transition-transform duration-300 hover:scale-[1.01]"
+      className="relative flex flex-col md:flex-row md:h-[380px] items-center justify-center gap-8 md:gap-12 overflow-hidden p-6 md:p-8 transition-transform duration-300 hover:scale-[1.01]"
       style={{ background: accentColor }}
     >
       {/* Full-card link, sitting under the Add to Cart button (same
@@ -63,7 +63,7 @@ export function HighlightedCard({ product }: { product: Product }) {
         <button
           type="button"
           onClick={() => add(product.slug)}
-          className="hidden md:inline-flex text-btn font-bold relative items-center gap-2 bg-cream text-dark px-5 py-2.5 rounded-[4px] uppercase tracking-[0.06em] hover:bg-cream/90 transition-colors cursor-pointer"
+          className="hidden md:inline-flex text-btn font-bold relative items-center gap-2 bg-cream text-dark px-5 py-2.5 uppercase tracking-[0.06em] hover:bg-cream/90 transition-colors cursor-pointer"
         >
           Add to Cart
           <CartIcon />
@@ -72,7 +72,7 @@ export function HighlightedCard({ product }: { product: Product }) {
         <button
           type="button"
           onClick={() => add(product.slug)}
-          className="md:hidden w-full inline-flex items-center justify-center gap-2 text-btn font-bold relative bg-cream text-dark px-5 py-3 rounded-[4px] uppercase tracking-[0.06em] hover:bg-cream/90 transition-colors cursor-pointer"
+          className="md:hidden w-full inline-flex items-center justify-center gap-2 text-btn font-bold relative bg-cream text-dark px-5 py-3 uppercase tracking-[0.06em] hover:bg-cream/90 transition-colors cursor-pointer"
         >
           Add to Cart
           <span aria-hidden="true">·</span>
@@ -89,7 +89,7 @@ function CollapsedCard({ product, onSelect }: { product: Product; onSelect: () =
     <button
       type="button"
       onClick={onSelect}
-      className="w-full md:h-[380px] flex flex-col items-center justify-center gap-4 rounded-lg bg-cream-dark p-5 hover:bg-cream-dark/70 transition-colors cursor-pointer"
+      className="w-full md:h-[380px] flex flex-col items-center justify-center gap-4 bg-cream-dark p-5 hover:bg-cream-dark/70 transition-colors cursor-pointer"
     >
       <div className="relative w-28 md:w-36 aspect-[3/4]">
         <Image

@@ -31,7 +31,7 @@ export default function FaqList() {
           </div>
 
           <ScrollReveal delay={0.1}>
-            <div className="bg-cream-dark rounded-2xl p-8 md:p-9">
+            <div className="bg-cream-dark p-8 md:p-9">
               <p className="text-tag font-bold text-red mb-2">{stillQuestions.heading}</p>
               <p className="text-body-sm text-dark/70 mb-6">{stillQuestions.note}</p>
 

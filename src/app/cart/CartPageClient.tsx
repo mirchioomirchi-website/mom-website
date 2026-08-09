@@ -252,7 +252,7 @@ export default function CartPageClient() {
                                 className="text-body-sm font-bold truncate"
                                 style={{ color: PDP_ACCENT_COLOR[p.flavor] }}
                               >
-                                {p.shortName}
+                                {p.name}
                               </h3>
                               <p className="text-body font-bold text-dark mt-0.5">₹{p.price}</p>
                             </div>

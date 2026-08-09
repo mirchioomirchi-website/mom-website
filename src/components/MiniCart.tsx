@@ -7,10 +7,6 @@ import { motion, AnimatePresence } from "motion/react";
 import { useCart } from "@/lib/cart-context";
 import { PRODUCTS, PRODUCT_CARD_IMAGES } from "@/lib/products";
 
-// Thumbnail backdrop is a flat neutral cream, not tinted per flavor — matches
-// the actual design (product photography already carries the color).
-const THUMB_BG = "#F2E4C4";
-
 /* ── Trash icon ── */
 function TrashIcon() {
   return (
@@ -29,96 +25,60 @@ function CartItem({ slug, qty }: { slug: string; qty: number }) {
   if (!product) return null;
 
   return (
-    <div style={{
-      padding: "18px 0",
-      borderBottom: "1px solid #F2E4C4",
-      display: "flex", gap: 14, alignItems: "flex-start",
-    }}>
-      {/* Product image */}
-      <div style={{
-        width: 80, height: 80, borderRadius: 6, flexShrink: 0,
-        background: THUMB_BG,
-        position: "relative", overflow: "hidden",
-      }}>
+    <div className="flex gap-3.5 items-start py-[18px] border-b border-cream-dark">
+      {/* Product image — flat cream-dark backdrop, no tint per flavor
+          (product photography already carries the color). */}
+      <div className="relative w-20 h-20 shrink-0 bg-cream-dark overflow-hidden">
         <Image
           src={PRODUCT_CARD_IMAGES[slug] || product.image}
-          alt={product.name} fill
-          style={{ objectFit: "contain", padding: 4 }}
+          alt={product.name}
+          fill
+          className="object-contain p-1"
         />
       </div>
 
       {/* Details */}
-      <div style={{ flex: 1, minWidth: 0 }}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 4 }}>
-          <p style={{
-            fontFamily: "Afacad, Arial, sans-serif", fontWeight: 600,
-            fontSize: "1.075rem", color: "#1A0D04", margin: 0,
-            lineHeight: 1.2,
-          }}>
+      <div className="flex-1 min-w-0">
+        <div className="flex justify-between items-start mb-1">
+          <p className="font-quirk font-semibold text-[1.075rem] text-dark m-0 leading-tight">
             {product.name}
           </p>
           <button
+            type="button"
             onClick={() => remove(slug)}
             aria-label="Remove"
-            style={{ background: "none", border: "none", cursor: "pointer",
-                     color: "#1A0D04", opacity: 0.35, padding: "2px 0 0 8px",
-                     flexShrink: 0, transition: "opacity 0.2s" }}
-            onMouseEnter={(e) => (e.currentTarget.style.opacity = "0.8")}
-            onMouseLeave={(e) => (e.currentTarget.style.opacity = "0.35")}
+            className="bg-transparent border-none cursor-pointer text-dark/35 hover:text-dark/80 pt-0.5 pl-2 shrink-0 transition-colors"
           >
             <TrashIcon />
           </button>
         </div>
 
-        <p style={{
-          fontFamily: "GreycliffCF, Inter, sans-serif",
-          fontSize: "0.875rem", color: "#1A0D04", opacity: 1,
-          margin: "0 0 12px",
-        }}>
+        <p className="text-body-sm text-dark mb-3">
           ₹{product.price} /{product.weight.replace("g", "G")}
         </p>
 
         {/* Qty + total row */}
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-          <div style={{
-            display: "flex", alignItems: "center", gap: 14,
-            borderBottom: "1.5px solid #1A0D04", paddingBottom: 4,
-          }}>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3.5 border-b-[1.5px] border-dark pb-1">
             <button
+              type="button"
               onClick={() => setQty(slug, qty - 1)}
-              style={{
-                width: 34, height: 34, border: "none",
-                background: "none", cursor: "pointer", color: "#1A0D04",
-                borderRadius: "50%", fontSize: "1.4rem", lineHeight: 1,
-                display: "flex", alignItems: "center", justifyContent: "center",
-                transition: "all 0.15s",
-              }}
-              onMouseEnter={(e) => { e.currentTarget.style.background = "#1A0D04"; e.currentTarget.style.color = "#FFF3D7"; }}
-              onMouseLeave={(e) => { e.currentTarget.style.background = "none"; e.currentTarget.style.color = "#1A0D04"; }}
-            >−</button>
-            <span style={{
-              fontFamily: "Afacad, Arial, sans-serif", fontWeight: 600,
-              fontSize: "1rem", color: "#1A0D04", minWidth: 16, textAlign: "center",
-            }}>
+              className="w-[34px] h-[34px] border-none bg-transparent cursor-pointer text-dark rounded-full text-[1.4rem] leading-none flex items-center justify-center transition-colors hover:bg-dark hover:text-cream"
+            >
+              −
+            </button>
+            <span className="font-quirk font-semibold text-base text-dark min-w-4 text-center">
               {qty}
             </span>
             <button
+              type="button"
               onClick={() => setQty(slug, qty + 1)}
-              style={{
-                width: 34, height: 34, border: "none",
-                background: "none", cursor: "pointer", color: "#1A0D04",
-                borderRadius: "50%", fontSize: "1.4rem", lineHeight: 1,
-                display: "flex", alignItems: "center", justifyContent: "center",
-                transition: "all 0.15s",
-              }}
-              onMouseEnter={(e) => { e.currentTarget.style.background = "#1A0D04"; e.currentTarget.style.color = "#FFF3D7"; }}
-              onMouseLeave={(e) => { e.currentTarget.style.background = "none"; e.currentTarget.style.color = "#1A0D04"; }}
-            >+</button>
+              className="w-[34px] h-[34px] border-none bg-transparent cursor-pointer text-dark rounded-full text-[1.4rem] leading-none flex items-center justify-center transition-colors hover:bg-dark hover:text-cream"
+            >
+              +
+            </button>
           </div>
-          <span style={{
-            fontFamily: "Afacad, Arial, sans-serif", fontWeight: 700,
-            fontSize: "1rem", color: "#1A0D04",
-          }}>
+          <span className="font-quirk font-bold text-base text-dark">
             ₹{product.price * qty}
           </span>
         </div>
@@ -134,46 +94,27 @@ function QuickAddRow({ slug }: { slug: string }) {
   if (!product) return null;
 
   return (
-    <div style={{
-      display: "flex", alignItems: "center", gap: 12,
-      padding: "12px 0", borderBottom: "1px solid #F2E4C4",
-    }}>
-      <div style={{
-        width: 52, height: 52, borderRadius: 6, flexShrink: 0,
-        background: THUMB_BG,
-        position: "relative", overflow: "hidden",
-      }}>
+    <div className="flex items-center gap-3 py-3 border-b border-cream-dark">
+      <div className="relative w-[52px] h-[52px] shrink-0 bg-cream-dark overflow-hidden">
         <Image
           src={PRODUCT_CARD_IMAGES[slug] || product.image}
-          alt={product.name} fill
-          style={{ objectFit: "contain", padding: 4 }}
+          alt={product.name}
+          fill
+          className="object-contain p-1"
         />
       </div>
-      <div style={{ flex: 1, minWidth: 0 }}>
-        <p style={{
-          fontFamily: "Afacad, Arial, sans-serif", fontWeight: 600,
-          fontSize: "0.88rem", color: "#1A0D04", margin: "0 0 2px",
-        }}>
+      <div className="flex-1 min-w-0">
+        <p className="font-quirk font-semibold text-[0.88rem] text-dark mb-0.5">
           {product.name}
         </p>
-        <p style={{
-          fontFamily: "GreycliffCF, Inter, sans-serif",
-          fontSize: "0.72rem", color: "#1A0D04", opacity: 0.5, margin: 0,
-        }}>
+        <p className="text-[0.72rem] text-dark/50">
           ₹{product.price} /{product.weight.replace("g", "G")}
         </p>
       </div>
       <button
+        type="button"
         onClick={() => add(product.slug)}
-        style={{
-          background: "#9B1E15", color: "#FFF3D7", border: "none",
-          borderRadius: 4, padding: "7px 14px", cursor: "pointer",
-          fontFamily: "GreycliffCF, Inter, sans-serif", fontWeight: 600,
-          fontSize: "0.7rem", letterSpacing: "0.06em",
-          flexShrink: 0, transition: "background 0.2s",
-        }}
-        onMouseEnter={(e) => (e.currentTarget.style.background = "#7a1710")}
-        onMouseLeave={(e) => (e.currentTarget.style.background = "#9B1E15")}
+        className="font-quirk bg-red text-cream border-none px-3.5 py-1.5 cursor-pointer font-bold text-[0.7rem] tracking-[0.06em] shrink-0 transition-colors hover:bg-red/85"
       >
         + ADD
       </button>
@@ -217,11 +158,7 @@ export default function MiniCart() {
             initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
             transition={{ duration: 0.25 }}
             onClick={closeMini}
-            style={{
-              position: "fixed", inset: 0, zIndex: 200,
-              background: "rgba(26,13,4,0.6)",
-              backdropFilter: "blur(3px)", cursor: "pointer",
-            }}
+            className="fixed inset-0 z-[200] bg-dark/60 backdrop-blur-sm cursor-pointer"
           />
 
           {/* Drawer */}
@@ -229,37 +166,23 @@ export default function MiniCart() {
             key="drawer"
             initial={{ x: "100%" }} animate={{ x: 0 }} exit={{ x: "100%" }}
             transition={{ duration: 0.38, ease: [0.4, 0, 0.2, 1] }}
-            style={{
-              position: "fixed", top: 0, right: 0, bottom: 0,
-              width: 420, maxWidth: "100vw", zIndex: 300,
-              background: "#FFF3D7",
-              display: "flex", flexDirection: "column",
-              boxShadow: "-12px 0 60px rgba(26,13,4,0.2)",
-            }}
+            className="fixed top-0 right-0 bottom-0 w-[420px] max-w-[100vw] z-[300] bg-cream flex flex-col"
+            style={{ boxShadow: "-12px 0 60px rgba(26,13,4,0.2)" }}
           >
             {/* ── HEADER ── */}
-            <div style={{ padding: "20px 24px 16px", flexShrink: 0 }}>
-              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                <p style={{
-                  fontFamily: "Afacad, Arial, sans-serif", fontWeight: 700,
-                  fontSize: "1rem", color: "#1A0D04", margin: 0,
-                  letterSpacing: "0.02em",
-                }}>
+            <div className="shrink-0 px-6 pt-5 pb-4">
+              <div className="flex items-center justify-between">
+                <p className="font-quirk font-bold text-base text-dark m-0 tracking-[0.02em]">
                   Your Cart
-                  <span style={{ fontWeight: 400, opacity: 0.5, marginLeft: 8 }}>
+                  <span className="font-normal text-dark/50 ml-2">
                     · {itemCount} {itemCount === 1 ? "Item" : "Items"}
                   </span>
                 </p>
                 <button
+                  type="button"
                   onClick={closeMini}
                   aria-label="Close cart"
-                  style={{
-                    background: "none", border: "none", cursor: "pointer",
-                    color: "#1A0D04", opacity: 0.4, fontSize: "1.2rem",
-                    lineHeight: 1, padding: 4, transition: "opacity 0.2s",
-                  }}
-                  onMouseEnter={(e) => (e.currentTarget.style.opacity = "1")}
-                  onMouseLeave={(e) => (e.currentTarget.style.opacity = "0.4")}
+                  className="bg-transparent border-none cursor-pointer text-dark/40 hover:text-dark text-[1.2rem] leading-none p-1 transition-colors"
                 >
                   ✕
                 </button>
@@ -269,107 +192,71 @@ export default function MiniCart() {
             <DottedDivider />
 
             {/* ── BODY ── */}
-            <div style={{ flex: 1, overflowY: "auto", padding: "0 24px" }}>
+            <div className="flex-1 overflow-y-auto px-6">
 
               {isEmpty ? (
                 /* EMPTY STATE — the message sits at top; everything else
                    (quick-add list, combo banner, WhatsApp link) is pushed to
                    the bottom of the drawer via the flexible spacer below. */
-                <div style={{ display: "flex", flexDirection: "column", minHeight: "100%" }}>
+                <div className="flex flex-col min-h-full">
                   {/* Empty message */}
-                  <div style={{ textAlign: "center", padding: "40px 0 32px" }}>
-                    <h3 style={{
-                      fontFamily: "Afacad, Arial, sans-serif", fontWeight: 700,
-                      fontSize: "1.6rem", color: "#1A0D04", margin: "0 0 8px",
-                    }}>
+                  <div className="text-center pt-10 pb-8">
+                    <h3 className="font-quirk font-bold text-[1.6rem] text-dark mb-2">
                       Your Cart is Empty
                     </h3>
-                    <p style={{
-                      fontFamily: "GreycliffCF, Inter, sans-serif",
-                      fontSize: "0.85rem", color: "#1A0D04", opacity: 0.5,
-                      margin: "0 0 24px",
-                    }}>
+                    <p className="text-[0.85rem] text-dark/50 mb-6">
                       No thecha means no flavour.
                     </p>
                     <Link
                       href="/shop"
                       onClick={closeMini}
-                      style={{
-                        display: "inline-flex", alignItems: "center", gap: 6,
-                        background: "#9B1E15", color: "#FFF3D7",
-                        fontFamily: "GreycliffCF, Inter, sans-serif", fontWeight: 600,
-                        fontSize: "0.85rem",
-                        textDecoration: "none", padding: "12px 28px", borderRadius: 4,
-                      }}
+                      className="font-quirk inline-flex items-center gap-1.5 bg-red text-cream font-semibold text-[0.85rem] no-underline px-7 py-3"
                     >
                       Shop shopping <span aria-hidden="true">→</span>
                     </Link>
                   </div>
 
                   {/* Spacer — pushes the block below to the bottom of the drawer */}
-                  <div style={{ flex: 1 }} />
+                  <div className="flex-1" />
 
                   <div>
                     <DottedDivider />
 
                     {/* Quick-add products */}
-                    <div style={{ padding: "8px 0" }}>
+                    <div className="py-2">
                       <QuickAddRow slug="green-chilli-thecha" />
                       <QuickAddRow slug="red-chilli-thecha" />
                       <QuickAddRow slug="mixed-chilli-thecha" />
                     </div>
 
                     {/* Grab all three — banner card, matching the Upgrade-to-Combo treatment */}
-                    <div style={{
-                      display: "flex", alignItems: "center", justifyContent: "space-between",
-                      gap: 12, padding: "14px 16px", margin: "16px 0",
-                      background: "#F2E4C4", borderRadius: 6,
-                    }}>
+                    <div className="flex items-center justify-between gap-3 px-4 py-3.5 my-4 bg-cream-dark">
                       <div>
-                        <p style={{
-                          fontFamily: "Afacad, Arial, sans-serif", fontWeight: 700,
-                          fontSize: "0.9rem", color: "#1A0D04", margin: "0 0 2px",
-                        }}>
+                        <p className="font-quirk font-bold text-[0.9rem] text-dark mb-0.5">
                           Grab all three.
                         </p>
-                        <p style={{
-                          fontFamily: "GreycliffCF, Inter, sans-serif",
-                          fontSize: "0.72rem", color: "#1A0D04", opacity: 0.55, margin: 0,
-                        }}>
+                        <p className="text-[0.72rem] text-dark/55">
                           Green + Red + Mixed. Save ₹98.
                         </p>
                       </div>
                       <button
                         type="button"
                         onClick={() => add("combo-pack")}
-                        style={{
-                          fontFamily: "GreycliffCF, Inter, sans-serif", fontWeight: 600,
-                          fontSize: "0.78rem", background: "none", cursor: "pointer",
-                          color: "#9B1E15", textDecoration: "none",
-                          border: "1.5px solid #9B1E15", borderRadius: 4,
-                          padding: "8px 14px", whiteSpace: "nowrap", flexShrink: 0,
-                          transition: "all 0.2s",
-                        }}
-                        onMouseEnter={(e) => { e.currentTarget.style.background = "#9B1E15"; e.currentTarget.style.color = "#FFF3D7"; }}
-                        onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "#9B1E15"; }}
+                        className="font-quirk font-semibold text-[0.78rem] bg-transparent cursor-pointer text-red border-[1.5px] border-red px-3.5 py-2 whitespace-nowrap shrink-0 transition-colors hover:bg-red hover:text-cream"
                       >
                         Add Combo
                       </button>
                     </div>
 
                     {/* WhatsApp */}
-                    <div style={{ textAlign: "center", padding: "0 0 24px" }}>
+                    <div className="text-center pb-6">
                       <a
                         href="https://wa.me/918850816448?text=Hi%20Mirchi%20O%20Mirchi%20%E2%80%94%20I%20want%20to%20order%20%F0%9F%8C%B6%EF%B8%8F"
                         target="_blank" rel="noopener noreferrer"
-                        style={{
-                          fontFamily: "GreycliffCF, Inter, sans-serif",
-                          fontSize: "0.78rem", color: "#1A0D04", opacity: 1,
-                          textDecoration: "none",
-                        }}
+                        className="text-[0.78rem] text-dark no-underline"
                       >
                         Prefer WhatsApp?{" "}
-                        <span style={{ color: "#9B1E15", textDecoration: "underline" }}>Order via chat →</span>
+                        <span className="text-red underline">Order via chat →</span>
                       </a>
                     </div>
                   </div>
@@ -377,7 +264,7 @@ export default function MiniCart() {
               ) : (
                 /* FILLED STATE */
                 <>
-                  <div style={{ padding: "8px 0" }}>
+                  <div className="py-2">
                     {lines.map((line) => (
                       <CartItem key={line.slug} slug={line.slug} qty={line.qty} />
                     ))}
@@ -385,26 +272,15 @@ export default function MiniCart() {
 
                   {/* Upgrade to Combo upsell */}
                   {!lines.find((l) => l.slug === "combo-pack") && (
-                    <div style={{
-                      display: "flex", alignItems: "center",
-                      gap: 12, padding: "14px 16px", margin: "8px 0 16px",
-                      background: "#F2E4C4", borderRadius: 6,
-                      border: "1px solid #E8D9B8",
-                    }}>
-                      <div style={{ fontSize: "1.2rem", lineHeight: 1, flexShrink: 0 }} aria-hidden="true">
+                    <div className="flex items-center gap-3 px-4 py-3.5 my-2 mb-4 bg-cream-dark">
+                      <div className="text-[1.2rem] leading-none shrink-0" aria-hidden="true">
                         💡
                       </div>
-                      <div style={{ flex: 1, minWidth: 0 }}>
-                        <p style={{
-                          fontFamily: "Afacad, Arial, sans-serif", fontWeight: 600,
-                          fontSize: "0.85rem", color: "#1A0D04", margin: "0 0 2px",
-                        }}>
+                      <div className="flex-1 min-w-0">
+                        <p className="font-quirk font-semibold text-[0.85rem] text-dark mb-0.5">
                           Upgrade to Combo. Save ₹98
                         </p>
-                        <p style={{
-                          fontFamily: "GreycliffCF, Inter, sans-serif",
-                          fontSize: "0.7rem", color: "#1A0D04", opacity: 0.55, margin: 0,
-                        }}>
+                        <p className="text-[0.7rem] text-dark/55">
                           Switch to the Combo Pack at ₹799 instead of ₹897
                         </p>
                       </div>
@@ -414,16 +290,7 @@ export default function MiniCart() {
                           clear();
                           add("combo-pack");
                         }}
-                        style={{
-                          fontFamily: "GreycliffCF, Inter, sans-serif", fontWeight: 600,
-                          fontSize: "0.75rem", background: "none", cursor: "pointer",
-                          color: "#9B1E15", textDecoration: "none",
-                          border: "1.5px solid #9B1E15", borderRadius: 4,
-                          padding: "6px 12px", flexShrink: 0, whiteSpace: "nowrap",
-                          transition: "all 0.2s",
-                        }}
-                        onMouseEnter={(e) => { e.currentTarget.style.background = "#9B1E15"; e.currentTarget.style.color = "#FFF3D7"; }}
-                        onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "#9B1E15"; }}
+                        className="font-quirk font-semibold text-[0.75rem] bg-transparent cursor-pointer text-red border-[1.5px] border-red px-3 py-1.5 shrink-0 whitespace-nowrap transition-colors hover:bg-red hover:text-cream"
                       >
                         Upgrade
                       </button>
@@ -431,56 +298,42 @@ export default function MiniCart() {
                   )}
 
                   {/* Spacer */}
-                  <div style={{ height: 16 }} />
+                  <div className="h-4" />
                 </>
               )}
             </div>
 
             {/* ── FOOTER (only in filled state) ── */}
             {!isEmpty && (
-              <div style={{ flexShrink: 0 }}>
+              <div className="shrink-0">
                 <DottedDivider />
-                <div style={{ padding: "16px 24px 24px" }}>
+                <div className="px-6 pt-4 pb-6">
                   {/* Checkout button */}
                   <button
+                    type="button"
                     onClick={goToCheckout}
-                    style={{
-                      width: "100%", padding: "15px 20px",
-                      background: "#9B1E15", color: "#FFF3D7",
-                      border: "none", borderRadius: 6, cursor: "pointer",
-                      display: "flex", alignItems: "center", justifyContent: "space-between",
-                      marginBottom: 14, transition: "background 0.2s",
-                    }}
-                    onMouseEnter={(e) => (e.currentTarget.style.background = "#7a1710")}
-                    onMouseLeave={(e) => (e.currentTarget.style.background = "#9B1E15")}
+                    className="w-full py-[15px] px-5 bg-red text-cream border-none cursor-pointer flex items-center justify-between mb-3.5 transition-colors hover:bg-red/85"
                   >
-                    <span style={{
-                      fontFamily: "Afacad, Arial, sans-serif", fontWeight: 700,
-                      fontSize: "0.95rem", letterSpacing: "0.02em",
-                    }}>
+                    <span className="font-quirk font-bold text-[0.95rem] tracking-[0.02em]">
                       Secure Checkout · ₹{subtotal}
                     </span>
                     <Image
                       src="/images/payment-options.png"
                       alt="Visa Mastercard GPay PhonePe"
                       width={100} height={24}
-                      style={{ height: 22, width: "auto", objectFit: "contain" }}
+                      className="h-[22px] w-auto object-contain"
                     />
                   </button>
 
                   {/* WhatsApp */}
-                  <div style={{ textAlign: "center" }}>
+                  <div className="text-center">
                     <a
                       href="https://wa.me/918850816448?text=Hi%20Mirchi%20O%20Mirchi%20%E2%80%94%20I%20want%20to%20order%20%F0%9F%8C%B6%EF%B8%8F"
                       target="_blank" rel="noopener noreferrer"
-                      style={{
-                        fontFamily: "GreycliffCF, Inter, sans-serif",
-                        fontSize: "0.78rem", color: "#1A0D04", opacity: 1,
-                        textDecoration: "none",
-                      }}
+                      className="text-[0.78rem] text-dark no-underline"
                     >
                       Prefer WhatsApp?{" "}
-                      <span style={{ color: "#9B1E15", textDecoration: "underline" }}>Order via chat →</span>
+                      <span className="text-red underline">Order via chat →</span>
                     </a>
                   </div>
                 </div>

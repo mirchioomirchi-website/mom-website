@@ -273,7 +273,7 @@ export default function Navigation() {
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.94, y: 16 }}
               transition={{ type: "spring", stiffness: 380, damping: 28 }}
-              className="fixed top-1/2 left-1/2 z-[201] -translate-x-1/2 -translate-y-1/2 bg-cream border-[1.5px] border-cream-dark rounded py-12 px-10 max-w-[440px] w-[90vw] text-center shadow-[0_24px_64px_rgba(26,13,4,0.18)]"
+              className="fixed top-1/2 left-1/2 z-[201] -translate-x-1/2 -translate-y-1/2 bg-cream border-[1.5px] border-cream-dark py-12 px-10 max-w-[440px] w-[90vw] text-center shadow-[0_24px_64px_rgba(26,13,4,0.18)]"
             >
               <button
                 type="button"
@@ -295,7 +295,7 @@ export default function Navigation() {
                 href={BULK_WHATSAPP_HREF}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-2.5 bg-[#25D366] text-white font-bold text-[0.85rem] tracking-[0.07em] uppercase no-underline px-8 py-3.5 rounded-sm"
+                className="font-quirk inline-flex items-center gap-2.5 bg-[#25D366] text-white font-bold text-[0.85rem] tracking-[0.07em] uppercase no-underline px-8 py-3.5"
               >
                 <WaIcon /> Chat on WhatsApp
               </a>

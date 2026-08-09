@@ -144,7 +144,7 @@
     text-align: justify;
   }
   .text-btn {
-    font-family: var(--font-body), system-ui, sans-serif;
+    font-family: var(--font-quirk), Arial, sans-serif;
     font-weight: 600;
     font-size: 1rem; /* 16px, flat by spec */
     line-height: 1.3;
