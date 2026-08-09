@@ -111,7 +111,7 @@ export default function PdpStory({ product }: { product: Product }) {
             </text>
           </svg>
 
-          <p className="text-body text-dark/80 max-w-2xl relative z-10 px-5 md:px-5">{product.storyText}</p>
+          <p className="text-body text-dark/80 max-w-2xl relative z-10 px-5 md:px-9">{product.storyText}</p>
         </div>
 
         {/* Secondary lifestyle photo — falls back to a color-tinted panel
