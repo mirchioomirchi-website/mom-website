@@ -2,11 +2,11 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import { AnimatePresence, motion } from "motion/react";
 import { ScrollReveal } from "@/components/primitives";
 import { SITE_CONTENT } from "@/lib/content";
 
-const { eyebrowDevanagari, eyebrowEnglish, headingLines, subheading: homeSubheading, slides } =
-  SITE_CONTENT.recipes;
+const { eyebrowDevanagari, eyebrowEnglish, slides } = SITE_CONTENT.recipes;
 const { heading: pdpHeading, subheading: pdpSubheading, ctaLabel, ctaHref } =
   SITE_CONTENT.productPage.pairing;
 
@@ -15,9 +15,11 @@ const { heading: pdpHeading, subheading: pdpSubheading, ctaLabel, ctaHref } =
 // the one after that 60%/40%. Anything further back isn't rendered at all.
 const OFFSETS = [
   { heightPct: 100, opacity: 1 },
-  { heightPct: 80, opacity: 0.6 },
-  { heightPct: 60, opacity: 0.4 },
+  { heightPct: 80, opacity: 0.55 },
+  { heightPct: 60, opacity: 0.35 },
 ];
+
+const SLIDE_TRANSITION = { duration: 0.6, ease: [0.22, 1, 0.36, 1] as const };
 
 function ArrowButton({
   direction,
@@ -33,9 +35,9 @@ function ArrowButton({
       type="button"
       onClick={onClick}
       aria-label={label}
-      className="w-9 h-9 md:w-10 md:h-10 shrink-0 rounded-full border border-cream/40 flex items-center justify-center text-cream hover:bg-cream hover:text-dark hover:border-cream transition-colors duration-300 cursor-pointer"
+      className="w-7 h-7 md:w-8 md:h-8 shrink-0 rounded-full border border-cream/40 flex items-center justify-center text-cream hover:bg-cream hover:text-dark hover:border-cream transition-colors duration-300 cursor-pointer"
     >
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
         {direction === "prev" ? <path d="M15 18l-6-6 6-6" /> : <path d="M9 18l6-6-6-6" />}
       </svg>
     </button>
@@ -55,6 +57,29 @@ export default function RecipesSection({
   const goPrev = () => setActiveIndex((i) => (i - 1 + slides.length) % slides.length);
   const goNext = () => setActiveIndex((i) => (i + 1) % slides.length);
   const selectIndex = (i: number) => setActiveIndex(i);
+
+  // The `autoPlay` attribute only fires once, at mount — flipping it as a
+  // prop on an already-mounted <video> does nothing. So whenever the active
+  // dish changes we imperatively play its clip(s) — desktop stack + mobile
+  // carousel share the same slide, both get a ref registered here — and
+  // pause everything else.
+  const mobileVideoRefs = useRef<Record<string, HTMLVideoElement | null>>({});
+  const desktopVideoRefs = useRef<Record<string, HTMLVideoElement | null>>({});
+  useEffect(() => {
+    const sync = (map: Record<string, HTMLVideoElement | null>) => {
+      Object.entries(map).forEach(([title, el]) => {
+        if (!el) return;
+        if (title === slide.title) {
+          el.currentTime = 0;
+          void el.play().catch(() => {});
+        } else {
+          el.pause();
+        }
+      });
+    };
+    sync(mobileVideoRefs.current);
+    sync(desktopVideoRefs.current);
+  }, [slide.title]);
 
   // Mobile carousel — tracks whichever card is most centered in the
   // horizontal scroller (same convention as PdpCrossSell), so a tap on a
@@ -84,136 +109,147 @@ export default function RecipesSection({
     cardRefs.current[i]?.scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" });
   };
 
+  // Windowed, offset-ordered — index 0 of this array is always the active
+  // dish. Rendering in THIS order (rather than the slides' fixed order) is
+  // what makes the active clip visually slide into the lead position: with
+  // a stable per-dish `key` + framer's `layout` prop, reordering the array
+  // triggers a FLIP animation instead of an instant jump.
+  const windowed = [0, 1, 2].map((offset) => {
+    const idx = (activeIndex + offset) % slides.length;
+    return { offset, idx, slide: slides[idx] };
+  });
+
   return (
     <section
       id={variant === "home" ? "recipes" : undefined}
-      className={`relative py-16 md:py-24 overflow-hidden cv-auto ${variant === "home" ? "bg-green" : ""}`}
+      className={`relative py-16 md:py-24 overflow-hidden cv-auto ${variant === "home" ? "bg-red" : ""}`}
       style={variant === "pdp" ? { background: accentColor } : undefined}
     >
-      <div className="max-w-[1400px] mx-auto px-5 md:px-9">
-        <div className="grid md:grid-cols-[2fr_3fr] gap-8 md:gap-16 md:items-center">
-          {/* LEFT column — section text + the active dish's info + nav. */}
-          <div className="flex flex-col gap-6 md:gap-8 min-w-0">
-            {variant === "home" ? (
-              <div className="flex flex-col gap-3 md:gap-4">
-                <ScrollReveal className="flex items-center gap-2.5">
-                  <span className="font-sura text-cream text-[15px] md:text-base">{eyebrowDevanagari}</span>
-                  <span className="text-cream/50 text-sm">•</span>
-                  <span className="font-sura text-cream text-[15px] md:text-base">{eyebrowEnglish}</span>
-                </ScrollReveal>
-                <ScrollReveal delay={0.05}>
-                  <h2 className="text-h2 text-cream">
-                    {headingLines[0]}
-                    <br />
-                    {headingLines[1]}
-                  </h2>
-                </ScrollReveal>
-                <ScrollReveal delay={0.1}>
-                  <p className="text-body leading-relaxed text-cream/75 max-w-[46ch]">{homeSubheading}</p>
-                </ScrollReveal>
-              </div>
-            ) : (
-              <ScrollReveal>
-                <h2 className="text-h2 text-cream mb-3">{pdpHeading}</h2>
-                <p className="text-body leading-relaxed text-cream/80 max-w-md">{pdpSubheading}</p>
-              </ScrollReveal>
-            )}
-
-            {/* Mobile — swipeable video cards, current one filling most of
-                the width with the next one peeking at the edge. */}
-            <div
-              ref={scrollRef}
-              className="md:hidden flex gap-4 overflow-x-auto snap-x snap-mandatory pb-1 -mx-5 px-5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
-            >
-              {slides.map((s, i) => (
-                <div
-                  key={s.title}
-                  ref={(el) => {
-                    cardRefs.current[i] = el;
-                  }}
-                  data-index={i}
-                  className="relative snap-center shrink-0 w-[78%] aspect-[9/16] rounded-2xl overflow-hidden bg-cream/10"
-                  onClickCapture={(e) => {
-                    if (i !== activeIndex) {
-                      e.preventDefault();
-                      e.stopPropagation();
-                      scrollToCard(i);
-                    }
-                  }}
-                >
-                  <video
-                    className="absolute inset-0 w-full h-full object-cover"
-                    src={s.video}
-                    autoPlay={i === activeIndex}
-                    preload={i === activeIndex ? "auto" : "metadata"}
-                    loop
-                    muted
-                    playsInline
-                    controls={false}
-                    aria-hidden="true"
-                  />
-                </div>
-              ))}
-            </div>
-
-            <ScrollReveal delay={0.1} className="pt-5 md:pt-2 border-t border-cream/15">
-              <h3 className="text-h4 text-cream mb-2">{slide.title}</h3>
-              <p className="text-body leading-relaxed text-cream/75 max-w-[42ch] mb-5">{slide.description}</p>
-              <div className="flex items-center gap-3 flex-wrap">
-                <div className="flex items-center gap-2.5">
-                  <ArrowButton direction="prev" onClick={goPrev} label="Previous recipe" />
-                  <ArrowButton direction="next" onClick={goNext} label="Next recipe" />
-                </div>
-                {variant === "pdp" && (
-                  <Link
-                    href={ctaHref}
-                    className="text-btn inline-flex items-center gap-1.5 text-cream underline decoration-cream decoration-2 underline-offset-4 hover:text-cream/80 transition-colors"
-                  >
-                    {ctaLabel}
-                    <span aria-hidden="true">→</span>
-                  </Link>
-                )}
-              </div>
+      <div className="md:grid md:grid-cols-[380px_1fr] lg:grid-cols-[440px_1fr] md:items-center">
+        {/* LEFT column — padded to line up with the site's normal 1400px
+            container on desktop (same left inset as px-9 elsewhere), while
+            the right column below is left unconstrained so it can bleed
+            all the way to the browser's edge instead of clipping mid-slide. */}
+        <div
+          className="flex flex-col gap-6 md:gap-8 min-w-0 px-5 md:pr-10"
+          style={{ paddingLeft: "max(1.25rem, calc((100vw - 1400px) / 2 + 2.25rem))" }}
+        >
+          {variant === "home" ? (
+            <ScrollReveal className="flex items-center gap-2.5">
+              <span className="font-sura text-cream text-[15px] md:text-base">{eyebrowDevanagari}</span>
+              <span className="text-cream/50 text-sm">•</span>
+              <span className="font-sura text-cream text-[15px] md:text-base">{eyebrowEnglish}</span>
             </ScrollReveal>
+          ) : (
+            <ScrollReveal>
+              <h2 className="text-h2 text-cream mb-3">{pdpHeading}</h2>
+              <p className="text-body leading-relaxed text-cream/80 max-w-md">{pdpSubheading}</p>
+            </ScrollReveal>
+          )}
+
+          {/* Mobile — swipeable video cards, current one filling most of
+              the width with the next one peeking at the edge. */}
+          <div
+            ref={scrollRef}
+            className="md:hidden flex gap-4 overflow-x-auto snap-x snap-mandatory pb-1 -mx-5 px-5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+          >
+            {slides.map((s, i) => (
+              <div
+                key={s.title}
+                ref={(el) => {
+                  cardRefs.current[i] = el;
+                }}
+                data-index={i}
+                className="relative snap-center shrink-0 w-[78%] aspect-[9/16] overflow-hidden bg-cream/10"
+                onClickCapture={(e) => {
+                  if (i !== activeIndex) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    scrollToCard(i);
+                  }
+                }}
+              >
+                <video
+                  ref={(el) => {
+                    mobileVideoRefs.current[s.title] = el;
+                  }}
+                  className="absolute inset-0 w-full h-full object-cover"
+                  src={s.video}
+                  controls={i === activeIndex}
+                  loop
+                  muted
+                  playsInline
+                  aria-hidden={i !== activeIndex}
+                />
+              </div>
+            ))}
           </div>
 
-          {/* RIGHT column — desktop only, cascading video slider. Only the
-              active clip + next two are ever rendered; overflow-hidden lets
-              the trailing one clip off the edge exactly like the reference
-              design. Clicking a smaller clip brings it into focus. */}
-          <div className="hidden md:flex relative h-[440px] lg:h-[560px] items-center overflow-hidden">
-            <div className="flex items-center gap-6 lg:gap-8 h-full">
-              {slides.map((s, i) => {
-                const offset = (i - activeIndex + slides.length) % slides.length;
-                if (offset > 2) return null;
+          <ScrollReveal delay={0.1}>
+            <h3 className="text-h2 text-cream mb-2">{slide.title}</h3>
+            <p className="text-body leading-relaxed text-cream/75 max-w-[42ch] mb-5">{slide.description}</p>
+            <div className="flex items-center gap-3 flex-wrap">
+              <div className="flex items-center gap-2.5">
+                <ArrowButton direction="prev" onClick={goPrev} label="Previous recipe" />
+                <ArrowButton direction="next" onClick={goNext} label="Next recipe" />
+              </div>
+              {variant === "pdp" && (
+                <Link
+                  href={ctaHref}
+                  className="text-btn inline-flex items-center gap-1.5 text-cream underline decoration-cream decoration-2 underline-offset-4 hover:text-cream/80 transition-colors"
+                >
+                  {ctaLabel}
+                  <span aria-hidden="true">→</span>
+                </Link>
+              )}
+            </div>
+          </ScrollReveal>
+        </div>
+
+        {/* RIGHT column — desktop only, cascading video slider. Deliberately
+            left without horizontal padding/max-width so it bleeds to the
+            true right edge of the viewport; overflow-hidden clips the
+            trailing clip there exactly like the reference design. Clicking
+            a smaller clip brings it into focus — with `layout` + a stable
+            per-dish key, it slides into the lead position instead of
+            jumping or flashing. */}
+        <div className="hidden md:flex relative h-[460px] lg:h-[580px] items-center overflow-hidden mt-10 md:mt-0">
+          <div className="flex items-center gap-6 lg:gap-8 h-full">
+            <AnimatePresence initial={false}>
+              {windowed.map(({ offset, idx, slide: s }) => {
                 const { heightPct, opacity } = OFFSETS[offset];
+                const isActive = offset === 0;
                 return (
-                  <button
+                  <motion.div
                     key={s.title}
-                    type="button"
-                    tabIndex={offset === 0 ? -1 : 0}
-                    onClick={() => offset !== 0 && selectIndex(i)}
-                    aria-label={offset === 0 ? s.title : `Show ${s.title}`}
-                    className={`relative shrink-0 rounded-2xl overflow-hidden transition-all duration-500 ease-out ${
-                      offset === 0 ? "cursor-default" : "cursor-pointer"
-                    }`}
-                    style={{ height: `${heightPct}%`, aspectRatio: "9 / 16", opacity }}
+                    layout
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity }}
+                    exit={{ opacity: 0 }}
+                    transition={{ layout: SLIDE_TRANSITION, opacity: { duration: 0.35 } }}
+                    style={{ height: `${heightPct}%`, aspectRatio: "9 / 16" }}
+                    className={`relative shrink-0 overflow-hidden ${isActive ? "" : "cursor-pointer"}`}
+                    onClick={isActive ? undefined : () => selectIndex(idx)}
+                    role={isActive ? undefined : "button"}
+                    tabIndex={isActive ? undefined : 0}
+                    aria-label={isActive ? undefined : `Show ${s.title}`}
                   >
                     <video
+                      ref={(el) => {
+                        desktopVideoRefs.current[s.title] = el;
+                      }}
                       className="absolute inset-0 w-full h-full object-cover"
                       src={s.video}
-                      autoPlay={offset === 0}
-                      preload={offset === 0 ? "auto" : "metadata"}
+                      controls={isActive}
                       loop
                       muted
                       playsInline
-                      controls={false}
-                      aria-hidden="true"
+                      aria-hidden={!isActive}
                     />
-                  </button>
+                  </motion.div>
                 );
               })}
-            </div>
+            </AnimatePresence>
           </div>
         </div>
       </div>
