@@ -29,7 +29,7 @@ function HighlightedCard({ product }: { product: Product }) {
   const accentColor = product.pdpAccentColor ?? PDP_ACCENT_COLOR[product.flavor];
   return (
     <div
-      className="relative flex flex-col md:flex-row md:h-[380px] items-center justify-center gap-5 md:gap-12 rounded-lg overflow-hidden p-6 md:p-8 transition-transform duration-300 hover:scale-[1.01]"
+      className="relative flex flex-col md:flex-row md:h-[380px] items-center justify-center gap-8 md:gap-12 rounded-lg overflow-hidden p-6 md:p-8 transition-transform duration-300 hover:scale-[1.01]"
       style={{ background: accentColor }}
     >
       {/* Full-card link, sitting under the Add to Cart button (same
@@ -45,39 +45,39 @@ function HighlightedCard({ product }: { product: Product }) {
           sizes="200px"
         />
       </div>
-      <div className="relative z-10 flex flex-col items-center md:items-start text-center md:text-left gap-3 min-w-0 w-full md:w-auto">
+      <div className="relative z-10 flex flex-col items-center md:items-start text-center md:text-left gap-6 md:gap-5 min-w-0 w-full md:w-auto">
         <h3 className="text-h3 text-cream pointer-events-none">{product.name}</h3>
 
         {/* Tagline and the icon-CTA are desktop only — the mobile card
-            below is deliberately simpler: just the price and CTA inline. */}
+            below is deliberately simpler: one full-width pill with the
+            price folded into the button itself. */}
         <p className="hidden md:block text-body-sm font-bold text-cream/80 uppercase tracking-[0.06em] pointer-events-none">
           {product.tagline}
         </p>
 
-        <div className="hidden md:flex items-baseline gap-2 pointer-events-none">
-          <span className="text-h3 font-bold text-cream">₹{product.price}</span>
-          <span className="text-body-sm font-semibold text-cream/70 uppercase tracking-[0.06em]">{product.weight}</span>
+        <div className="hidden md:flex items-baseline gap-1.5 pointer-events-none">
+          <span className="text-h4 font-bold text-cream">₹{product.price}</span>
+          <span className="text-body-sm font-semibold text-cream/70 uppercase tracking-[0.06em]">/ {product.weight}</span>
         </div>
 
         <button
           type="button"
           onClick={() => add(product.slug)}
-          className="hidden md:inline-flex text-btn font-bold relative items-center gap-2 bg-cream text-dark px-5 py-2.5 uppercase tracking-[0.06em] hover:bg-cream/90 transition-colors cursor-pointer"
+          className="hidden md:inline-flex text-btn font-bold relative items-center gap-2 bg-cream text-dark px-5 py-2.5 rounded-[4px] uppercase tracking-[0.06em] hover:bg-cream/90 transition-colors cursor-pointer"
         >
           Add to Cart
           <CartIcon />
         </button>
 
-        <div className="flex md:hidden items-center justify-center gap-3 w-full">
-          <span className="text-h4 font-bold text-cream pointer-events-none">₹{product.price}</span>
-          <button
-            type="button"
-            onClick={() => add(product.slug)}
-            className="text-btn font-bold relative bg-cream text-dark px-5 py-2.5 uppercase tracking-[0.06em] hover:bg-cream/90 transition-colors cursor-pointer"
-          >
-            Add to Cart
-          </button>
-        </div>
+        <button
+          type="button"
+          onClick={() => add(product.slug)}
+          className="md:hidden w-full inline-flex items-center justify-center gap-2 text-btn font-bold relative bg-cream text-dark px-5 py-3 rounded-[4px] uppercase tracking-[0.06em] hover:bg-cream/90 transition-colors cursor-pointer"
+        >
+          Add to Cart
+          <span aria-hidden="true">·</span>
+          ₹{product.price}
+        </button>
       </div>
     </div>
   );
