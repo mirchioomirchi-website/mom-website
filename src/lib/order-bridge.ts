@@ -9,7 +9,8 @@ import {
   type CreateOrderResult,
   type AdminOrderLineInput,
 } from "@/lib/shopify-admin";
-import { PRODUCTS, computeCartTotal, computeShipping } from "@/lib/products";
+import { PRODUCTS } from "@/lib/products";
+import { computeCartTotal, computeShipping } from "@/lib/discounts";
 
 export type RazorpayBridgeInput = {
   razorpayPaymentId: string;
@@ -70,7 +71,10 @@ export async function pushRazorpayOrderToShopify(
     return { ok: false, reason: "No items in payment notes" };
   }
 
-  const { subtotal, discount, total: itemsTotal } = computeCartTotal(items);
+  const { subtotal, discount, discountLabel, total: itemsTotal } = computeCartTotal(
+    items,
+    notes.coupon_code
+  );
   const shipping = computeShipping({ itemsSubtotal: subtotal });
 
   const expectedTotal = itemsTotal + shipping.price;
@@ -111,7 +115,7 @@ export async function pushRazorpayOrderToShopify(
       shipping.price === 0 ? "Free shipping (orders over ₹999)" : "Standard shipping",
     shippingPriceRupees: shipping.price,
     discountRupees: discount,
-    discountLabel: discount > 0 ? "Auto 10% off" : undefined,
+    discountLabel,
     totalRupees: paidRupees,
     razorpayPaymentId: input.razorpayPaymentId,
     razorpayOrderId: input.razorpayOrderId,

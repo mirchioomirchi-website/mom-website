@@ -182,68 +182,7 @@ export const PDP_ACCENT_COLOR: Record<Product["flavor"], string> = {
   combo: "var(--color-pink)",
 };
 
-// Discount config — must match CheckoutPageClient.tsx so the server-computed
-// total and the client-displayed total agree.
-export const CART_DISCOUNT_THRESHOLD = 1000;
-export const CART_DISCOUNT_PCT = 10;
-
-// Shipping config — must match CheckoutPageClient.tsx + CartPageClient.tsx so
-// the displayed total and the Razorpay/Shopify-charged total agree.
-export const SHIPPING_FREE_THRESHOLD = 999;
-export const SHIPPING_FLAT_RATE = 70;
-
-// Authoritative server-side price computation. Used by /api/razorpay/order to
-// derive the true order amount from a list of {slug, qty} items, so a malicious
-// client cannot tamper with the amount.
-export function computeCartTotal(
-  items: Array<{ slug: string; qty: number }>
-): { subtotal: number; discount: number; total: number; lineCount: number } {
-  let subtotal = 0;
-  let lineCount = 0;
-  for (const line of items) {
-    const p = PRODUCTS.find((pr) => pr.slug === line.slug);
-    if (!p) continue;
-    const qty = Math.max(0, Math.min(99, Math.floor(line.qty)));
-    if (qty === 0) continue;
-    subtotal += p.price * qty;
-    lineCount += qty;
-  }
-  const discount =
-    subtotal >= CART_DISCOUNT_THRESHOLD
-      ? Math.round(subtotal * (CART_DISCOUNT_PCT / 100))
-      : 0;
-  return { subtotal, discount, total: subtotal - discount, lineCount };
-}
-
-// Shipping is computed on the post-discount items subtotal, so a customer
-// can't game the free-shipping threshold via a discount.
-export function computeShipping(params: {
-  itemsSubtotal: number;
-}): { price: number; isFree: boolean; label: string } {
-  if (params.itemsSubtotal >= SHIPPING_FREE_THRESHOLD) {
-    return { price: 0, isFree: true, label: "Free shipping" };
-  }
-  return {
-    price: SHIPPING_FLAT_RATE,
-    isFree: false,
-    label: "Standard shipping",
-  };
-}
-
-// One-stop authoritative grand total: items − discount + shipping. Used by
-// the order endpoint to compute the amount sent to Razorpay AND used by the
-// COD endpoint to set the Shopify order total. The client also derives the
-// same number for display; if they disagree, the server wins.
-export function computeGrandTotal(items: Array<{ slug: string; qty: number }>) {
-  const cart = computeCartTotal(items);
-  const shipping = computeShipping({ itemsSubtotal: cart.total });
-  return {
-    subtotal: cart.subtotal,
-    discount: cart.discount,
-    itemsTotal: cart.total,
-    shipping: shipping.price,
-    shippingLabel: shipping.label,
-    grandTotal: cart.total + shipping.price,
-    lineCount: cart.lineCount,
-  };
-}
+// Discount, coupon-code, and shipping config + the authoritative price
+// computation functions now live in "@/lib/discounts" — a dedicated file so
+// pricing rules aren't buried inside the product catalogue. See that file to
+// change a promo or add a coupon code.

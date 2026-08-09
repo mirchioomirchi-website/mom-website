@@ -8,15 +8,13 @@ import SmoothScroll from "@/components/SmoothScroll";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import { useCart } from "@/lib/cart-context";
+import { getProduct, PRODUCT_CARD_IMAGES, PDP_ACCENT_COLOR } from "@/lib/products";
 import {
-  getProduct,
   CART_DISCOUNT_PCT,
   CART_DISCOUNT_THRESHOLD,
-  PRODUCT_CARD_IMAGES,
-  PDP_ACCENT_COLOR,
   SHIPPING_FLAT_RATE,
   SHIPPING_FREE_THRESHOLD,
-} from "@/lib/products";
+} from "@/lib/discounts";
 import { trackViewCart } from "@/lib/analytics-events";
 
 export default function CartPageClient() {

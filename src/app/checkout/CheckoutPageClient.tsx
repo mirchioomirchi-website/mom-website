@@ -9,24 +9,19 @@ import SmoothScroll from "@/components/SmoothScroll";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import { useCart } from "@/lib/cart-context";
+import { getProduct, PRODUCT_CARD_IMAGES, PDP_ACCENT_COLOR } from "@/lib/products";
 import {
-  getProduct,
-  CART_DISCOUNT_PCT,
+  computeCartTotal,
+  computeShipping,
   CART_DISCOUNT_THRESHOLD,
-  SHIPPING_FLAT_RATE,
-  SHIPPING_FREE_THRESHOLD,
-  PRODUCT_CARD_IMAGES,
-  PDP_ACCENT_COLOR,
-} from "@/lib/products";
+  CART_DISCOUNT_PCT,
+} from "@/lib/discounts";
 import {
   trackAddPaymentInfo,
   trackAddShippingInfo,
   trackBeginCheckout,
   trackPurchase,
 } from "@/lib/analytics-events";
-
-const DISCOUNT_THRESHOLD = CART_DISCOUNT_THRESHOLD;
-const DISCOUNT_PCT = CART_DISCOUNT_PCT;
 
 type Shipping = {
   name: string;
@@ -73,6 +68,8 @@ export default function CheckoutPageClient() {
   const [paying, setPaying] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("razorpay");
+  const [couponInput, setCouponInput] = useState("");
+  const [appliedCoupon, setAppliedCoupon] = useState("");
   const [pincodeStatus, setPincodeStatus] = useState<
     | { state: "idle" }
     | { state: "checking" }
@@ -88,12 +85,31 @@ export default function CheckoutPageClient() {
     } catch {}
   }, []);
 
-  const discountUnlocked = subtotal >= DISCOUNT_THRESHOLD;
-  const discount = discountUnlocked ? Math.round(subtotal * (DISCOUNT_PCT / 100)) : 0;
-  const itemsTotal = subtotal - discount;
-  const shippingFree = itemsTotal >= SHIPPING_FREE_THRESHOLD;
-  const shippingCost = shippingFree ? 0 : SHIPPING_FLAT_RATE;
+  // Client-side preview only — computed with the exact same pure function the
+  // server re-runs authoritatively in /api/razorpay/order and /api/cod-order,
+  // so this can never drift from what's actually charged as long as both
+  // sides agree on `lines` + `appliedCoupon` (which the server re-derives
+  // itself rather than trusting).
+  const cartTotal = useMemo(
+    () => computeCartTotal(lines, appliedCoupon),
+    [lines, appliedCoupon]
+  );
+  const { discount, discountType, discountLabel, couponValid } = cartTotal;
+  const itemsTotal = cartTotal.total;
+  const shippingInfo = useMemo(
+    () => computeShipping({ itemsSubtotal: itemsTotal }),
+    [itemsTotal]
+  );
+  const shippingFree = shippingInfo.isFree;
+  const shippingCost = shippingInfo.price;
   const total = itemsTotal + shippingCost;
+  const couponApplied = discountType === "coupon";
+  const couponSuperseded =
+    appliedCoupon !== "" && couponValid && !couponApplied && discountType === "auto";
+
+  function handleApplyCoupon() {
+    setAppliedCoupon(couponInput.trim());
+  }
 
   const itemSummary = useMemo(
     () =>
@@ -234,6 +250,7 @@ export default function CheckoutPageClient() {
         body: JSON.stringify({
           items: lines.map((l) => ({ slug: l.slug, qty: l.qty })),
           shipping,
+          couponCode: appliedCoupon || undefined,
         }),
       });
       const data = (await res.json().catch(() => ({}))) as {
@@ -252,7 +269,7 @@ export default function CheckoutPageClient() {
         shipping: shippingCost,
         discount,
         paymentType: "cod",
-        coupon: discountUnlocked ? `cart-${DISCOUNT_PCT}-off` : undefined,
+        coupon: discountLabel,
       });
       clear();
       const q = new URLSearchParams({
@@ -282,7 +299,9 @@ export default function CheckoutPageClient() {
     trackAddShippingInfo(lines, total, shippingFree ? "free" : "flat_rate");
     trackAddPaymentInfo(lines, total, "razorpay");
 
-    // Build compact notes for Razorpay (max 256 chars per value, 15 keys).
+    // Build compact notes for Razorpay (max 256 chars per value, 15 keys —
+    // the server fills in subtotal/discount/shipping/total itself, so this
+    // only needs to carry the shipping contact fields + the coupon code).
     // These notes are what the order-bridge uses to populate the Shopify
     // order: name, email, phone, address, city, state, pincode, items.
     const notes: Record<string, string> = {
@@ -297,10 +316,7 @@ export default function CheckoutPageClient() {
         .map((l) => `${l.slug}:${l.qty}`)
         .join(";")
         .slice(0, 256),
-      subtotal: String(subtotal),
-      discount: String(discount),
-      shipping: String(shippingCost),
-      total: String(total),
+      ...(appliedCoupon ? { coupon_code: appliedCoupon.slice(0, 32) } : {}),
     };
 
     try {
@@ -311,6 +327,7 @@ export default function CheckoutPageClient() {
           // Server derives the authoritative total (items − discount + shipping).
           // The client `total` is never trusted as-is.
           items: lines.map((l) => ({ slug: l.slug, qty: l.qty })),
+          couponCode: appliedCoupon || undefined,
           receipt: `mom-${Date.now()}`,
           notes,
         }),
@@ -330,11 +347,7 @@ export default function CheckoutPageClient() {
 
       if (!window.Razorpay) throw new Error("Razorpay couldn't load. Check your internet and try again.");
 
-      trackBeginCheckout(
-        lines,
-        total,
-        discountUnlocked ? `cart-${DISCOUNT_PCT}-off` : undefined
-      );
+      trackBeginCheckout(lines, total, discountLabel);
 
       const rzp = new window.Razorpay({
         key: order.keyId,
@@ -372,7 +385,7 @@ export default function CheckoutPageClient() {
               shipping: shippingCost,
               discount,
               paymentType: "razorpay",
-              coupon: discountUnlocked ? `cart-${DISCOUNT_PCT}-off` : undefined,
+              coupon: discountLabel,
             });
 
             clear();
@@ -605,14 +618,52 @@ export default function CheckoutPageClient() {
 
                 <div className="dotted-divider text-dark/15 my-5" />
 
+                <div className="mb-5">
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      value={couponInput}
+                      onChange={(e) => setCouponInput(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                          e.preventDefault();
+                          handleApplyCoupon();
+                        }
+                      }}
+                      placeholder="Discount code"
+                      className="flex-1 min-w-0 bg-cream border-0 px-3 py-2.5 text-body-sm text-dark placeholder:text-dark/40 outline-none focus:ring-2 focus:ring-green/40"
+                    />
+                    <button
+                      type="button"
+                      onClick={handleApplyCoupon}
+                      disabled={!couponInput.trim()}
+                      className="text-btn font-bold text-body-sm bg-dark text-cream px-4 py-2.5 hover:bg-dark/85 transition-colors cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed shrink-0"
+                    >
+                      Apply
+                    </button>
+                  </div>
+                  {appliedCoupon !== "" && !couponValid && (
+                    <p className="text-body-sm text-red mt-2">
+                      &ldquo;{appliedCoupon}&rdquo; isn&apos;t a code we recognize.
+                    </p>
+                  )}
+                  {appliedCoupon !== "" && couponValid && couponApplied && (
+                    <p className="text-body-sm text-green font-semibold mt-2">
+                      ✓ Code applied — {discountLabel}
+                    </p>
+                  )}
+                  {couponSuperseded && (
+                    <p className="text-body-sm text-dark/60 mt-2">
+                      Your ₹{CART_DISCOUNT_THRESHOLD}+ auto-discount ({CART_DISCOUNT_PCT}%
+                      off) already beats this code, so that&apos;s what&apos;s applied.
+                    </p>
+                  )}
+                </div>
+
                 <div className="space-y-2 mb-5">
                   <Row label="Subtotal" value={`₹${subtotal}`} />
-                  {discountUnlocked && (
-                    <Row
-                      label={`${DISCOUNT_PCT}% discount`}
-                      value={`−₹${discount}`}
-                      accent
-                    />
+                  {discount > 0 && (
+                    <Row label={discountLabel ?? "Discount"} value={`−₹${discount}`} accent />
                   )}
                   <Row
                     label="Shipping"

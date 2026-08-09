@@ -5,7 +5,8 @@ import {
   shopifyAdminConfigured,
   type AdminOrderLineInput,
 } from "@/lib/shopify-admin";
-import { PRODUCTS, computeGrandTotal } from "@/lib/products";
+import { PRODUCTS } from "@/lib/products";
+import { computeGrandTotal, SHIPPING_FREE_THRESHOLD } from "@/lib/discounts";
 import { sendCriticalAlert } from "@/lib/email";
 
 export const runtime = "nodejs";
@@ -26,6 +27,7 @@ type CodOrderBody = {
   items?: Array<{ slug: string; qty: number }>;
   shipping?: Shipping;
   idempotencyKey?: string;
+  couponCode?: string;
 };
 
 // Same IP rate limit pattern used in /api/contact.
@@ -109,7 +111,7 @@ export async function POST(req: Request) {
     )
     .map((it) => ({ slug: it.slug, qty: it.qty }));
 
-  const totals = computeGrandTotal(safeItems);
+  const totals = computeGrandTotal(safeItems, body.couponCode);
   if (totals.lineCount === 0 || totals.grandTotal <= 0) {
     return NextResponse.json(
       { error: "Cart is empty or all items are invalid" },
@@ -179,11 +181,11 @@ export async function POST(req: Request) {
     lines: expandLines(safeItems),
     shippingTitle:
       totals.shipping === 0
-        ? "Free shipping (orders over ₹999)"
+        ? `Free shipping (orders over ₹${SHIPPING_FREE_THRESHOLD})`
         : "Standard shipping",
     shippingPriceRupees: totals.shipping,
     discountRupees: totals.discount,
-    discountLabel: totals.discount > 0 ? "Auto 10% off" : undefined,
+    discountLabel: totals.discountLabel,
     totalRupees: totals.grandTotal,
     codReference,
   });

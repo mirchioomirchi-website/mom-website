@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { createOrder, razorpayServerConfigured } from "@/lib/razorpay";
-import { computeGrandTotal } from "@/lib/products";
+import { computeGrandTotal } from "@/lib/discounts";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -9,6 +9,9 @@ type OrderItem = { slug: string; qty: number };
 
 type OrderBody = {
   items?: OrderItem[];
+  // Optional coupon code entered at checkout (e.g. "WHATSAPP5"). Re-validated
+  // here from scratch — the client's discount preview is never trusted.
+  couponCode?: string;
   // Legacy single-amount path for the RazorpayCheckout standalone widget.
   // Only used when items is absent. Bounded server-side to prevent tampering.
   amount?: number;
@@ -76,8 +79,15 @@ export async function POST(req: Request) {
       )
       .map((it) => ({ slug: it.slug, qty: it.qty }));
 
-    const { subtotal, discount, itemsTotal, shipping, grandTotal, lineCount } =
-      computeGrandTotal(safeItems);
+    const {
+      subtotal,
+      discount,
+      discountType,
+      discountLabel,
+      shipping,
+      grandTotal,
+      lineCount,
+    } = computeGrandTotal(safeItems, body.couponCode);
 
     if (lineCount === 0 || grandTotal <= 0) {
       return NextResponse.json(
@@ -86,10 +96,16 @@ export async function POST(req: Request) {
       );
     }
     rupees = grandTotal;
+    // Kept compact — Razorpay caps notes at 15 keys total, and the shipping
+    // contact fields (name/email/phone/address/city/state/pincode) plus
+    // coupon_code sent from the client need the remaining slots. `itemsTotal`
+    // (subtotal − discount) isn't stored separately since it's trivially
+    // derivable from subtotal + discount.
     derivedNotes = {
       subtotal: String(subtotal),
       discount: String(discount),
-      items_total: String(itemsTotal),
+      discount_type: discountType,
+      ...(discountLabel ? { discount_label: discountLabel } : {}),
       shipping: String(shipping),
       total: String(grandTotal),
       items: safeItems

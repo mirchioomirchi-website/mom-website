@@ -6,6 +6,7 @@ import Link from "next/link";
 import { motion, AnimatePresence } from "motion/react";
 import { useCart } from "@/lib/cart-context";
 import { PRODUCTS, PRODUCT_CARD_IMAGES } from "@/lib/products";
+import { CART_DISCOUNT_THRESHOLD, CART_DISCOUNT_PCT } from "@/lib/discounts";
 
 /* ── Trash icon ── */
 function TrashIcon() {
@@ -247,6 +248,14 @@ export default function MiniCart() {
                         Add Combo
                       </button>
                     </div>
+
+                    {/* Auto discount nudge — small, informational only (no
+                        button, nothing to click — the discount applies by
+                        itself at checkout once the threshold is hit). */}
+                    <p className="text-[0.72rem] text-dark/55 text-center px-2 mb-4">
+                      Spend ₹{CART_DISCOUNT_THRESHOLD}+ and get {CART_DISCOUNT_PCT}% off
+                      automatically at checkout.
+                    </p>
 
                     {/* WhatsApp */}
                     <div className="text-center pb-6">

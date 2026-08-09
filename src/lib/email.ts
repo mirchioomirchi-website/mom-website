@@ -69,13 +69,32 @@ function renderCustomerHtml(input: OrderEmailInput) {
         .join("")
     : "";
 
+  // Subtotal/discount/shipping breakdown — same numbers shown at checkout,
+  // read from the order's own notes so this can never disagree with what the
+  // customer actually saw before paying.
+  const subtotalNum = Number(notes.subtotal);
+  const discountNum = Number(notes.discount);
+  const shippingNum = Number(notes.shipping);
+  const hasBreakdown = Number.isFinite(subtotalNum) && subtotalNum > 0;
+  const breakdownHtml = hasBreakdown
+    ? `<tr><td style="padding:4px 0;color:#666">Subtotal</td><td style="padding:4px 0;text-align:right;color:#444">₹${subtotalNum}</td></tr>` +
+      (discountNum > 0
+        ? `<tr><td style="padding:4px 0;color:#B81862">${escapeHtml(notes.discount_label || "Discount")}</td><td style="padding:4px 0;text-align:right;color:#B81862">−₹${discountNum}</td></tr>`
+        : "") +
+      `<tr><td style="padding:4px 0 10px;color:#666">Shipping</td><td style="padding:4px 0 10px;text-align:right;color:#444">${shippingNum > 0 ? `₹${shippingNum}` : "Free"}</td></tr>`
+    : "";
+
   return `
   <div style="font-family:-apple-system,Segoe UI,Roboto,sans-serif;max-width:560px;margin:0 auto;padding:32px 24px;color:#222;background:#fafafa">
     <h1 style="font-size:28px;letter-spacing:-0.01em;margin:0 0 8px;color:#000">Mirchi O Mirchi</h1>
     <p style="font-size:12px;letter-spacing:0.2em;text-transform:uppercase;color:#B81862;margin:0 0 24px">Order confirmed</p>
     <p style="font-size:16px;line-height:1.6;color:#222;margin:0 0 16px">Hey ${escapeHtml(name)}, we got it — packing your mirchi now.</p>
     <p style="font-size:14px;color:#666;margin:0 0 24px">Order ID: <strong>${escapeHtml(orderId)}</strong><br/>Payment ID: <strong>${escapeHtml(paymentId)}</strong></p>
-    ${itemsHtml ? `<table style="width:100%;border-top:1px solid #eee;border-bottom:1px solid #eee;border-collapse:collapse;margin:16px 0">${itemsHtml}<tr><td style="padding:10px 0;font-weight:600;color:#000">Total</td><td style="padding:10px 0;text-align:right;font-weight:600;color:#000">${rupees(amountInPaise)}</td></tr></table>` : ""}
+    ${itemsHtml ? `<table style="width:100%;border-top:1px solid #eee;border-bottom:1px solid #eee;border-collapse:collapse;margin:16px 0;font-size:14px">${itemsHtml}</table>` : ""}
+    ${hasBreakdown ? `<table style="width:100%;border-collapse:collapse;margin:0 0 16px;font-size:13px">${breakdownHtml}</table>` : ""}
+    <table style="width:100%;border-top:1px solid #eee;border-collapse:collapse;margin:0 0 16px">
+      <tr><td style="padding:10px 0;font-weight:600;color:#000">Total</td><td style="padding:10px 0;text-align:right;font-weight:600;color:#000">${rupees(amountInPaise)}</td></tr>
+    </table>
     ${address ? `<p style="font-size:14px;color:#444;margin:0 0 8px"><strong style="color:#000">Shipping to:</strong></p><p style="font-size:14px;color:#444;margin:0 0 24px;line-height:1.6">${escapeHtml(address)}</p>` : ""}
     <p style="font-size:14px;color:#666;line-height:1.6;margin:0 0 16px">You'll get another email with the tracking number once your jars hit the courier — 3–7 working days pan-India.</p>
     <p style="margin:0 0 24px">
