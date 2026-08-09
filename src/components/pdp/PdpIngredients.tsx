@@ -61,7 +61,7 @@ export default function PdpIngredients({ product }: { product: Product }) {
 
                 <ul className="flex-1 flex flex-col items-center gap-3 md:gap-4">
                   {product.ingredients.map((ing) => (
-                    <li key={ing} className="text-2xl md:text-2xl capitalize text-center">
+                    <li key={ing} className="text-lg md:text-xl capitalize text-center">
                       {ing}
                     </li>
                   ))}

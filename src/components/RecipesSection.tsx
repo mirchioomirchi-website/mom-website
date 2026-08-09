@@ -1,14 +1,11 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import Link from "next/link";
 import { AnimatePresence, motion } from "motion/react";
 import { ScrollReveal } from "@/components/primitives";
 import { SITE_CONTENT } from "@/lib/content";
 
 const { eyebrowDevanagari, eyebrowEnglish, slides } = SITE_CONTENT.recipes;
-const { heading: pdpHeading, subheading: pdpSubheading, ctaLabel, ctaHref } =
-  SITE_CONTENT.productPage.pairing;
 
 // Cascading video stack (desktop) — distance-from-active drives both size
 // and opacity: the active dish is full size/opacity, the next one 80%/60%,
@@ -133,21 +130,15 @@ export default function RecipesSection({
     >
       <div className="max-w-[1400px] mx-auto px-5 md:px-9">
         <div className="md:grid md:grid-cols-[2fr_3fr] gap-10 md:gap-14 lg:gap-20 md:items-center">
-          {/* LEFT column — section eyebrow/heading, ~40% of the row on
-              desktop. */}
+          {/* LEFT column — section eyebrow, ~40% of the row on desktop. Same
+              content on every page it appears on; only the background
+              color varies (fixed red on home, per-product accent on PDP). */}
           <div className="flex flex-col gap-6 md:gap-8 min-w-0">
-            {variant === "home" ? (
-              <ScrollReveal className="flex items-center gap-2.5">
-                <span className="font-sura text-cream text-[15px] md:text-base">{eyebrowDevanagari}</span>
-                <span className="text-cream/50 text-sm">•</span>
-                <span className="font-sura text-cream text-[15px] md:text-base">{eyebrowEnglish}</span>
-              </ScrollReveal>
-            ) : (
-              <ScrollReveal>
-                <h2 className="text-h2 text-cream mb-3">{pdpHeading}</h2>
-                <p className="text-body leading-relaxed text-cream/80 max-w-md">{pdpSubheading}</p>
-              </ScrollReveal>
-            )}
+            <ScrollReveal className="flex items-center gap-2.5">
+              <span className="font-sura text-cream text-[15px] md:text-base">{eyebrowDevanagari}</span>
+              <span className="text-cream/50 text-sm">•</span>
+              <span className="font-sura text-cream text-[15px] md:text-base">{eyebrowEnglish}</span>
+            </ScrollReveal>
 
             {/* Mobile — dish name + description come before the video here
                 (opposite order from desktop), with the arrows sitting right
@@ -161,15 +152,6 @@ export default function RecipesSection({
                 </div>
               </div>
               <p className="text-body leading-relaxed text-cream/75 mt-2">{slide.description}</p>
-              {variant === "pdp" && (
-                <Link
-                  href={ctaHref}
-                  className="text-btn inline-flex items-center gap-1.5 text-cream underline decoration-cream decoration-2 underline-offset-4 hover:text-cream/80 transition-colors mt-3"
-                >
-                  {ctaLabel}
-                  <span aria-hidden="true">→</span>
-                </Link>
-              )}
             </ScrollReveal>
 
             {/* Mobile — swipeable video cards, current one filling most of
@@ -214,20 +196,9 @@ export default function RecipesSection({
             <ScrollReveal delay={0.1} className="hidden md:block">
               <h3 className="text-h2 text-cream mb-2">{slide.title}</h3>
               <p className="text-body leading-relaxed text-cream/75 max-w-[42ch] mb-5">{slide.description}</p>
-              <div className="flex items-center gap-3 flex-wrap">
-                <div className="flex items-center gap-2.5">
-                  <ArrowButton direction="prev" onClick={goPrev} label="Previous recipe" />
-                  <ArrowButton direction="next" onClick={goNext} label="Next recipe" />
-                </div>
-                {variant === "pdp" && (
-                  <Link
-                    href={ctaHref}
-                    className="text-btn inline-flex items-center gap-1.5 text-cream underline decoration-cream decoration-2 underline-offset-4 hover:text-cream/80 transition-colors"
-                  >
-                    {ctaLabel}
-                    <span aria-hidden="true">→</span>
-                  </Link>
-                )}
+              <div className="flex items-center gap-2.5">
+                <ArrowButton direction="prev" onClick={goPrev} label="Previous recipe" />
+                <ArrowButton direction="next" onClick={goNext} label="Next recipe" />
               </div>
             </ScrollReveal>
           </div>

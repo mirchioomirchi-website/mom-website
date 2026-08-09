@@ -15,6 +15,13 @@ export default function PdpStory({ product }: { product: Product }) {
   const pathId = `pdp-wave-${reactId}`;
   const textRef = useRef<SVGTextElement>(null);
   const textPathRef = useRef<SVGTextPathElement>(null);
+  // A single, non-repeated copy of the tagline, rendered invisibly — used
+  // only to measure exactly one tile's length directly, rather than
+  // measuring the whole repeated string and dividing by REPEATS. Dividing
+  // assumes every repeat renders at an identical width, but kerning at each
+  // repeat's seam can throw that off by a fraction of a pixel; over many
+  // wraps that drift is what caused the visible stutter at the loop point.
+  const unitRef = useRef<SVGTextElement>(null);
 
   // The path itself never moves — only the text's startOffset animates,
   // measured so the loop wraps exactly on a repeat boundary. That makes the
@@ -24,13 +31,13 @@ export default function PdpStory({ product }: { product: Product }) {
     let cancelled = false;
 
     const start = () => {
-      const textEl = textRef.current;
       const textPathEl = textPathRef.current;
-      if (!textEl || !textPathEl || cancelled) return;
+      const unitEl = unitRef.current;
+      if (!textPathEl || !unitEl || cancelled) return;
 
       let unitLength = 0;
       try {
-        unitLength = textEl.getComputedTextLength() / REPEATS;
+        unitLength = unitEl.getComputedTextLength();
       } catch {
         return;
       }
@@ -67,11 +74,16 @@ export default function PdpStory({ product }: { product: Product }) {
       <div className="grid md:grid-cols-2">
         {/* Wavy tagline marquee + story copy — plain cream background, no
             invented color block. Text itself carries the product's color. */}
-        <div className="relative flex flex-col gap-8 md:gap-10 py-16 md:py-0 md:justify-center md:min-h-[520px]">
+        <div className="relative flex flex-col gap-3 md:gap-4 py-16 md:py-0 md:justify-center md:min-h-[520px]">
+          {/* No `preserveAspectRatio="none"` here — the box's aspect ratio
+              (full width by a fixed, much shorter height) doesn't match the
+              viewBox's, and "none" was stretching the glyphs independently
+              in x and y to force-fill it, which is what made the font look
+              stretchy with the wrong height. Default (xMidYMid meet) scales
+              the wave + text uniformly instead, so nothing distorts. */}
           <svg
             viewBox="0 0 1200 220"
-            preserveAspectRatio="none"
-            className="w-full h-28 md:h-36"
+            className="w-full h-20 md:h-28"
             style={{ overflow: "visible" }}
             aria-hidden="true"
           >
@@ -90,6 +102,12 @@ export default function PdpStory({ product }: { product: Product }) {
               <textPath ref={textPathRef} href={`#${pathId}`} startOffset="0">
                 {repeated}
               </textPath>
+            </text>
+            {/* Invisible — exists purely so the effect above can measure one
+                exact tile length. Not on the path, so it doesn't affect the
+                visible wave at all. */}
+            <text ref={unitRef} fontSize="100" fontWeight="500" opacity="0" aria-hidden="true">
+              {`${product.tagline}    `}
             </text>
           </svg>
 

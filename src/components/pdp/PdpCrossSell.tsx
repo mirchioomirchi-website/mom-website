@@ -11,6 +11,15 @@ import { PDP_ACCENT_COLOR, PRODUCT_CARD_IMAGES, type Product } from "@/lib/produ
 // How long each product stays highlighted before auto-advancing.
 const ROTATE_MS = 4500;
 
+function CartIcon() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="9" cy="21" r="1" /><circle cx="20" cy="21" r="1" />
+      <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" />
+    </svg>
+  );
+}
+
 // The active product — full details + direct Add to Cart, matching the
 // "first highlighted card" treatment in the design. Stacked (image on top,
 // details below) on mobile so nothing collides in a narrow card; back to
@@ -39,15 +48,15 @@ function HighlightedCard({ product }: { product: Product }) {
       <div className="relative z-10 flex flex-col items-center md:items-start text-center md:text-left gap-2 md:gap-3.5 min-w-0">
         <h3 className="text-h3 text-cream pointer-events-none">{product.shortName}</h3>
         <p className="text-body-sm font-bold text-cream/80 uppercase tracking-[0.06em] pointer-events-none">{product.tagline}</p>
-        <p className="text-body-sm font-semibold text-cream/70 uppercase tracking-[0.06em] pointer-events-none">{product.weight}</p>
         <div className="flex items-center gap-3 mt-1">
           <span className="text-h4 font-bold text-cream pointer-events-none">₹{product.price}</span>
           <button
             type="button"
             onClick={() => add(product.slug)}
-            className="text-btn font-bold relative bg-cream text-dark px-5 py-2.5 rounded-full uppercase tracking-[0.06em] hover:bg-cream/90 transition-colors cursor-pointer"
+            className="text-btn font-bold relative inline-flex items-center gap-2 bg-cream text-dark px-5 py-2.5 uppercase tracking-[0.06em] hover:bg-cream/90 transition-colors cursor-pointer"
           >
             Add to Cart
+            <CartIcon />
           </button>
         </div>
       </div>
