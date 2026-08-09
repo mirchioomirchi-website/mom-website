@@ -56,18 +56,29 @@ export default function PdpIngredients({ product }: { product: Product }) {
                 <span className="text-lg font-medium">Ingredients</span>
               </div>
 
-              <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6 font-sura" style={{ color: accentColor }}>
-                <span className="hidden md:block text-3xl md:text-4xl font-medium shrink-0 md:mr-8 lg:mr-16">Ingredients</span>
+              {/* Desktop — the two side labels ("Ingredients" / देवनागरी) are
+                  absolutely positioned rather than flex siblings of the
+                  list. With `justify-between`, the list's centering depends
+                  on the two labels being equal width — they aren't (English
+                  vs Devanagari render at different widths), so the list sat
+                  visibly off-center. Taking the labels out of flow lets
+                  `justify-center` center the list against the box itself,
+                  regardless of how wide either label renders. */}
+              <div
+                className="flex flex-col gap-6 md:relative md:flex md:items-center md:justify-center md:gap-0 md:px-36 lg:px-44 font-sura"
+                style={{ color: accentColor }}
+              >
+                <span className="hidden md:block absolute left-0 text-3xl md:text-4xl font-medium">Ingredients</span>
 
-                <ul className="flex-1 flex flex-col items-center gap-3 md:gap-4">
+                <ul className="flex flex-col items-center gap-3 md:gap-4">
                   {product.ingredients.map((ing) => (
-                    <li key={ing} className="text-lg md:text-xl capitalize text-center">
+                    <li key={ing} className="text-xl md:text-xl capitalize text-center">
                       {ing}
                     </li>
                   ))}
                 </ul>
 
-                <span className="hidden md:block text-3xl md:text-4xl font-medium shrink-0 md:ml-8 lg:ml-16">{ingredientsDevanagari}</span>
+                <span className="hidden md:block absolute right-0 text-3xl md:text-4xl font-medium">{ingredientsDevanagari}</span>
               </div>
             </div>
           </div>

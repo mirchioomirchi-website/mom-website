@@ -45,18 +45,37 @@ function HighlightedCard({ product }: { product: Product }) {
           sizes="200px"
         />
       </div>
-      <div className="relative z-10 flex flex-col items-center md:items-start text-center md:text-left gap-2 md:gap-3.5 min-w-0">
-        <h3 className="text-h3 text-cream pointer-events-none">{product.shortName}</h3>
-        <p className="text-body-sm font-bold text-cream/80 uppercase tracking-[0.06em] pointer-events-none">{product.tagline}</p>
-        <div className="flex items-center gap-3 mt-1">
+      <div className="relative z-10 flex flex-col items-center md:items-start text-center md:text-left gap-3 min-w-0 w-full md:w-auto">
+        <h3 className="text-h3 text-cream pointer-events-none">{product.name}</h3>
+
+        {/* Tagline and the icon-CTA are desktop only — the mobile card
+            below is deliberately simpler: just the price and CTA inline. */}
+        <p className="hidden md:block text-body-sm font-bold text-cream/80 uppercase tracking-[0.06em] pointer-events-none">
+          {product.tagline}
+        </p>
+
+        <div className="hidden md:flex items-baseline gap-2 pointer-events-none">
+          <span className="text-h3 font-bold text-cream">₹{product.price}</span>
+          <span className="text-body-sm font-semibold text-cream/70 uppercase tracking-[0.06em]">{product.weight}</span>
+        </div>
+
+        <button
+          type="button"
+          onClick={() => add(product.slug)}
+          className="hidden md:inline-flex text-btn font-bold relative items-center gap-2 bg-cream text-dark px-5 py-2.5 uppercase tracking-[0.06em] hover:bg-cream/90 transition-colors cursor-pointer"
+        >
+          Add to Cart
+          <CartIcon />
+        </button>
+
+        <div className="flex md:hidden items-center justify-center gap-3 w-full">
           <span className="text-h4 font-bold text-cream pointer-events-none">₹{product.price}</span>
           <button
             type="button"
             onClick={() => add(product.slug)}
-            className="text-btn font-bold relative inline-flex items-center gap-2 bg-cream text-dark px-5 py-2.5 uppercase tracking-[0.06em] hover:bg-cream/90 transition-colors cursor-pointer"
+            className="text-btn font-bold relative bg-cream text-dark px-5 py-2.5 uppercase tracking-[0.06em] hover:bg-cream/90 transition-colors cursor-pointer"
           >
             Add to Cart
-            <CartIcon />
           </button>
         </div>
       </div>
@@ -81,7 +100,7 @@ function CollapsedCard({ product, onSelect }: { product: Product; onSelect: () =
           sizes="150px"
         />
       </div>
-      <p className="text-lg md:text-xl font-semibold text-dark text-center">{product.shortName}</p>
+      <p className="text-lg md:text-xl font-semibold text-dark text-center">{product.name}</p>
     </button>
   );
 }
