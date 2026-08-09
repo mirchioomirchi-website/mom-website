@@ -5,7 +5,7 @@ import Hero from "@/components/Hero";
 import ProductShowcase from "@/components/ProductShowcase";
 import OurProcess from "@/components/OurProcess";
 import Ingredients from "@/components/Ingredients";
-import Recipes from "@/components/Recipes";
+import RecipesSection from "@/components/RecipesSection";
 import Shop from "@/components/Shop";
 import Instagram from "@/components/Instagram";
 import CtaBanner from "@/components/CtaBanner";
@@ -32,7 +32,7 @@ export default async function Home() {
         <ProductShowcase products={products} />
         <OurProcess />
         <Ingredients />
-        <Recipes />
+        <RecipesSection variant="home" />
         <Shop />
         <Instagram />
         <CtaBanner />

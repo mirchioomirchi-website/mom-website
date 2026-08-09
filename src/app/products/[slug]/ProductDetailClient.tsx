@@ -9,9 +9,9 @@ import Footer from "@/components/Footer";
 import PdpHero from "@/components/pdp/PdpHero";
 import PdpStory from "@/components/pdp/PdpStory";
 import PdpIngredients from "@/components/pdp/PdpIngredients";
-import PdpPairing from "@/components/pdp/PdpPairing";
+import RecipesSection from "@/components/RecipesSection";
 import PdpCrossSell from "@/components/pdp/PdpCrossSell";
-import { Product } from "@/lib/products";
+import { PDP_ACCENT_COLOR, Product } from "@/lib/products";
 import { trackViewItem } from "@/lib/analytics-events";
 
 export default function ProductDetailClient({
@@ -25,6 +25,8 @@ export default function ProductDetailClient({
     trackViewItem(product);
   }, [product]);
 
+  const accentColor = product.pdpAccentColor ?? PDP_ACCENT_COLOR[product.flavor];
+
   return (
     <SmoothScroll>
       <Navigation />
@@ -32,7 +34,7 @@ export default function ProductDetailClient({
         <PdpHero product={product} />
         <PdpStory product={product} />
         <PdpIngredients product={product} />
-        <PdpPairing />
+        <RecipesSection variant="pdp" accentColor={accentColor} />
         <PdpCrossSell relatedProducts={relatedProducts} />
         <Instagram />
         <CtaBanner />

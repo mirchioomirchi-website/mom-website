@@ -116,28 +116,28 @@ export const SITE_CONTENT = {
         title: "With Dal-Chawal",
         description:
           "Stir a spoon into dal-chawal and suddenly your comfort meal has heat, garlic and flavour.",
-        video: "/videos/mortar.mp4",
+        video: "/videos/thecha-grilled-cheese.mp4",
       },
       {
         title: "With Parathas",
         description: "Tear, dip, repeat. Paratha and thecha is an iconic pairing.",
-        video: "/videos/mortar.mp4",
+        video: "/videos/thecha-grilled-cheese.mp4",
       },
       {
         title: "On Toast",
         description: "Spread it on toast, layer it with butter, cheese or eggs.",
-        video: "/videos/mortar.mp4",
+        video: "/videos/thecha-grilled-cheese.mp4",
       },
       {
         title: "With Eggs",
         description:
           "Scrambled, fried, omelette — anything goes. The breakfast game changer.",
-        video: "/videos/mortar.mp4",
+        video: "/videos/thecha-grilled-cheese.mp4",
       },
       {
         title: "Straight Out the Jar",
         description: "Spoon. Jar. Done. We've all been there. No shame.",
-        video: "/videos/mortar.mp4",
+        video: "/videos/thecha-grilled-cheese.mp4",
       },
     ],
   },
