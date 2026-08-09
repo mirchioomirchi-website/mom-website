@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { Resend } from "resend";
+import { isRateLimited, getClientIp } from "@/lib/rate-limit";
 
 // Captures a phone number from the "get new-batch updates + 5% off" signup
 // (CtaBanner + the promo popup both post here). There's no phone-based CRM
@@ -17,22 +18,6 @@ const KEY = process.env.RESEND_API_KEY;
 const FROM = process.env.RESEND_FROM_EMAIL || "orders@mirchiomirchi.com";
 const ADMIN = process.env.RESEND_ADMIN_EMAIL || "contact@mirchiomirchi.com";
 
-type Bucket = { count: number; resetAt: number };
-const buckets = new Map<string, Bucket>();
-const WINDOW_MS = 60 * 60 * 1000;
-const MAX_REQUESTS = 10;
-
-function rateLimited(ip: string): boolean {
-  const now = Date.now();
-  const b = buckets.get(ip);
-  if (!b || b.resetAt < now) {
-    buckets.set(ip, { count: 1, resetAt: now + WINDOW_MS });
-    return false;
-  }
-  b.count += 1;
-  return b.count > MAX_REQUESTS;
-}
-
 function escapeHtml(s: string): string {
   return s
     .replace(/&/g, "&amp;")
@@ -42,12 +27,9 @@ function escapeHtml(s: string): string {
 }
 
 export async function POST(req: Request) {
-  const ip =
-    req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
-    req.headers.get("x-real-ip") ||
-    "unknown";
+  const ip = getClientIp(req);
 
-  if (rateLimited(ip)) {
+  if (isRateLimited(`phone-signup:${ip}`, { windowMs: 60 * 60 * 1000, max: 10 })) {
     return NextResponse.json({ error: "Slow down — try again later." }, { status: 429 });
   }
 

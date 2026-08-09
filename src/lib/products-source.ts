@@ -50,6 +50,7 @@ function mergeProduct(p: Product, live: ShopifyProductData | undefined): Product
     mainImage: live.mainImage ?? p.mainImage,
     closeupImage: live.imageCloseup ?? p.closeupImage,
     secondaryImage: live.imageLifestyle ?? p.secondaryImage,
+    available: live.available,
   };
 }
 
@@ -69,4 +70,33 @@ export async function getLiveProduct(
 ): Promise<Product | undefined> {
   const all = await getLiveProducts();
   return all.find((p) => p.slug === slug) ?? getStaticProduct(slug);
+}
+
+// Server-authoritative stock check, called from the Razorpay/COD order
+// endpoints right before money changes hands or a Shopify order is created —
+// this is the check that actually matters, since any client-side "sold out"
+// UI can be stale (multiple tabs, a cart added to before a flavor sold out,
+// etc). Returns the slugs (from the requested items) that Shopify currently
+// reports as unavailable. Fails OPEN (returns no unavailable slugs) if the
+// live fetch itself fails, matching this file's existing fallback
+// philosophy — a Shopify outage shouldn't block every checkout, just the
+// specific stock check.
+export async function getUnavailableSlugs(
+  items: Array<{ slug: string; qty: number }>
+): Promise<string[]> {
+  if (items.length === 0) return [];
+  let live: Product[];
+  try {
+    live = await getLiveProducts();
+  } catch (err) {
+    console.error("[products-source] stock check failed, failing open", err);
+    return [];
+  }
+  const bySlug = new Map(live.map((p) => [p.slug, p]));
+  const unavailable: string[] = [];
+  for (const it of items) {
+    const p = bySlug.get(it.slug);
+    if (p && p.available === false) unavailable.push(it.slug);
+  }
+  return unavailable;
 }

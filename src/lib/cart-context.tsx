@@ -10,6 +10,7 @@ import {
   ReactNode,
 } from "react";
 import { PRODUCTS, Product } from "@/lib/products";
+import { MAX_QTY_PER_LINE } from "@/lib/discounts";
 import {
   trackAddToCart,
   trackBeginCheckout,
@@ -77,9 +78,13 @@ export function CartProvider({ children }: { children: ReactNode }) {
     setLines((prev) => {
       const existing = prev.find((l) => l.slug === slug);
       if (existing) {
-        return prev.map((l) => (l.slug === slug ? { ...l, qty: l.qty + qty } : l));
+        return prev.map((l) =>
+          l.slug === slug
+            ? { ...l, qty: Math.min(MAX_QTY_PER_LINE, l.qty + qty) }
+            : l
+        );
       }
-      return [...prev, { slug, qty }];
+      return [...prev, { slug, qty: Math.min(MAX_QTY_PER_LINE, qty) }];
     });
     const product = PRODUCTS.find((p) => p.slug === slug);
     if (product) {
@@ -106,13 +111,14 @@ export function CartProvider({ children }: { children: ReactNode }) {
         remove(slug);
         return;
       }
+      const cappedQty = Math.min(MAX_QTY_PER_LINE, qty);
       setLines((prev) => {
         const existing = prev.find((l) => l.slug === slug);
         const product = PRODUCTS.find((p) => p.slug === slug);
-        if (product && existing && qty < existing.qty) {
-          trackRemoveFromCart(product, existing.qty - qty);
+        if (product && existing && cappedQty < existing.qty) {
+          trackRemoveFromCart(product, existing.qty - cappedQty);
         }
-        return prev.map((l) => (l.slug === slug ? { ...l, qty } : l));
+        return prev.map((l) => (l.slug === slug ? { ...l, qty: cappedQty } : l));
       });
     },
     [remove]

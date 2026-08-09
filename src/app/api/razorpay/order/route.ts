@@ -1,6 +1,9 @@
 import { NextResponse } from "next/server";
 import { createOrder, razorpayServerConfigured } from "@/lib/razorpay";
-import { computeGrandTotal } from "@/lib/discounts";
+import { computeGrandTotal, RAZORPAY_MAX_ORDER_RUPEES } from "@/lib/discounts";
+import { getUnavailableSlugs } from "@/lib/products-source";
+import { getProduct } from "@/lib/products";
+import { isRateLimited, getClientIp } from "@/lib/rate-limit";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -51,6 +54,14 @@ export async function POST(req: Request) {
     );
   }
 
+  const ip = getClientIp(req);
+  if (isRateLimited(`razorpay-order:${ip}`, { windowMs: 60 * 60 * 1000, max: 20 })) {
+    return NextResponse.json(
+      { error: "Too many attempts. Try again in an hour." },
+      { status: 429 }
+    );
+  }
+
   let body: OrderBody = {};
   try {
     body = (await req.json()) as OrderBody;
@@ -79,6 +90,24 @@ export async function POST(req: Request) {
       )
       .map((it) => ({ slug: it.slug, qty: it.qty }));
 
+    // Server-authoritative stock check, right before we ask Razorpay for an
+    // order. Any client-side "sold out" state can be stale (a second tab, a
+    // cart built up before a flavor sold out) — this is the check that
+    // actually stops a customer from paying for something that isn't
+    // fulfillable.
+    const unavailable = await getUnavailableSlugs(safeItems);
+    if (unavailable.length > 0) {
+      const names = unavailable
+        .map((slug) => getProduct(slug)?.name ?? slug)
+        .join(", ");
+      return NextResponse.json(
+        {
+          error: `Sorry, this just sold out: ${names}. Please remove it from your cart and try again.`,
+        },
+        { status: 409 }
+      );
+    }
+
     const {
       subtotal,
       discount,
@@ -92,6 +121,12 @@ export async function POST(req: Request) {
     if (lineCount === 0 || grandTotal <= 0) {
       return NextResponse.json(
         { error: "Cart is empty or all items are invalid" },
+        { status: 400 }
+      );
+    }
+    if (grandTotal > RAZORPAY_MAX_ORDER_RUPEES) {
+      return NextResponse.json(
+        { error: "Order total exceeds what we can process online. Please contact us to place this order." },
         { status: 400 }
       );
     }
@@ -116,11 +151,10 @@ export async function POST(req: Request) {
   } else {
     // --- Legacy single-amount path (RazorpayCheckout standalone widget) -----
     const n = Number(body.amount);
-    if (!Number.isFinite(n) || n < 1 || n > 5_00_000) {
+    if (!Number.isFinite(n) || n < 1 || n > RAZORPAY_MAX_ORDER_RUPEES) {
       return NextResponse.json(
         {
-          error:
-            "Provide items: [{slug, qty}] or a valid amount between 1 and 500000",
+          error: `Provide items: [{slug, qty}] or a valid amount between 1 and ${RAZORPAY_MAX_ORDER_RUPEES}`,
         },
         { status: 400 }
       );

@@ -37,6 +37,13 @@ export type Product = {
   // Native Shopify product photo (the transparent jar-front cutout) — used
   // in place of PRODUCT_CARD_IMAGES[slug] wherever that compact shot appears.
   mainImage?: string;
+  // Live Shopify stock flag (variant.availableForSale). Undefined on the
+  // static PRODUCTS fallback below (Shopify unreachable) — every check
+  // against this field should treat `undefined` the same as `true` (fail
+  // open, matching this file's existing "static catalogue is a resilience
+  // fallback" philosophy) and only gate purchasing when it's explicitly
+  // `false`.
+  available?: boolean;
 };
 
 export const PRODUCTS: Product[] = [

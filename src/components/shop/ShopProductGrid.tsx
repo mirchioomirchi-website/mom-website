@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { ScrollReveal } from "@/components/primitives";
 import { SITE_CONTENT } from "@/lib/content";
-import { PRODUCTS, PRODUCT_CARD_IMAGES } from "@/lib/products";
+import { PRODUCT_CARD_IMAGES, type Product } from "@/lib/products";
 import { useCart } from "@/lib/cart-context";
 import { trackSelectItem } from "@/lib/analytics-events";
 
@@ -53,9 +53,9 @@ function PinIcon() {
   );
 }
 
-export default function ShopProductGrid() {
+export default function ShopProductGrid({ products }: { products: Product[] }) {
   const { add } = useCart();
-  const flavours = PRODUCTS.filter((p) => !p.isCombo);
+  const flavours = products.filter((p) => !p.isCombo);
 
   return (
     <section className="relative bg-cream pt-14 md:pt-20 pb-24 md:pb-32 cv-auto">
@@ -85,6 +85,7 @@ export default function ShopProductGrid() {
         <div className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-10">
           {flavours.map((product, i) => {
             const style = FLAVOR_STYLE[product.flavor];
+            const soldOut = product.available === false;
             return (
               <ScrollReveal key={product.slug} delay={i * 0.06}>
                 <div className="flex flex-col h-full">
@@ -98,10 +99,15 @@ export default function ShopProductGrid() {
                         src={PRODUCT_CARD_IMAGES[product.slug] ?? product.image}
                         alt={product.name}
                         fill
-                        className="object-contain"
+                        className={`object-contain ${soldOut ? "opacity-50" : ""}`}
                         sizes="(max-width: 768px) 40vw, 15vw"
                       />
                     </div>
+                    {soldOut && (
+                      <span className="absolute top-3 left-3 bg-dark text-cream text-[11px] font-bold uppercase tracking-[0.06em] px-2.5 py-1">
+                        Sold out
+                      </span>
+                    )}
                   </Link>
 
                   <div className="flex items-baseline justify-between gap-2 mt-3 md:mt-5 mb-1 md:mb-2">
@@ -128,11 +134,12 @@ export default function ShopProductGrid() {
                     </p>
                     <button
                       type="button"
+                      disabled={soldOut}
                       onClick={() => add(product.slug)}
-                      className={`text-sm md:text-btn font-bold inline-flex items-center justify-center gap-1.5 md:gap-2 w-full md:w-auto md:h-9 ${style.button} text-cream px-3 py-1.5 md:px-5 md:py-0 hover:opacity-90 transition-opacity cursor-pointer shrink-0`}
+                      className={`text-sm md:text-btn font-bold inline-flex items-center justify-center gap-1.5 md:gap-2 w-full md:w-auto md:h-9 ${style.button} text-cream px-3 py-1.5 md:px-5 md:py-0 hover:opacity-90 transition-opacity cursor-pointer shrink-0 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:opacity-50`}
                     >
-                      Add to Cart
-                      <CartIcon />
+                      {soldOut ? "Sold Out" : "Add to Cart"}
+                      {!soldOut && <CartIcon />}
                     </button>
                   </div>
                 </div>

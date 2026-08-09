@@ -97,9 +97,12 @@ export default function CheckoutPageClient() {
   );
   const { discount, discountType, discountLabel, couponValid } = cartTotal;
   const itemsTotal = cartTotal.total;
+  // Shipping is keyed off the pre-discount subtotal (matching
+  // computeGrandTotal server-side) — see the comment on computeShipping in
+  // discounts.ts for why post-discount was wrong.
   const shippingInfo = useMemo(
-    () => computeShipping({ itemsSubtotal: itemsTotal }),
-    [itemsTotal]
+    () => computeShipping({ itemsSubtotal: cartTotal.subtotal }),
+    [cartTotal.subtotal]
   );
   const shippingFree = shippingInfo.isFree;
   const shippingCost = shippingInfo.price;

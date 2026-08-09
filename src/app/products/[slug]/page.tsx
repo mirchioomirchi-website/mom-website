@@ -73,7 +73,10 @@ export default async function ProductPage({
       url: `${SITE_URL}/products/${product.slug}`,
       priceCurrency: "INR",
       price: product.price,
-      availability: "https://schema.org/InStock",
+      availability:
+        product.available === false
+          ? "https://schema.org/OutOfStock"
+          : "https://schema.org/InStock",
       itemCondition: "https://schema.org/NewCondition",
     },
   };

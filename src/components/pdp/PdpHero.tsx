@@ -6,6 +6,7 @@ import { motion } from "motion/react";
 import { SITE_CONTENT } from "@/lib/content";
 import { useCart } from "@/lib/cart-context";
 import { PDP_ACCENT_COLOR, PRODUCT_CARD_IMAGES, type Product } from "@/lib/products";
+import { MAX_QTY_PER_LINE } from "@/lib/discounts";
 
 // Label — dotted leader line — value. Classic spec-sheet row, matching the
 // design's "Heat Level ⋯⋯⋯⋯⋯⋯⋯⋯ Medium - Hot" treatment exactly. The leader
@@ -41,6 +42,10 @@ export default function PdpHero({ product }: { product: Product }) {
   const accentColor = product.pdpAccentColor ?? PDP_ACCENT_COLOR[product.flavor];
   const mainImage = product.mainImage ?? PRODUCT_CARD_IMAGES[product.slug] ?? product.image;
   const hindiName = product.nameHi ?? devanagariLabel;
+  // Only ever explicitly `false` when Shopify itself reports the variant as
+  // sold out — `undefined` (static fallback, live fetch unreachable) is
+  // treated as available so a Shopify hiccup never blocks purchasing.
+  const soldOut = product.available === false;
 
   return (
     // Mobile: image + jar-overlay + content all sized to fit within the
@@ -120,40 +125,47 @@ export default function PdpHero({ product }: { product: Product }) {
           <div className="w-full max-w-xl space-y-1.5 md:space-y-2 mt-4 md:mt-5">
             <DetailRow label="Heat Level" value={product.heatLevel} accentColor={accentColor} />
             <DetailRow label="Volume" value={product.weight} accentColor={accentColor} />
-            <DetailRow label="Price" value={`₹${product.price}`} accentColor={accentColor} />
+            <DetailRow
+              label="Price"
+              value={soldOut ? "Sold out" : `₹${product.price}`}
+              accentColor={accentColor}
+            />
           </div>
 
           <div className="flex items-center gap-3 w-full max-w-xl mt-4 md:mt-6">
-            <div className="shrink-0">
-              <div className="flex items-center">
-                <button
-                  type="button"
-                  onClick={() => setQty((q) => Math.max(1, q - 1))}
-                  aria-label="Decrease quantity"
-                  className="w-9 h-11 text-xl md:text-2xl font-semibold text-dark/70 hover:text-dark transition-colors cursor-pointer"
-                >
-                  −
-                </button>
-                <span className="w-8 text-center text-body font-semibold text-dark">{qty}</span>
-                <button
-                  type="button"
-                  onClick={() => setQty((q) => q + 1)}
-                  aria-label="Increase quantity"
-                  className="w-9 h-11 text-xl md:text-2xl font-semibold text-dark/70 hover:text-dark transition-colors cursor-pointer"
-                >
-                  +
-                </button>
+            {!soldOut && (
+              <div className="shrink-0">
+                <div className="flex items-center">
+                  <button
+                    type="button"
+                    onClick={() => setQty((q) => Math.max(1, q - 1))}
+                    aria-label="Decrease quantity"
+                    className="w-9 h-11 text-xl md:text-2xl font-semibold text-dark/70 hover:text-dark transition-colors cursor-pointer"
+                  >
+                    −
+                  </button>
+                  <span className="w-8 text-center text-body font-semibold text-dark">{qty}</span>
+                  <button
+                    type="button"
+                    onClick={() => setQty((q) => Math.min(MAX_QTY_PER_LINE, q + 1))}
+                    aria-label="Increase quantity"
+                    className="w-9 h-11 text-xl md:text-2xl font-semibold text-dark/70 hover:text-dark transition-colors cursor-pointer"
+                  >
+                    +
+                  </button>
+                </div>
+                <div className="dotted-divider" style={{ color: accentColor }} />
               </div>
-              <div className="dotted-divider" style={{ color: accentColor }} />
-            </div>
+            )}
 
             <button
               type="button"
+              disabled={soldOut}
               onClick={() => add(product.slug, qty)}
-              className="text-btn font-bold flex-1 h-11 text-cream uppercase tracking-[0.06em] hover:opacity-90 transition-opacity cursor-pointer"
-              style={{ backgroundColor: accentColor }}
+              className="text-btn font-bold flex-1 h-11 text-cream uppercase tracking-[0.06em] hover:opacity-90 transition-opacity cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:opacity-50"
+              style={{ backgroundColor: soldOut ? "var(--color-dark)" : accentColor }}
             >
-              Add to Cart
+              {soldOut ? "Sold Out" : "Add to Cart"}
             </button>
           </div>
         </motion.div>

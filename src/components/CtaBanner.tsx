@@ -14,7 +14,8 @@ const heading = `Claim your ${signupCoupon.pct}% off`;
 const { bodyMobile, bodyDesktopLines } = SITE_CONTENT.ctaBanner;
 
 export default function CtaBanner() {
-  const { phone, setPhone, status, errorMsg, submit } = useDiscountSignup("banner");
+  const { phone, setPhone, honeypot, setHoneypot, status, errorMsg, submit } =
+    useDiscountSignup("banner");
   const [copied, setCopied] = useState(false);
 
   async function handleCopy() {
@@ -79,6 +80,18 @@ export default function CtaBanner() {
                       }}
                       className="w-full flex flex-col items-center md:items-end gap-2"
                     >
+                      {/* Honeypot — hidden from real users, bots that fill
+                          every field blindly will trip it. */}
+                      <input
+                        type="text"
+                        name="website"
+                        value={honeypot}
+                        onChange={(e) => setHoneypot(e.target.value)}
+                        tabIndex={-1}
+                        autoComplete="off"
+                        aria-hidden="true"
+                        className="absolute opacity-0 pointer-events-none w-px h-px overflow-hidden"
+                      />
                       <div className="flex w-full gap-2">
                         <input
                           type="tel"
@@ -87,6 +100,7 @@ export default function CtaBanner() {
                           value={phone}
                           onChange={(e) => setPhone(e.target.value)}
                           placeholder="Your 10-digit mobile number"
+                          aria-label="Your 10-digit mobile number"
                           className="flex-1 min-w-0 bg-cream border-0 px-4 py-3 text-body-sm text-dark placeholder:text-dark/40 outline-none focus:ring-2 focus:ring-green/40"
                         />
                         <button

@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { verifyPaymentSignature, razorpayServerConfigured, fetchRazorpayPayment } from "@/lib/razorpay";
 import { pushRazorpayOrderToShopify } from "@/lib/order-bridge";
 import { shopifyAdminConfigured } from "@/lib/shopify-admin";
+import { isRateLimited, getClientIp } from "@/lib/rate-limit";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -17,6 +18,14 @@ export async function POST(req: Request) {
     return NextResponse.json(
       { error: "Razorpay is not configured on the server" },
       { status: 503 }
+    );
+  }
+
+  const ip = getClientIp(req);
+  if (isRateLimited(`razorpay-verify:${ip}`, { windowMs: 60 * 60 * 1000, max: 20 })) {
+    return NextResponse.json(
+      { error: "Too many attempts. Try again in an hour." },
+      { status: 429 }
     );
   }
 

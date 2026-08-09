@@ -34,6 +34,21 @@ export const COUPONS: Record<string, { pct: number; label: string }> = {
 export const SHIPPING_FREE_THRESHOLD = 999;
 export const SHIPPING_FLAT_RATE = 70;
 
+// ── Robustness limits ──────────────────────────────────────────────────────
+// Per-line quantity cap. Shared by computeCartTotal (below), the cart UI
+// (cart-context.tsx), and the Shopify line-item builder (shopify-admin.ts)
+// so the number a customer sees in their cart can never exceed what they're
+// actually charged/fulfilled for.
+export const MAX_QTY_PER_LINE = 99;
+// Sanity ceilings on total order value, checked server-side right before an
+// order is created. Not a real-world expectation (no genuine cart should get
+// anywhere near these) — purely a backstop against a malformed/abusive
+// request. Razorpay's cap matches the pre-existing legacy single-amount
+// path's limit; COD is capped lower since it carries no payment-verification
+// step at all (see the COD audit note this constant was added for).
+export const RAZORPAY_MAX_ORDER_RUPEES = 5_00_000;
+export const COD_MAX_ORDER_RUPEES = 50_000;
+
 export type DiscountType = "auto" | "coupon" | "none";
 
 export type CartTotal = {
@@ -63,7 +78,7 @@ export function computeCartTotal(
   for (const line of items) {
     const p = PRODUCTS.find((pr) => pr.slug === line.slug);
     if (!p) continue;
-    const qty = Math.max(0, Math.min(99, Math.floor(line.qty)));
+    const qty = Math.max(0, Math.min(MAX_QTY_PER_LINE, Math.floor(line.qty)));
     if (qty === 0) continue;
     subtotal += p.price * qty;
     lineCount += qty;
@@ -111,8 +126,14 @@ export function computeCartTotal(
   };
 }
 
-// Shipping is computed on the post-discount items total, so a customer can't
-// game the free-shipping threshold via a discount.
+// Shipping is computed on the PRE-discount item subtotal — the same number
+// the automatic-discount threshold checks — so "spend ₹999+, get free
+// shipping AND 10% off" is actually true at exactly ₹999. (A discount only
+// ever shrinks the total, so there's no way to "game" a bigger effective
+// subtotal by applying one; checking the post-discount total instead just
+// meant a cart could clear the ₹999 discount threshold and *still* get
+// charged shipping, since 10% off ₹999 drops it to ₹899 — below its own
+// threshold. That mismatch is what this comment used to justify.)
 export function computeShipping(params: {
   itemsSubtotal: number;
 }): { price: number; isFree: boolean; label: string } {
@@ -137,7 +158,7 @@ export function computeGrandTotal(
   couponCode?: string
 ) {
   const cart = computeCartTotal(items, couponCode);
-  const shipping = computeShipping({ itemsSubtotal: cart.total });
+  const shipping = computeShipping({ itemsSubtotal: cart.subtotal });
   return {
     subtotal: cart.subtotal,
     discount: cart.discount,

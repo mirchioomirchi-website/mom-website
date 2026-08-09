@@ -5,9 +5,11 @@ import {
   shopifyAdminConfigured,
   type AdminOrderLineInput,
 } from "@/lib/shopify-admin";
-import { PRODUCTS } from "@/lib/products";
-import { computeGrandTotal, SHIPPING_FREE_THRESHOLD } from "@/lib/discounts";
+import { PRODUCTS, getProduct } from "@/lib/products";
+import { computeGrandTotal, SHIPPING_FREE_THRESHOLD, COD_MAX_ORDER_RUPEES } from "@/lib/discounts";
+import { getUnavailableSlugs } from "@/lib/products-source";
 import { sendCriticalAlert } from "@/lib/email";
+import { isRateLimited, getClientIp } from "@/lib/rate-limit";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -29,22 +31,6 @@ type CodOrderBody = {
   idempotencyKey?: string;
   couponCode?: string;
 };
-
-// Same IP rate limit pattern used in /api/contact.
-type Bucket = { count: number; resetAt: number };
-const buckets = new Map<string, Bucket>();
-const WINDOW_MS = 60 * 60 * 1000;
-const MAX_REQUESTS = 10;
-function rateLimited(ip: string): boolean {
-  const now = Date.now();
-  const b = buckets.get(ip);
-  if (!b || b.resetAt < now) {
-    buckets.set(ip, { count: 1, resetAt: now + WINDOW_MS });
-    return false;
-  }
-  b.count += 1;
-  return b.count > MAX_REQUESTS;
-}
 
 function splitName(full: string): { firstName: string; lastName: string } {
   const parts = full.trim().split(/\s+/);
@@ -78,12 +64,9 @@ export async function POST(req: Request) {
     );
   }
 
-  const ip =
-    req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
-    req.headers.get("x-real-ip") ||
-    "unknown";
+  const ip = getClientIp(req);
 
-  if (rateLimited(ip)) {
+  if (isRateLimited(`cod-order:${ip}`, { windowMs: 60 * 60 * 1000, max: 10 })) {
     return NextResponse.json(
       { error: "Too many attempts. Try again in an hour." },
       { status: 429 }
@@ -111,10 +94,34 @@ export async function POST(req: Request) {
     )
     .map((it) => ({ slug: it.slug, qty: it.qty }));
 
+  // Server-authoritative stock check — same reasoning as the Razorpay order
+  // route: any client-side "sold out" state can be stale, this is the check
+  // that actually stops an unfulfillable COD order from being created.
+  const unavailable = await getUnavailableSlugs(safeItems);
+  if (unavailable.length > 0) {
+    const names = unavailable
+      .map((slug) => getProduct(slug)?.name ?? slug)
+      .join(", ");
+    return NextResponse.json(
+      {
+        error: `Sorry, this just sold out: ${names}. Please remove it from your cart and try again.`,
+      },
+      { status: 409 }
+    );
+  }
+
   const totals = computeGrandTotal(safeItems, body.couponCode);
   if (totals.lineCount === 0 || totals.grandTotal <= 0) {
     return NextResponse.json(
       { error: "Cart is empty or all items are invalid" },
+      { status: 400 }
+    );
+  }
+  // COD carries no payment-verification step at all, so it's capped lower
+  // than the Razorpay ceiling — see the constant's comment in discounts.ts.
+  if (totals.grandTotal > COD_MAX_ORDER_RUPEES) {
+    return NextResponse.json(
+      { error: "This order is too large for cash on delivery. Please use online payment or contact us." },
       { status: 400 }
     );
   }

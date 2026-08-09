@@ -15,7 +15,8 @@ const DELAY_MS = 10_000;
 export default function PromoPopup() {
   const [visible, setVisible] = useState(false);
   const [copied, setCopied] = useState(false);
-  const { phone, setPhone, status, errorMsg, submit } = useDiscountSignup("popup");
+  const { phone, setPhone, honeypot, setHoneypot, status, errorMsg, submit } =
+    useDiscountSignup("popup");
 
   useEffect(() => {
     try {
@@ -127,6 +128,18 @@ export default function PromoPopup() {
                       }}
                       className="flex flex-col gap-3"
                     >
+                      {/* Honeypot — hidden from real users, bots that fill
+                          every field blindly will trip it. */}
+                      <input
+                        type="text"
+                        name="website"
+                        value={honeypot}
+                        onChange={(e) => setHoneypot(e.target.value)}
+                        tabIndex={-1}
+                        autoComplete="off"
+                        aria-hidden="true"
+                        className="absolute opacity-0 pointer-events-none w-px h-px overflow-hidden"
+                      />
                       <input
                         type="tel"
                         inputMode="numeric"
@@ -134,6 +147,7 @@ export default function PromoPopup() {
                         value={phone}
                         onChange={(e) => setPhone(e.target.value)}
                         placeholder="Your 10-digit mobile number"
+                        aria-label="Your 10-digit mobile number"
                         className="w-full bg-cream border-0 px-4 py-3 text-body-sm text-dark placeholder:text-dark/40 outline-none focus:ring-2 focus:ring-yellow text-center"
                       />
                       <button

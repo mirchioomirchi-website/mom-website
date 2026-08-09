@@ -10,6 +10,8 @@ import Footer from "@/components/Footer";
 import { useCart } from "@/lib/cart-context";
 import { getProduct, PRODUCT_CARD_IMAGES, PDP_ACCENT_COLOR } from "@/lib/products";
 import {
+  computeCartTotal,
+  computeShipping,
   CART_DISCOUNT_PCT,
   CART_DISCOUNT_THRESHOLD,
   SHIPPING_FLAT_RATE,
@@ -18,7 +20,7 @@ import {
 import { trackViewCart } from "@/lib/analytics-events";
 
 export default function CartPageClient() {
-  const { lines, subtotal, itemCount, setQty, remove, add, goToCheckout } = useCart();
+  const { lines, itemCount, setQty, remove, add, goToCheckout } = useCart();
 
   useEffect(() => {
     if (lines.length > 0) trackViewCart(lines);
@@ -75,12 +77,22 @@ export default function CartPageClient() {
     return result.slice(0, 3);
   }, [lines]);
 
+  // Computed through the same shared functions the server re-runs
+  // authoritatively at checkout (discounts.ts) — this page used to
+  // re-implement the discount/shipping formula inline, which meant it could
+  // silently drift from the real rules if that logic ever changed here.
+  const cartTotal = useMemo(() => computeCartTotal(lines), [lines]);
+  const subtotal = cartTotal.subtotal;
   const discountProgress = Math.min(1, subtotal / CART_DISCOUNT_THRESHOLD);
-  const discountUnlocked = subtotal >= CART_DISCOUNT_THRESHOLD;
-  const discount = discountUnlocked ? Math.round(subtotal * (CART_DISCOUNT_PCT / 100)) : 0;
-  const itemsTotal = subtotal - discount;
-  const shippingFree = itemsTotal >= SHIPPING_FREE_THRESHOLD;
-  const shipping = shippingFree ? 0 : SHIPPING_FLAT_RATE;
+  const discountUnlocked = cartTotal.discount > 0;
+  const discount = cartTotal.discount;
+  const itemsTotal = cartTotal.total;
+  const shippingInfo = useMemo(
+    () => computeShipping({ itemsSubtotal: subtotal }),
+    [subtotal]
+  );
+  const shippingFree = shippingInfo.isFree;
+  const shipping = shippingInfo.price;
   const total = itemsTotal + shipping;
 
   if (itemCount === 0) {

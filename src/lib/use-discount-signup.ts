@@ -17,6 +17,13 @@ export function useDiscountSignup(source: string) {
   const [phone, setPhone] = useState("");
   const [status, setStatus] = useState<SignupStatus>("idle");
   const [errorMsg, setErrorMsg] = useState("");
+  // Honeypot — the API route already checks `body.website` and silently
+  // no-ops if it's filled in (same pattern as ContactForm.tsx), but neither
+  // surface using this hook was actually rendering the hidden field that
+  // would populate it, so the check was dead. `honeypot`/`setHoneypot` are
+  // meant to be wired to a visually-hidden input a real user would never
+  // see or fill in, but a bot filling every field blindly would.
+  const [honeypot, setHoneypot] = useState("");
 
   async function submit() {
     const digits = phone.replace(/\D/g, "").slice(-10);
@@ -31,7 +38,7 @@ export function useDiscountSignup(source: string) {
       const res = await fetch("/api/phone-signup", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ phone: digits, source }),
+        body: JSON.stringify({ phone: digits, source, website: honeypot }),
       });
       const data = (await res.json().catch(() => ({}))) as { error?: string };
       if (!res.ok) throw new Error(data.error || "Something went wrong.");
@@ -42,5 +49,5 @@ export function useDiscountSignup(source: string) {
     }
   }
 
-  return { phone, setPhone, status, errorMsg, submit };
+  return { phone, setPhone, honeypot, setHoneypot, status, errorMsg, submit };
 }
