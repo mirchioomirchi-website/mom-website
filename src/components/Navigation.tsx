@@ -1,11 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { AnimatePresence, motion } from "motion/react";
 import { useCart } from "@/lib/cart-context";
 import { SITE_WHATSAPP_NUMBER } from "@/lib/site";
+import { NAV_SCROLL_OFFSET } from "@/components/SmoothScroll";
 
 const NAV_LINKS = [
   { label: "Shop",        href: "/shop" },
@@ -24,6 +25,31 @@ const BULK_WHATSAPP_HREF = `https://wa.me/${SITE_WHATSAPP_NUMBER}?text=${encodeU
 // utilities on every link/button below.
 const NAV_ITEM_CLASS =
   "font-quirk font-medium text-[0.88rem] tracking-[0.01em] uppercase text-dark hover:text-red transition-colors duration-200";
+
+// Recipes/Ingredients are same-page anchors ("/#recipes", "/#ingredients").
+// When already on the homepage, a plain Link click doesn't cleanly land on
+// the section — Lenis owns scroll position and fights the browser's native
+// hash jump (see SmoothScroll.tsx). So on the homepage we intercept the
+// click and drive the scroll through Lenis directly; navigating in from
+// another page is left alone since SmoothScroll's own route-change effect
+// picks up the hash once the homepage mounts.
+function handleAnchorClick(e: React.MouseEvent<HTMLAnchorElement>, href: string) {
+  const hashIndex = href.indexOf("#");
+  if (hashIndex === -1) return;
+  if (typeof window === "undefined" || window.location.pathname !== "/") return;
+
+  const id = href.slice(hashIndex + 1);
+  const target = document.getElementById(id);
+  if (!target) return;
+
+  e.preventDefault();
+  if (window.__lenis) {
+    window.__lenis.scrollTo(target, { offset: -NAV_SCROLL_OFFSET });
+  } else {
+    const top = target.getBoundingClientRect().top + window.scrollY - NAV_SCROLL_OFFSET;
+    window.scrollTo({ top, behavior: "smooth" });
+  }
+}
 
 function CartIcon() {
   return (
@@ -46,12 +72,53 @@ function WaIcon() {
 export default function Navigation() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [bulkOpen, setBulkOpen] = useState(false);
+  const [navHidden, setNavHidden] = useState(false);
+  const lastScrollY = useRef(0);
   const { itemCount, openCart } = useCart();
+
+  // Hide the bar on scroll-down, bring it back on the very next scroll-up —
+  // a small threshold keeps trackpad/momentum jitter from flickering it,
+  // and it's always forced visible near the top of the page.
+  useEffect(() => {
+    lastScrollY.current = window.scrollY;
+    let ticking = false;
+
+    const onScroll = () => {
+      if (ticking) return;
+      ticking = true;
+      requestAnimationFrame(() => {
+        const currentY = window.scrollY;
+        const delta = currentY - lastScrollY.current;
+
+        if (currentY < 80) {
+          setNavHidden(false);
+        } else if (delta > 4) {
+          setNavHidden(true);
+        } else if (delta < -4) {
+          setNavHidden(false);
+        }
+
+        lastScrollY.current = currentY;
+        ticking = false;
+      });
+    };
+
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  // Keep the bar visible whenever the mobile menu or bulk popup is open —
+  // hiding it mid-interaction would be disorienting.
+  const isHidden = navHidden && !menuOpen && !bulkOpen;
 
   return (
     <>
       {/* ── NAV BAR ── */}
-      <nav className="fixed top-0 left-0 right-0 z-[100] bg-cream">
+      <nav
+        className={`fixed top-0 left-0 right-0 z-[100] bg-cream transition-transform duration-300 ease-out ${
+          isHidden ? "-translate-y-full" : "translate-y-0"
+        }`}
+      >
         {/* Shared dotted-divider pattern — also reused by CtaBanner. */}
         <div aria-hidden className="dotted-divider absolute bottom-0 left-0 right-0 pointer-events-none" />
 
@@ -71,7 +138,12 @@ export default function Navigation() {
           {/* ── DESKTOP CENTER NAV ── */}
           <div className="hidden md:flex items-center gap-10">
             {NAV_LINKS.map((link) => (
-              <Link key={link.label} href={link.href} className={NAV_ITEM_CLASS}>
+              <Link
+                key={link.label}
+                href={link.href}
+                onClick={(e) => handleAnchorClick(e, link.href)}
+                className={NAV_ITEM_CLASS}
+              >
                 {link.label}
               </Link>
             ))}
@@ -170,7 +242,10 @@ export default function Navigation() {
                 ) : (
                   <Link
                     href={link.href}
-                    onClick={() => setMenuOpen(false)}
+                    onClick={(e) => {
+                      setMenuOpen(false);
+                      handleAnchorClick(e, link.href);
+                    }}
                     className="font-quirk font-bold text-[2.2rem] tracking-[0.04em] uppercase text-dark"
                   >
                     {link.label}

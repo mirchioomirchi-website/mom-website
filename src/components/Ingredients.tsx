@@ -69,7 +69,7 @@ export default function Ingredients() {
   return (
     <section
       id="ingredients"
-      className="relative h-[90vh] flex flex-col justify-center pt-16 pb-[220px] bg-cream overflow-hidden cv-auto"
+      className="relative h-[90vh] flex flex-col justify-center pt-16 pb-[220px] bg-cream overflow-hidden cv-auto scroll-mt-[84px]"
     >
       {/* Hover overlays — full-bleed decorative ingredient scatter, one per line */}
       {LINES.map((line, i) => (

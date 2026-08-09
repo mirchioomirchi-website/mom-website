@@ -99,7 +99,7 @@ export default function Shop() {
           </ScrollReveal>
 
           <ScrollReveal className="md:hidden">
-            <h2 className="text-h2 text-pink">{mobileHeading}</h2>
+            <h2 className="text-h2 text-green">{mobileHeading}</h2>
           </ScrollReveal>
 
           <Link
@@ -199,9 +199,11 @@ export default function Shop() {
                   aria-label={`View ${jar.title}`}
                 />
                 <div
-                  className={`absolute top-0 right-0 -translate-y-1/3 translate-x-1/3 transition-all duration-300 ${
-                    isActive ? "opacity-100 scale-100" : "opacity-0 scale-75 pointer-events-none"
-                  }`}
+                  className={`absolute top-0 transition-all duration-300 ${
+                    jar.boomSide === "left"
+                      ? "left-0 -translate-y-1/3 -translate-x-1/3"
+                      : "right-0 -translate-y-1/3 translate-x-1/3"
+                  } ${isActive ? "opacity-100 scale-100" : "opacity-0 scale-75 pointer-events-none"}`}
                 >
                   {product && <JarBoom price={product.price} onAdd={() => add(jar.slug)} />}
                 </div>

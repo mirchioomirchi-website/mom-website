@@ -43,6 +43,9 @@
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeSpeed;
+    /* Fallback for touch devices (Lenis is skipped there — see
+       SmoothScroll.tsx) and the instant before it hydrates on desktop. */
+    scroll-behavior: smooth;
   }
 
   body {

@@ -211,6 +211,7 @@ export const SITE_CONTENT = {
         title: "Green Chilli Mirchi",
         bgDark: "#114A22",
         hotspot: { left: 40.7, top: 24.5, width: 18.5, height: 34.0 },
+        boomSide: "right" as const,
       },
       {
         flavor: "mixed" as const,
@@ -218,6 +219,12 @@ export const SITE_CONTENT = {
         title: "Mixed Chilli Mirchi",
         bgDark: "#B44800",
         hotspot: { left: 34.7, top: 53.3, width: 18.6, height: 35.3 },
+        // The mixed jar sits directly beside the red jar in the composite,
+        // so the default top-right badge placement lands in the gap between
+        // them and reads as floating in the middle. Anchoring it to this
+        // jar's own left edge (open space) instead keeps it clearly
+        // attached to the mixed jar.
+        boomSide: "left" as const,
       },
       {
         flavor: "red" as const,
@@ -225,6 +232,7 @@ export const SITE_CONTENT = {
         title: "Red Chilli Mirchi",
         bgDark: "#9B1E15",
         hotspot: { left: 50.9, top: 53.0, width: 18.4, height: 35.2 },
+        boomSide: "right" as const,
       },
     ],
   },

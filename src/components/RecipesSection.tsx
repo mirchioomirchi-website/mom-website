@@ -125,7 +125,7 @@ export default function RecipesSection({
   return (
     <section
       id={variant === "home" ? "recipes" : undefined}
-      className={`relative py-16 md:py-24 overflow-hidden cv-auto ${variant === "home" ? "bg-red" : ""}`}
+      className={`relative py-16 md:py-24 overflow-hidden cv-auto scroll-mt-[84px] ${variant === "home" ? "bg-red" : ""}`}
       style={variant === "pdp" ? { background: accentColor } : undefined}
     >
       <div className="max-w-[1400px] mx-auto px-5 md:px-9">

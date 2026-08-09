@@ -10,7 +10,7 @@ export default function Hero() {
 
   return (
     <section className="relative bg-cream overflow-hidden min-h-screen flex flex-col">
-      <div className="flex-1 flex items-center w-full max-w-[1400px] mx-auto px-5 md:px-9 pt-[88px] pb-16">
+      <div className="flex-1 flex items-center w-full max-w-[1400px] mx-auto px-5 md:px-9 pt-28 md:pt-36 pb-8 md:pb-10">
         {/* ───────────────────── MOBILE (< md) ───────────────────── */}
         <div className="md:hidden flex flex-col items-center text-center w-full">
           <motion.p
