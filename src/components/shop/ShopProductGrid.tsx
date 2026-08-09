@@ -77,6 +77,7 @@ export default function ShopProductGrid({ products }: { products: Product[] }) {
   // "Enter PIN code" — reuses the same Mumbai-aware /api/pincode endpoint the
   // checkout page's live serviceability check calls, so the answer here is
   // never out of sync with what checkout will actually allow.
+  const [showAvailabilityMenu, setShowAvailabilityMenu] = useState(false);
   const [showPincodeInput, setShowPincodeInput] = useState(false);
   const [pincode, setPincode] = useState("");
   const [pincodeStatus, setPincodeStatus] = useState<PincodeStatus>({ state: "idle" });
@@ -132,24 +133,43 @@ export default function ShopProductGrid({ products }: { products: Product[] }) {
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8 md:mb-12">
             <h2 className="text-h3 font-bold text-dark">{allProductsLabel}</h2>
             <div className="flex flex-col md:flex-row md:items-center gap-3 md:gap-6 text-body-sm text-dark/70">
-              <div className="relative inline-flex items-center gap-1.5">
-                <label htmlFor="shop-availability-filter" className="sr-only">
-                  {availabilityLabel}
-                </label>
-                <select
-                  id="shop-availability-filter"
-                  value={availabilityFilter}
-                  onChange={(e) =>
-                    setAvailabilityFilter(e.target.value === "in-stock" ? "in-stock" : "all")
-                  }
-                  className="appearance-none bg-transparent pr-5 text-body-sm text-dark/70 outline-none cursor-pointer"
+              <div className="relative">
+                <button
+                  type="button"
+                  onClick={() => setShowAvailabilityMenu((v) => !v)}
+                  aria-expanded={showAvailabilityMenu}
+                  aria-haspopup="listbox"
+                  className="inline-flex items-center gap-1.5 cursor-pointer"
                 >
-                  <option value="all">{availabilityLabel}: All</option>
-                  <option value="in-stock">{availabilityLabel}: In stock only</option>
-                </select>
-                <span className="pointer-events-none absolute right-0">
+                  {availabilityLabel}: {availabilityFilter === "in-stock" ? "In stock only" : "All"}
                   <ChevronDown />
-                </span>
+                </button>
+
+                {showAvailabilityMenu && (
+                  <ul
+                    role="listbox"
+                    className="absolute right-0 md:left-0 top-full mt-2 z-20 bg-cream border border-dark/10 shadow-lg py-1 w-max"
+                  >
+                    {(["all", "in-stock"] as const).map((value) => (
+                      <li key={value}>
+                        <button
+                          type="button"
+                          role="option"
+                          aria-selected={availabilityFilter === value}
+                          onClick={() => {
+                            setAvailabilityFilter(value);
+                            setShowAvailabilityMenu(false);
+                          }}
+                          className={`block w-full text-left px-4 py-2 text-body-sm hover:bg-cream-dark transition-colors cursor-pointer ${
+                            availabilityFilter === value ? "text-dark font-semibold" : "text-dark/70"
+                          }`}
+                        >
+                          {value === "in-stock" ? "In stock only" : "All"}
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                )}
               </div>
 
               <div className="relative">

@@ -116,13 +116,12 @@ export default function CtaBanner() {
                         <p role="alert" className="text-body-sm text-red">{errorMsg}</p>
                       )}
                       <p className="text-[0.72rem] text-dark/50 text-center md:text-right">
-                        By submitting, you agree to get WhatsApp/SMS updates on new
-                        batches, drops, and offers from Mirchi O Mirchi. No spam,
-                        unsubscribe anytime. See our{" "}
+                        Updates on new batches, drops, and offers from Mirchi O
+                        Mirchi. See our{" "}
                         <Link href="/privacy" className="underline hover:text-dark/70">
                           Privacy Policy
-                        </Link>
-                        .
+                        </Link>{" "}
+                        before submitting.
                       </p>
                     </form>
                   )}
