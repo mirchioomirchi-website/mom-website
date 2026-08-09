@@ -177,7 +177,7 @@ export default function Shop() {
             />
           ))}
 
-          {jars.map((jar) => {
+          {jars.map((jar, jarIndex) => {
             const product = getProduct(jar.slug);
             const isActive = hovered === jar.flavor;
             return (
@@ -198,6 +198,28 @@ export default function Shop() {
                   className="absolute inset-0"
                   aria-label={`View ${jar.title}`}
                 />
+
+                {/* Subtle passive shimmer — a light sweep that idles then
+                    crosses the jar every few seconds, staggered per jar so
+                    they don't all catch the eye at once. Purely a nudge
+                    toward the hover interaction, so it fades out the moment
+                    this jar is actually hovered. */}
+                <div
+                  className="absolute inset-0 overflow-hidden transition-opacity duration-300 pointer-events-none"
+                  style={{ opacity: isActive ? 0 : 1 }}
+                  aria-hidden="true"
+                >
+                  <div
+                    className="absolute inset-y-0 w-1/3 animate-jar-shimmer"
+                    style={{
+                      background:
+                        "linear-gradient(115deg, transparent 15%, rgba(255,255,255,0.9) 50%, transparent 85%)",
+                      mixBlendMode: "overlay",
+                      animationDelay: `${jarIndex * 1.4}s`,
+                    }}
+                  />
+                </div>
+
                 <div
                   className={`absolute top-0 transition-all duration-300 ${
                     jar.boomSide === "left"

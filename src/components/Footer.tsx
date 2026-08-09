@@ -35,7 +35,7 @@ function InstagramGlyph() {
 function SocialIcon() {
   return (
     <a
-      href="https://www.instagram.com/mirchiomirchi/"
+      href="https://www.instagram.com/mirchiomirchi.in"
       target="_blank"
       rel="noopener noreferrer"
       aria-label="Mirchi O Mirchi on Instagram"

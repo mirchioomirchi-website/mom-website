@@ -181,9 +181,9 @@ export const SITE_CONTENT = {
 
   // ─── Instagram (parallax photo scatter) ───────────────────────────────────
   instagram: {
-    handle: "@mirchiomirchi",
+    handle: "@mirchiomirchi.in",
     heading: "For more garmi",
-    href: "https://www.instagram.com/mirchiomirchi/",
+    href: "https://www.instagram.com/mirchiomirchi.in",
     images: [
       { src: "/images/social/top-left.webp", alt: "Mirchi O Mirchi on Instagram" },
       { src: "/images/social/top-right.webp", alt: "Mirchi O Mirchi on Instagram" },
