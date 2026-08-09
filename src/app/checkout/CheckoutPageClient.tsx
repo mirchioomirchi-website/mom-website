@@ -455,7 +455,11 @@ export default function CheckoutPageClient() {
         strategy="afterInteractive"
       />
       <Navigation />
-      <main className="bg-cream pt-28 md:pt-36 pb-20 md:pb-28 cv-auto">
+      <main
+        className={`bg-cream pt-28 md:pt-36 cv-auto ${
+          quickAddProducts.length === 0 ? "pb-20 md:pb-28" : "pb-8 md:pb-10"
+        }`}
+      >
         <div className="max-w-[1400px] mx-auto px-5 md:px-9">
           <div className="mb-10 md:mb-14">
             <h1 className="text-h1 text-red">Where should we send it?</h1>
@@ -596,14 +600,16 @@ export default function CheckoutPageClient() {
                     if (!p) return null;
                     return (
                       <li key={line.slug} className="flex items-center gap-3">
-                        <div className="relative w-14 h-14 shrink-0 bg-cream overflow-hidden">
-                          <Image
-                            src={PRODUCT_CARD_IMAGES[line.slug] ?? p.image}
-                            alt={p.name}
-                            fill
-                            className="object-contain p-1.5"
-                          />
-                          <span className="absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] px-1 rounded-full bg-red text-cream text-[10px] font-bold flex items-center justify-center">
+                        <div className="relative w-14 h-14 shrink-0">
+                          <div className="absolute inset-0 bg-cream overflow-hidden">
+                            <Image
+                              src={PRODUCT_CARD_IMAGES[line.slug] ?? p.image}
+                              alt={p.name}
+                              fill
+                              className="object-contain p-1.5"
+                            />
+                          </div>
+                          <span className="absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] px-1 rounded-full bg-red text-cream text-[10px] font-bold flex items-center justify-center z-10">
                             {line.qty}
                           </span>
                         </div>
@@ -720,7 +726,11 @@ export default function CheckoutPageClient() {
       </main>
 
       {quickAddProducts.length > 0 && (
-        <PdpCrossSell relatedProducts={quickAddProducts} heading="Quick add" />
+        <PdpCrossSell
+          relatedProducts={quickAddProducts}
+          heading="Quick add"
+          openCartOnAdd={false}
+        />
       )}
 
       <Footer />

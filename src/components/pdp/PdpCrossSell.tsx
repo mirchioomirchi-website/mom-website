@@ -24,7 +24,16 @@ function CartIcon() {
 // "first highlighted card" treatment in the design. Stacked (image on top,
 // details below) on mobile so nothing collides in a narrow card; back to
 // the side-by-side layout on desktop where there's room.
-export function HighlightedCard({ product }: { product: Product }) {
+export function HighlightedCard({
+  product,
+  openCartOnAdd = true,
+}: {
+  product: Product;
+  // False on checkout's Quick Add — the order summary right there already
+  // shows the cart contents, so popping the drawer open on top of it would
+  // be redundant.
+  openCartOnAdd?: boolean;
+}) {
   const { add } = useCart();
   const accentColor = product.pdpAccentColor ?? PDP_ACCENT_COLOR[product.flavor];
   return (
@@ -62,7 +71,7 @@ export function HighlightedCard({ product }: { product: Product }) {
 
         <button
           type="button"
-          onClick={() => add(product.slug)}
+          onClick={() => add(product.slug, 1, openCartOnAdd)}
           className="hidden md:inline-flex text-btn font-bold relative items-center gap-2 bg-cream text-dark px-5 py-2.5 uppercase tracking-[0.06em] hover:bg-cream/90 transition-colors cursor-pointer"
         >
           Add to Cart
@@ -71,7 +80,7 @@ export function HighlightedCard({ product }: { product: Product }) {
 
         <button
           type="button"
-          onClick={() => add(product.slug)}
+          onClick={() => add(product.slug, 1, openCartOnAdd)}
           className="md:hidden w-full inline-flex items-center justify-center gap-2 text-btn font-bold relative bg-cream text-dark px-5 py-3 uppercase tracking-[0.06em] hover:bg-cream/90 transition-colors cursor-pointer"
         >
           Add to Cart
@@ -108,12 +117,14 @@ function CollapsedCard({ product, onSelect }: { product: Product; onSelect: () =
 export default function PdpCrossSell({
   relatedProducts,
   heading,
+  openCartOnAdd = true,
 }: {
   relatedProducts: Product[];
   // Defaults to the PDP's own "You should also try" — pass a different
   // string to reuse this same card layout elsewhere (e.g. checkout's
   // "Quick add" section).
   heading?: string;
+  openCartOnAdd?: boolean;
 }) {
   const related = relatedProducts;
   const [activeIndex, setActiveIndex] = useState(0);
@@ -209,7 +220,7 @@ export default function PdpCrossSell({
                 }
               }}
             >
-              <HighlightedCard product={p} />
+              <HighlightedCard product={p} openCartOnAdd={openCartOnAdd} />
             </div>
           ))}
         </div>
@@ -217,7 +228,7 @@ export default function PdpCrossSell({
         {/* Desktop — one big highlighted card (auto-rotating) + two
             collapsed cards, click any collapsed card to bring it forward. */}
         <div className="hidden md:grid md:grid-cols-[1.7fr_1fr_1fr] md:gap-5">
-          <HighlightedCard product={activeProduct} />
+          <HighlightedCard product={activeProduct} openCartOnAdd={openCartOnAdd} />
           {others.map((p) => (
             <CollapsedCard key={p.slug} product={p} onSelect={() => handleSelect(p.slug)} />
           ))}

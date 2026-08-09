@@ -9,7 +9,6 @@ import {
   useCallback,
   ReactNode,
 } from "react";
-import { useRouter } from "next/navigation";
 import { PRODUCTS, Product } from "@/lib/products";
 import {
   trackAddToCart,
@@ -29,7 +28,11 @@ type CartContextValue = {
   lines: CartLine[];
   itemCount: number;
   subtotal: number;
-  add: (slug: string, qty?: number) => void;
+  // `openMiniCart` defaults to true (the usual "add → drawer slides in"
+  // behavior everywhere on the site). Pass false from a context that
+  // already shows the cart contents inline (e.g. checkout's own order
+  // summary), where popping the drawer open on top would be redundant.
+  add: (slug: string, qty?: number, openMiniCart?: boolean) => void;
   remove: (slug: string) => void;
   setQty: (slug: string, qty: number) => void;
   clear: () => void;
@@ -47,7 +50,6 @@ const CartContext = createContext<CartContextValue | null>(null);
 const LINES_KEY = "mom-cart-v1";
 
 export function CartProvider({ children }: { children: ReactNode }) {
-  const router = useRouter();
   const [lines, setLines] = useState<CartLine[]>([]);
   const [hydrated, setHydrated] = useState(false);
   const [miniOpen, setMiniOpen] = useState(false);
@@ -71,7 +73,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
     } catch {}
   }, [lines, hydrated]);
 
-  const add = useCallback((slug: string, qty: number = 1) => {
+  const add = useCallback((slug: string, qty: number = 1, openMiniCart: boolean = true) => {
     setLines((prev) => {
       const existing = prev.find((l) => l.slug === slug);
       if (existing) {
@@ -81,8 +83,10 @@ export function CartProvider({ children }: { children: ReactNode }) {
     });
     const product = PRODUCTS.find((p) => p.slug === slug);
     if (product) {
-      setMiniProduct(product);
-      setMiniOpen(true);
+      if (openMiniCart) {
+        setMiniProduct(product);
+        setMiniOpen(true);
+      }
       trackAddToCart(product, qty);
     }
   }, []);

@@ -38,12 +38,9 @@ export default function CtaBanner() {
           <ScrollReveal>
             <div className="bg-cream-dark px-6 md:px-14 py-10 md:py-12">
               <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6 md:gap-10">
-                <h2 className="text-h2 text-green text-center md:text-left shrink-0">
-                  {heading}
-                </h2>
-
-                <div className="flex flex-col items-center md:items-end gap-5 w-full md:w-auto md:max-w-sm">
-                  <p className="text-body text-dark/80 text-center md:text-right">
+                <div className="text-center md:text-left shrink-0">
+                  <h2 className="text-h2 text-green">{heading}</h2>
+                  <p className="text-body text-dark/80 mt-2">
                     <span className="md:hidden">{bodyMobile}</span>
                     <span className="hidden md:block">
                       {bodyDesktopLines.map((line) => (
@@ -53,7 +50,9 @@ export default function CtaBanner() {
                       ))}
                     </span>
                   </p>
+                </div>
 
+                <div className="flex flex-col items-center md:items-end gap-5 w-full md:w-auto md:max-w-sm shrink-0">
                   {status === "done" ? (
                     <div className="w-full flex flex-col items-center md:items-end gap-2">
                       <p className="text-body-sm text-dark/70 text-center md:text-right">
