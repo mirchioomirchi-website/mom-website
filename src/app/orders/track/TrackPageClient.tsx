@@ -134,31 +134,6 @@ export default function TrackPageClient() {
 
             <div className="grid md:grid-cols-2 gap-10 md:gap-16 mt-16 md:mt-20">
               <ScrollReveal>
-                <h2 className="text-body font-bold text-red mb-1">{lostOrder.heading}</h2>
-                <p className="text-body text-dark max-w-sm mb-8">
-                  Email{" "}
-                  <a
-                    href={`mailto:${SITE_SUPPORT_EMAIL}`}
-                    className="text-dark underline underline-offset-2 hover:text-red transition-colors"
-                  >
-                    {SITE_SUPPORT_EMAIL}
-                  </a>{" "}
-                  {lostOrder.note}
-                </p>
-
-                <p className="text-body font-bold text-red mb-1">Chat on Whatsapp</p>
-                <a
-                  href={`https://wa.me/${SITE_WHATSAPP_NUMBER}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="block text-xl font-bold text-dark hover:text-red transition-colors"
-                >
-                  {SITE_SUPPORT_PHONE}
-                </a>
-                <p className="text-body-sm text-dark/60 mt-2">{SITE_SUPPORT_HOURS}</p>
-              </ScrollReveal>
-
-              <ScrollReveal delay={0.08}>
                 <form
                   onSubmit={handleSubmit}
                   noValidate
@@ -204,6 +179,31 @@ export default function TrackPageClient() {
                     {loading ? "Looking it up…" : form.submitLabel}
                   </button>
                 </form>
+              </ScrollReveal>
+
+              <ScrollReveal delay={0.08}>
+                <h2 className="text-body font-bold text-red mb-1">{lostOrder.heading}</h2>
+                <p className="text-body text-dark max-w-sm mb-8">
+                  Email{" "}
+                  <a
+                    href={`mailto:${SITE_SUPPORT_EMAIL}`}
+                    className="text-dark underline underline-offset-2 hover:text-red transition-colors"
+                  >
+                    {SITE_SUPPORT_EMAIL}
+                  </a>{" "}
+                  {lostOrder.note}
+                </p>
+
+                <p className="text-body font-bold text-red mb-1">Chat on Whatsapp</p>
+                <a
+                  href={`https://wa.me/${SITE_WHATSAPP_NUMBER}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="block text-xl font-bold text-dark hover:text-red transition-colors"
+                >
+                  {SITE_SUPPORT_PHONE}
+                </a>
+                <p className="text-body-sm text-dark/60 mt-2">{SITE_SUPPORT_HOURS}</p>
               </ScrollReveal>
             </div>
 

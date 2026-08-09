@@ -21,7 +21,7 @@ export default function FaqAccordionItem({ q, a }: { q: string; a: string }) {
         aria-expanded={open}
         className="w-full flex items-center justify-between gap-4 py-5 text-left cursor-pointer"
       >
-        <span className="text-lg md:text-xl font-semibold text-dark">{q}</span>
+        <span className="text-lg md:text-xl font-medium text-dark">{q}</span>
         <span
           className={`shrink-0 text-red transition-transform duration-300 ${open ? "rotate-180" : ""}`}
         >

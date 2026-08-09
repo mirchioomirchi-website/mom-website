@@ -235,7 +235,7 @@ export default function Navigation() {
                       setMenuOpen(false);
                       setBulkOpen(true);
                     }}
-                    className="font-quirk font-bold text-[2.2rem] tracking-[0.04em] uppercase text-dark bg-transparent border-none cursor-pointer"
+                    className="font-quirk font-medium text-[2.2rem] tracking-[0.04em] uppercase text-dark bg-transparent border-none cursor-pointer"
                   >
                     {link.label}
                   </button>
@@ -246,7 +246,7 @@ export default function Navigation() {
                       setMenuOpen(false);
                       handleAnchorClick(e, link.href);
                     }}
-                    className="font-quirk font-bold text-[2.2rem] tracking-[0.04em] uppercase text-dark"
+                    className="font-quirk font-medium text-[2.2rem] tracking-[0.04em] uppercase text-dark"
                   >
                     {link.label}
                   </Link>

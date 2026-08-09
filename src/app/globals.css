@@ -229,15 +229,16 @@
 }
 
 /* A soft glow-pulse on the jar's own cutout art (not a generic rectangle) —
-   fades faintly in with a very slight scale-up, then back out. Reads as a
-   shimmer because it's the actual colored jar silhouette breathing, not an
-   abstract shape crossing a hotspot box. */
+   brightens in with a soft outward bloom, then fades back out. Deliberately
+   opacity/filter only, no transform: scaling a translucent duplicate over
+   its own static original always shows a ghosted double edge, since every
+   edge pixel physically moves outward from whatever origin is chosen. A
+   drop-shadow bloom reads as the jar "lighting up" without moving a pixel. */
 @keyframes jar-tease {
-  0%, 55%   { opacity: 0;    transform: scale(1); }
-  66%       { opacity: 0.55; transform: scale(1.03); }
-  78%       { opacity: 0.55; transform: scale(1.03); }
-  92%       { opacity: 0;    transform: scale(1); }
-  100%      { opacity: 0;    transform: scale(1); }
+  0%, 50%   { opacity: 0;    filter: brightness(1) drop-shadow(0 0 0 rgba(255, 243, 215, 0)); }
+  65%       { opacity: 0.7;  filter: brightness(1.18) drop-shadow(0 0 16px rgba(255, 243, 215, 0.65)); }
+  80%       { opacity: 0.7;  filter: brightness(1.18) drop-shadow(0 0 16px rgba(255, 243, 215, 0.65)); }
+  95%, 100% { opacity: 0;    filter: brightness(1) drop-shadow(0 0 0 rgba(255, 243, 215, 0)); }
 }
 
 /* ============================================

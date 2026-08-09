@@ -182,19 +182,22 @@ export default function Shop() {
           ))}
 
           {/* Passive tease — the same colored cutout art (not a generic
-              rectangle), breathing in at low opacity with a very slight
-              scale-up before fading back out, one jar at a time. Reads as a
-              soft shimmer/glow on the jar itself since it follows the jar's
-              actual silhouette. Discovering the hover interaction on any jar
-              retires this for good — the visitor doesn't need the hint
-              anymore.
+              rectangle), glowing/brightening in at low opacity before
+              fading back out, one jar at a time. Reads as a shimmer on the
+              jar itself since it follows the jar's actual silhouette.
 
-              transformOrigin is pinned to each jar's own hotspot center
-              (not the image's default center) — scaling around the whole
-              canvas's center would grow *and* shift the jar sideways since
-              the jar isn't centered in the full 2400x1603 photo, which is
-              what caused the doubled/ghosted edge look. Scaling from the
-              jar's own center keeps it anchored in place while it grows. */}
+              Deliberately NOT scaling this: the base photo is one flat
+              baked-in image, so overlaying an enlarged translucent copy of
+              the same art on top of it always shows a ghosted double edge
+              (every edge pixel physically moves outward from the scale
+              origin — no origin choice avoids that, it's inherent to
+              scaling a raster copy over its own unscaled original). A
+              brightness + soft drop-shadow bloom gives the same "the jar is
+              growing in presence" read without moving a single pixel, so
+              there's nothing to misalign or ghost.
+
+              Discovering the hover interaction on any jar retires this for
+              good — the visitor doesn't need the hint anymore. */}
           {!everHovered &&
             jars.map((jar, jarIndex) => (
               <Image
@@ -205,12 +208,7 @@ export default function Shop() {
                 unoptimized
                 aria-hidden="true"
                 className="object-contain pointer-events-none animate-jar-tease opacity-0"
-                style={{
-                  transformOrigin: `${jar.hotspot.left + jar.hotspot.width / 2}% ${
-                    jar.hotspot.top + jar.hotspot.height / 2
-                  }%`,
-                  animationDelay: `${jarIndex * 1.8}s`,
-                }}
+                style={{ animationDelay: `${jarIndex * 1.7}s` }}
               />
             ))}
 
