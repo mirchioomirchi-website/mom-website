@@ -1,32 +1,18 @@
 import { NextResponse } from "next/server";
 import { checkPincode } from "@/lib/shiprocket";
+import { isRateLimited, getClientIp } from "@/lib/rate-limit";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 // Per-IP rate limit (in-memory) to stop someone hammering the Shiprocket
 // API through us.
-type Bucket = { count: number; resetAt: number };
-const buckets = new Map<string, Bucket>();
 const WINDOW_MS = 60 * 1000;
 const MAX_REQUESTS = 30;
-function rateLimited(ip: string): boolean {
-  const now = Date.now();
-  const b = buckets.get(ip);
-  if (!b || b.resetAt < now) {
-    buckets.set(ip, { count: 1, resetAt: now + WINDOW_MS });
-    return false;
-  }
-  b.count += 1;
-  return b.count > MAX_REQUESTS;
-}
 
 export async function GET(req: Request) {
-  const ip =
-    req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
-    req.headers.get("x-real-ip") ||
-    "unknown";
-  if (rateLimited(ip)) {
+  const ip = getClientIp(req);
+  if (isRateLimited(`pincode:${ip}`, { windowMs: WINDOW_MS, max: MAX_REQUESTS })) {
     return NextResponse.json(
       { error: "Too many requests. Try again in a minute." },
       { status: 429 }

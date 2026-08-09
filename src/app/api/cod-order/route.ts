@@ -12,6 +12,7 @@ import { getUnavailableSlugs } from "@/lib/products-source";
 import { sendCriticalAlert } from "@/lib/email";
 import { isRateLimited, getClientIp } from "@/lib/rate-limit";
 import { isMumbaiPincode, OUTSIDE_MUMBAI_MESSAGE } from "@/lib/shiprocket";
+import { tryReserveCoupon, releaseCouponReservation, couponLockKeyFor } from "@/lib/coupon-lock";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -164,9 +165,24 @@ export async function POST(req: Request) {
   // enforcement: reject if this email or phone already has an order tagged
   // with this coupon. Checked here rather than left to the client so it
   // can't be bypassed by simply not showing the "already used" state.
+  //
+  // Also grabs the same short-lived reservation used by the Razorpay-order
+  // route (src/lib/coupon-lock.ts) so a concurrent Razorpay checkout with
+  // the same code+customer can't slip through in the gap between this check
+  // and the order actually being created below — COD's own gap is already
+  // narrow (synchronous, same request), but the code is shared across
+  // channels so the lock needs to be too.
+  let couponLockKey: string | undefined;
   if (totals.couponCode) {
     const alreadyUsed = await hasUsedCoupon({ email, phone, code: totals.couponCode });
     if (alreadyUsed) {
+      return NextResponse.json(
+        { error: `You've already used ${totals.couponCode}. It's valid once per customer.` },
+        { status: 400 }
+      );
+    }
+    couponLockKey = couponLockKeyFor(totals.couponCode, email, phone);
+    if (!tryReserveCoupon(couponLockKey, 2 * 60 * 1000)) {
       return NextResponse.json(
         { error: `You've already used ${totals.couponCode}. It's valid once per customer.` },
         { status: 400 }
@@ -220,6 +236,12 @@ export async function POST(req: Request) {
     totalRupees: totals.grandTotal,
     codReference,
   });
+
+  // COD creates the order synchronously in this same request (unlike
+  // Razorpay, which waits on payment) — nothing after this point can still
+  // race on this coupon, so release the reservation immediately rather than
+  // holding it the full 2 minutes and blocking a legitimate retry.
+  if (couponLockKey) releaseCouponReservation(couponLockKey);
 
   if (!result.ok) {
     console.error("[cod-order] failed", result.reason);

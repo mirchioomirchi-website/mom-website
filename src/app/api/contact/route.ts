@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { Resend } from "resend";
+import { isRateLimited, getClientIp } from "@/lib/rate-limit";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -20,21 +21,8 @@ const ADMIN = process.env.RESEND_ADMIN_EMAIL || "contact@mirchiomirchi.com";
 // Tiny in-memory IP rate limit. Won't survive across serverless instances but
 // catches the obvious single-instance spam. Real abuse protection lives at the
 // edge / CDN; this is just an honest-effort cap.
-type Bucket = { count: number; resetAt: number };
-const buckets = new Map<string, Bucket>();
 const WINDOW_MS = 60 * 60 * 1000;
 const MAX_REQUESTS = 6;
-
-function rateLimited(ip: string): boolean {
-  const now = Date.now();
-  const b = buckets.get(ip);
-  if (!b || b.resetAt < now) {
-    buckets.set(ip, { count: 1, resetAt: now + WINDOW_MS });
-    return false;
-  }
-  b.count += 1;
-  return b.count > MAX_REQUESTS;
-}
 
 function escapeHtml(s: string): string {
   return s
@@ -45,12 +33,9 @@ function escapeHtml(s: string): string {
 }
 
 export async function POST(req: Request) {
-  const ip =
-    req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
-    req.headers.get("x-real-ip") ||
-    "unknown";
+  const ip = getClientIp(req);
 
-  if (rateLimited(ip)) {
+  if (isRateLimited(`contact:${ip}`, { windowMs: WINDOW_MS, max: MAX_REQUESTS })) {
     return NextResponse.json(
       { error: "Too many messages. Try again in an hour." },
       { status: 429 }
@@ -82,14 +67,15 @@ export async function POST(req: Request) {
   }
 
   if (!KEY) {
-    // Email transport not configured — accept the message and log it so a
-    // legit attempt isn't bounced. Razorpay reviewers will not test deeply.
-    console.log("[contact] no RESEND_API_KEY — message dropped:", {
-      ip,
-      name,
-      email,
-      subject,
-    });
+    // Email transport not configured — accept the message so the user isn't
+    // bounced, but this is a live footgun: if RESEND_API_KEY is ever unset
+    // in production, every contact submission silently vanishes while the
+    // visitor sees success. console.error (not .log) so it's impossible to
+    // miss in Vercel's function logs / any log-level alerting.
+    console.error(
+      "[contact] ⚠️ RESEND_API_KEY is not set — message ACCEPTED but NOT SENT:",
+      { ip, name, email, subject }
+    );
     return NextResponse.json({ ok: true });
   }
 

@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { Resend } from "resend";
+import { isRateLimited, getClientIp } from "@/lib/rate-limit";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -14,21 +15,8 @@ const ADMIN = process.env.RESEND_ADMIN_EMAIL || "contact@mirchiomirchi.com";
 // https://resend.com/audiences → create audience → copy the ID.
 const AUDIENCE_ID = process.env.RESEND_AUDIENCE_ID;
 
-type Bucket = { count: number; resetAt: number };
-const buckets = new Map<string, Bucket>();
 const WINDOW_MS = 60 * 60 * 1000;
 const MAX_REQUESTS = 10;
-
-function rateLimited(ip: string): boolean {
-  const now = Date.now();
-  const b = buckets.get(ip);
-  if (!b || b.resetAt < now) {
-    buckets.set(ip, { count: 1, resetAt: now + WINDOW_MS });
-    return false;
-  }
-  b.count += 1;
-  return b.count > MAX_REQUESTS;
-}
 
 function escapeHtml(s: string): string {
   return s
@@ -39,12 +27,9 @@ function escapeHtml(s: string): string {
 }
 
 export async function POST(req: Request) {
-  const ip =
-    req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
-    req.headers.get("x-real-ip") ||
-    "unknown";
+  const ip = getClientIp(req);
 
-  if (rateLimited(ip)) {
+  if (isRateLimited(`newsletter:${ip}`, { windowMs: WINDOW_MS, max: MAX_REQUESTS })) {
     return NextResponse.json({ error: "Slow down — try again later." }, { status: 429 });
   }
 
@@ -68,7 +53,13 @@ export async function POST(req: Request) {
   }
 
   if (!KEY) {
-    console.log("[newsletter] no RESEND_API_KEY — signup logged only:", { ip, email, source });
+    // Same footgun as /api/contact — accept-and-log so the visitor isn't
+    // bounced, but console.error so a missing key in production is loud in
+    // the logs instead of silently dropping every signup.
+    console.error(
+      "[newsletter] ⚠️ RESEND_API_KEY is not set — signup ACCEPTED but NOT SENT:",
+      { ip, email, source }
+    );
     return NextResponse.json({ ok: true });
   }
 

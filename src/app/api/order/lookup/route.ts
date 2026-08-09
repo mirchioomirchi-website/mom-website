@@ -1,25 +1,14 @@
 import { NextResponse } from "next/server";
 import { lookupOrder, shopifyAdminConfigured } from "@/lib/shopify-admin";
+import { isRateLimited, getClientIp } from "@/lib/rate-limit";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 // Per-IP rate limit. Order lookup is unauthenticated by design (customer
 // types order # + email), so we throttle hard to prevent enumeration.
-type Bucket = { count: number; resetAt: number };
-const buckets = new Map<string, Bucket>();
 const WINDOW_MS = 60 * 60 * 1000;
 const MAX_REQUESTS = 20;
-function rateLimited(ip: string): boolean {
-  const now = Date.now();
-  const b = buckets.get(ip);
-  if (!b || b.resetAt < now) {
-    buckets.set(ip, { count: 1, resetAt: now + WINDOW_MS });
-    return false;
-  }
-  b.count += 1;
-  return b.count > MAX_REQUESTS;
-}
 
 type LookupBody = {
   orderName?: string;
@@ -34,11 +23,8 @@ export async function POST(req: Request) {
     );
   }
 
-  const ip =
-    req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
-    req.headers.get("x-real-ip") ||
-    "unknown";
-  if (rateLimited(ip)) {
+  const ip = getClientIp(req);
+  if (isRateLimited(`order-lookup:${ip}`, { windowMs: WINDOW_MS, max: MAX_REQUESTS })) {
     return NextResponse.json(
       { error: "Too many lookups. Please try again in an hour." },
       { status: 429 }

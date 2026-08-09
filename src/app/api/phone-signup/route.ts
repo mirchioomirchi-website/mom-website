@@ -68,12 +68,14 @@ export async function POST(req: Request) {
   }
 
   if (!KEY) {
-    console.log("[phone-signup] no RESEND_API_KEY — signup logged only:", {
-      ip,
-      phone,
-      source,
-      shopifyCustomerSaved: shopifyResult.ok,
-    });
+    // Lower risk than /api/contact or /api/newsletter since the Shopify
+    // customer record above is the durable copy — but still worth a loud
+    // log rather than a quiet one if the admin notification email is
+    // silently going nowhere.
+    console.error(
+      "[phone-signup] ⚠️ RESEND_API_KEY is not set — notification email NOT SENT (Shopify record still saved):",
+      { ip, phone, source, shopifyCustomerSaved: shopifyResult.ok }
+    );
     return NextResponse.json({ ok: true });
   }
 

@@ -5,6 +5,7 @@
 
 import {
   createPaidOrder,
+  hasUsedCoupon,
   shopifyAdminConfigured,
   type CreateOrderResult,
   type AdminOrderLineInput,
@@ -90,14 +91,52 @@ export async function pushRazorpayOrderToShopify(
   // but we attach a `flagged-mismatch` tag + spelled-out note so the order
   // is filterable in Shopify Admin and the founder can investigate.
   const isMismatched = mismatchRupees > 1;
-  const extraTags = isMismatched ? ["flagged-mismatch"] : [];
-  const extraNote = isMismatched
-    ? ` [AMOUNT MISMATCH: paid ₹${paidRupees} vs expected ₹${expectedTotal} (Δ ₹${mismatchRupees})]`
-    : "";
+
+  // Coupon-reuse safety net. /api/razorpay/order already checks
+  // hasUsedCoupon() (and holds a short-lived reservation, see
+  // src/lib/coupon-lock.ts) before payment even starts, so this should
+  // essentially never fire — but this is the authoritative point where the
+  // order is actually about to be written, several seconds to minutes after
+  // that first check, so we re-verify against Shopify itself right here. We
+  // do NOT block order creation on this: the customer has already paid, and
+  // refusing to create their order would be a much worse outcome than a rare
+  // extra 5% discount slipping through. Instead, same treatment as an amount
+  // mismatch — tag + note it so it's visible in Shopify Admin and the
+  // founder can decide whether to act on it.
+  let couponReused = false;
+  if (appliedCouponCode) {
+    try {
+      couponReused = await hasUsedCoupon({
+        email: notes.email,
+        phone: notes.phone,
+        code: appliedCouponCode,
+      });
+    } catch (err) {
+      console.error("[order-bridge] coupon-reuse re-check threw", err);
+      couponReused = false; // fail open, consistent with hasUsedCoupon itself
+    }
+  }
+
+  const extraTags = [
+    ...(isMismatched ? ["flagged-mismatch"] : []),
+    ...(couponReused ? ["flagged-coupon-reuse"] : []),
+  ];
+  const extraNote =
+    (isMismatched
+      ? ` [AMOUNT MISMATCH: paid ₹${paidRupees} vs expected ₹${expectedTotal} (Δ ₹${mismatchRupees})]`
+      : "") +
+    (couponReused
+      ? ` [COUPON REUSE: ${appliedCouponCode} appears to have already been used by this customer — order still created since payment was already captured, please review]`
+      : "");
 
   if (isMismatched) {
     console.warn(
       `[order-bridge] AMOUNT MISMATCH on ${input.razorpayPaymentId}: paid ₹${paidRupees} vs expected ₹${expectedTotal}. Order tagged flagged-mismatch.`
+    );
+  }
+  if (couponReused) {
+    console.warn(
+      `[order-bridge] COUPON REUSE on ${input.razorpayPaymentId}: ${appliedCouponCode} already used by this customer. Order tagged flagged-coupon-reuse.`
     );
   }
 
