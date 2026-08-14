@@ -244,7 +244,10 @@ export default function CheckoutPageClient() {
     return Object.keys(e).length === 0;
   }
 
-  async function handleCod() {
+  // Shared lead-in for both payment paths: reset error state, persist the
+  // shipping form for next time, and fire the two analytics events every
+  // checkout attempt needs regardless of which payment method is chosen.
+  function startCheckoutAttempt(method: PaymentMethod) {
     setSubmitError(null);
     setPaying(true);
     try {
@@ -252,7 +255,11 @@ export default function CheckoutPageClient() {
     } catch {}
 
     trackAddShippingInfo(lines, total, shippingFree ? "free" : "flat_rate");
-    trackAddPaymentInfo(lines, total, "cod");
+    trackAddPaymentInfo(lines, total, method);
+  }
+
+  async function handleCod() {
+    startCheckoutAttempt("cod");
 
     try {
       const res = await fetch("/api/cod-order", {
@@ -300,15 +307,7 @@ export default function CheckoutPageClient() {
   }
 
   async function handleRazorpay() {
-    setSubmitError(null);
-    setPaying(true);
-
-    try {
-      localStorage.setItem(PERSIST_KEY, JSON.stringify(shipping));
-    } catch {}
-
-    trackAddShippingInfo(lines, total, shippingFree ? "free" : "flat_rate");
-    trackAddPaymentInfo(lines, total, "razorpay");
+    startCheckoutAttempt("razorpay");
 
     // Build compact notes for Razorpay (max 256 chars per value, 15 keys —
     // the server fills in subtotal/discount/shipping/total itself, so this

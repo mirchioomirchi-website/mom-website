@@ -348,18 +348,37 @@ function toLineItems(lines: AdminOrderLineInput[]) {
   });
 }
 
-// ── Public: createPaidOrder ───────────────────────────────────────────────
-
-export async function createPaidOrder(
-  input: CreatePaidOrderInput
-): Promise<CreateOrderResult> {
+// ── Shared: build + submit an order, used by both createPaidOrder and
+// createPendingOrder ────────────────────────────────────────────────────
+//
+// Both callers do the same idempotency-check → build order → mutate →
+// parse-result dance, differing only in tag/note/tags, whether a payment
+// `transactions` entry is attached, and (previously) whether a discount was
+// applied. That last one was a real bug: createPendingOrder (COD) silently
+// dropped discountRupees/discountLabel even though the COD route always
+// passes them, so a COD order placed with a coupon showed the *full*
+// pre-discount total in Shopify instead of what the customer actually owes.
+// Centralizing here means both paths get the discountCode block whenever
+// discountRupees > 0, with no way for them to drift apart again.
+async function submitOrder(params: {
+  tag: string;
+  note: string;
+  tags: string[];
+  email: string;
+  phone: string;
+  shipping: AdminAddressInput;
+  lines: AdminOrderLineInput[];
+  shippingTitle: string;
+  shippingPriceRupees: number;
+  discountRupees: number;
+  discountLabel?: string;
+  transactions?: Array<Record<string, unknown>>;
+}): Promise<CreateOrderResult> {
   if (!shopifyAdminConfigured) {
     return { ok: false, reason: "Shopify Admin not configured" };
   }
 
-  const tag = `rzp-${input.razorpayPaymentId}`.replace(/[^A-Za-z0-9_-]/g, "");
-
-  const existing = await findOrderByTag(tag);
+  const existing = await findOrderByTag(params.tag);
   if (existing) {
     return {
       ok: true,
@@ -371,32 +390,16 @@ export async function createPaidOrder(
     };
   }
 
-  const lineItems = toLineItems(input.lines);
-  const shippingAddress = toMailingAddress(input.shipping);
+  const lineItems = toLineItems(params.lines);
+  const shippingAddress = toMailingAddress(params.shipping);
   const billingAddress = shippingAddress;
 
   const shippingLines = [
     {
-      title: input.shippingTitle.slice(0, 100),
+      title: params.shippingTitle.slice(0, 100),
       priceSet: {
         shopMoney: {
-          amount: input.shippingPriceRupees.toFixed(2),
-          currencyCode: "INR",
-        },
-      },
-    },
-  ];
-
-  // The transaction is what makes Shopify recognise this as a paid order.
-  const transactions = [
-    {
-      kind: "SALE",
-      status: "SUCCESS",
-      gateway: "razorpay",
-      authorizationCode: input.razorpayPaymentId.slice(0, 256),
-      amountSet: {
-        shopMoney: {
-          amount: input.totalRupees.toFixed(2),
+          amount: params.shippingPriceRupees.toFixed(2),
           currencyCode: "INR",
         },
       },
@@ -405,31 +408,30 @@ export async function createPaidOrder(
 
   const order: Record<string, unknown> = {
     currency: "INR",
-    email: input.email.slice(0, 255),
-    phone: input.phone.slice(0, 32),
-    note: `Razorpay payment ${input.razorpayPaymentId} (order ${input.razorpayOrderId})${input.extraNote ?? ""}`,
-    tags: [
-      tag,
-      "razorpay",
-      "headless-checkout",
-      ...couponTag(input.appliedCouponCode),
-      ...(input.extraTags ?? []),
-    ],
+    email: params.email.slice(0, 255),
+    phone: params.phone.slice(0, 32),
+    note: params.note,
+    tags: params.tags,
     lineItems,
     shippingAddress,
     billingAddress,
     shippingLines,
-    transactions,
     sourceName: "mirchiomirchi.com",
   };
 
-  if (input.discountRupees > 0) {
+  // The transaction is what makes Shopify recognise this as a paid order —
+  // omitted for COD, where the order should land as financial_status: pending.
+  if (params.transactions) {
+    order.transactions = params.transactions;
+  }
+
+  if (params.discountRupees > 0) {
     order.discountCode = {
       itemFixedDiscountCode: {
-        code: (input.discountLabel || "AUTO10").slice(0, 32),
+        code: (params.discountLabel || "AUTO10").slice(0, 32),
         amountSet: {
           shopMoney: {
-            amount: input.discountRupees.toFixed(2),
+            amount: params.discountRupees.toFixed(2),
             currencyCode: "INR",
           },
         },
@@ -471,90 +473,70 @@ export async function createPaidOrder(
   };
 }
 
+// ── Public: createPaidOrder ───────────────────────────────────────────────
+
+export async function createPaidOrder(
+  input: CreatePaidOrderInput
+): Promise<CreateOrderResult> {
+  const tag = `rzp-${input.razorpayPaymentId}`.replace(/[^A-Za-z0-9_-]/g, "");
+
+  return submitOrder({
+    tag,
+    note: `Razorpay payment ${input.razorpayPaymentId} (order ${input.razorpayOrderId})${input.extraNote ?? ""}`,
+    tags: [
+      tag,
+      "razorpay",
+      "headless-checkout",
+      ...couponTag(input.appliedCouponCode),
+      ...(input.extraTags ?? []),
+    ],
+    email: input.email,
+    phone: input.phone,
+    shipping: input.shipping,
+    lines: input.lines,
+    shippingTitle: input.shippingTitle,
+    shippingPriceRupees: input.shippingPriceRupees,
+    discountRupees: input.discountRupees,
+    discountLabel: input.discountLabel,
+    // The transaction is what makes Shopify recognise this as a paid order.
+    transactions: [
+      {
+        kind: "SALE",
+        status: "SUCCESS",
+        gateway: "razorpay",
+        authorizationCode: input.razorpayPaymentId.slice(0, 256),
+        amountSet: {
+          shopMoney: {
+            amount: input.totalRupees.toFixed(2),
+            currencyCode: "INR",
+          },
+        },
+      },
+    ],
+  });
+}
+
 // ── Public: createPendingOrder (COD) ──────────────────────────────────────
 
 export async function createPendingOrder(
   input: CreatePendingOrderInput
 ): Promise<CreateOrderResult> {
-  if (!shopifyAdminConfigured) {
-    return { ok: false, reason: "Shopify Admin not configured" };
-  }
-
   const tag = `cod-${input.codReference}`.replace(/[^A-Za-z0-9_-]/g, "");
 
-  const existing = await findOrderByTag(tag);
-  if (existing) {
-    return {
-      ok: true,
-      orderId: existing.id,
-      orderName: existing.name,
-      legacyOrderId: existing.legacyResourceId,
-      statusPageUrl: existing.statusPageUrl,
-      alreadyExists: true,
-    };
-  }
-
-  const lineItems = toLineItems(input.lines);
-  const shippingAddress = toMailingAddress(input.shipping);
-  const billingAddress = shippingAddress;
-
-  const shippingLines = [
-    {
-      title: input.shippingTitle.slice(0, 100),
-      priceSet: {
-        shopMoney: {
-          amount: input.shippingPriceRupees.toFixed(2),
-          currencyCode: "INR",
-        },
-      },
-    },
-  ];
-
-  const order: Record<string, unknown> = {
-    currency: "INR",
-    email: input.email.slice(0, 255),
-    phone: input.phone.slice(0, 32),
+  return submitOrder({
+    tag,
     note: `Cash on Delivery — internal ref ${input.codReference}`,
     tags: [tag, "cod", "headless-checkout", ...couponTag(input.appliedCouponCode)],
-    lineItems,
-    shippingAddress,
-    billingAddress,
-    shippingLines,
-    // NO transactions array → order will be financial_status: pending.
-    sourceName: "mirchiomirchi.com",
-  };
-
-  const { data, errors } = await adminFetch<OrderCreateResp>(
-    ORDER_CREATE_MUTATION,
-    {
-      order,
-      options: {
-        sendReceipt: true,
-        sendFulfillmentReceipt: false,
-        inventoryBehaviour: "DECREMENT_OBEYING_POLICY",
-      },
-    }
-  );
-
-  if (!data) {
-    return { ok: false, reason: errors.join("; ") || "no data" };
-  }
-  const result = data.orderCreate;
-  if (result.userErrors.length > 0 || !result.order) {
-    const userErrs = result.userErrors
-      .map((e) => `${e.field?.join(".") ?? "?"}: ${e.message}`)
-      .join("; ");
-    return { ok: false, reason: userErrs || "no order returned" };
-  }
-
-  return {
-    ok: true,
-    orderId: result.order.id,
-    orderName: result.order.name,
-    legacyOrderId: result.order.legacyResourceId,
-    statusPageUrl: result.order.statusPageUrl,
-    alreadyExists: false,
-  };
+    email: input.email,
+    phone: input.phone,
+    shipping: input.shipping,
+    lines: input.lines,
+    shippingTitle: input.shippingTitle,
+    shippingPriceRupees: input.shippingPriceRupees,
+    discountRupees: input.discountRupees,
+    discountLabel: input.discountLabel,
+    // NO transactions → order lands as financial_status: pending.
+  });
 }
 
 // ── Public: lookup order for tracking page ────────────────────────────────
