@@ -40,7 +40,7 @@ export default function CtaBanner() {
           <ScrollReveal>
             <div className="bg-cream-dark px-6 md:px-14 py-10 md:py-12">
               <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6 md:gap-10">
-                <div className="text-center md:text-left shrink-0">
+                <div className="text-left shrink-0">
                   <h2 className="text-h2 text-green">{heading}</h2>
                   <p className="text-body text-dark/80 mt-2">
                     <span className="md:hidden">{bodyMobile}</span>
@@ -54,10 +54,10 @@ export default function CtaBanner() {
                   </p>
                 </div>
 
-                <div className="flex flex-col items-center md:items-end gap-5 w-full md:w-auto md:max-w-sm shrink-0">
+                <div className="flex flex-col items-start gap-5 w-full md:w-auto md:max-w-sm shrink-0">
                   {status === "done" ? (
-                    <div className="w-full flex flex-col items-center md:items-end gap-2">
-                      <p className="text-body-sm text-dark/70 text-center md:text-right">
+                    <div className="w-full flex flex-col items-start gap-2">
+                      <p className="text-body-sm text-dark/70 text-left">
                         You&apos;re in! Here&apos;s your code — use it at checkout:
                       </p>
                       <div className="flex items-center gap-2 w-full md:w-auto">
@@ -79,7 +79,7 @@ export default function CtaBanner() {
                         e.preventDefault();
                         void submit();
                       }}
-                      className="w-full flex flex-col items-center md:items-end gap-2"
+                      className="w-full flex flex-col items-start gap-2"
                     >
                       {/* Honeypot — hidden from real users, bots that fill
                           every field blindly will trip it. */}
@@ -115,7 +115,7 @@ export default function CtaBanner() {
                       {status === "error" && (
                         <p role="alert" className="text-body-sm text-red">{errorMsg}</p>
                       )}
-                      <p className="text-[0.72rem] text-dark/60 text-center md:text-right">
+                      <p className="text-[0.72rem] text-dark/60 text-left">
                         Updates on new batches, drops, and offers from Mirchi O
                         Mirchi. See our{" "}
                         <Link href="/privacy" className="underline hover:text-dark/70">

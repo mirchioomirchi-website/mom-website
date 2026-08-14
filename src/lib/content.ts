@@ -106,8 +106,8 @@ export const SITE_CONTENT = {
 
   // ─── Our Process (what makes us different) ────────────────────────────────
   ourProcess: {
-    eyebrowDevanagari: "आमची प्रक्रिया",
-    eyebrowEnglish: "Our Process",
+    eyebrowDevanagari: "आमची कहाणी",
+    eyebrowEnglish: "Our Story",
     heading: "What makes us different?",
     steps: [
       {
@@ -129,7 +129,7 @@ export const SITE_CONTENT = {
           "Real food expires. That's how you know it's real. Ours doesn't last years on a shelf — and we think that's exactly how it should be.",
       },
     ],
-    cta: "Know More About Us",
+    cta: "Know More",
     ctaHref: "/about",
   },
 

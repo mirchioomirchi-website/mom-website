@@ -68,7 +68,7 @@ function ProcessStep({
         }`}
       >
         <div className="overflow-hidden">
-          <p className="text-body leading-relaxed text-dark/70 pt-2 md:pt-2">
+          <p className="text-body leading-relaxed text-dark/70 pt-1 md:pt-2">
             {step.description}
           </p>
         </div>
@@ -127,11 +127,24 @@ export default function OurProcess() {
           </span>
         </ScrollReveal>
 
-        {/* Heading */}
-        <ScrollReveal delay={0.05} className="[grid-area:heading] mt-3 md:mt-4 mb-8 md:mb-0">
-          <h2 className="text-h2 max-w-[13ch] md:max-w-[8ch]">
-            {heading}
-          </h2>
+        {/* Heading — shares a row with the CTA on mobile only (heading
+            left, CTA right, bottom-aligned) so the CTA doesn't need its
+            own separate row before the steps list, and the gap down to
+            the video can stay tight. Desktop keeps them apart — the CTA
+            stays in its own [grid-area:cta] below the steps, where
+            there's plenty of vertical room. */}
+        <ScrollReveal delay={0.05} className="[grid-area:heading] mt-3 md:mt-4 mb-3 md:mb-0">
+          <div className="flex items-end justify-between gap-4">
+            <h2 className="text-h2 max-w-[13ch] md:max-w-[8ch]">
+              {heading}
+            </h2>
+            <Link
+              href={ctaHref}
+              className="md:hidden shrink-0 text-btn inline-flex items-center gap-1.5 underline decoration-pink decoration-2 underline-offset-4 hover:text-pink transition-colors whitespace-nowrap"
+            >
+              {cta}
+            </Link>
+          </div>
         </ScrollReveal>
 
         {/* Video — real multi-angle mortar footage, loop/muted, no controls.
@@ -155,7 +168,7 @@ export default function OurProcess() {
         </ScrollReveal>
 
         {/* Numbered steps */}
-        <div className="[grid-area:steps] flex flex-col gap-8 md:gap-10">
+        <div className="[grid-area:steps] flex flex-col gap-5 md:gap-10">
           {steps.map((step, i) => (
             <ScrollReveal key={step.number} delay={0.1 + i * 0.08}>
               <ProcessStep
@@ -164,23 +177,24 @@ export default function OurProcess() {
                 onToggle={() => setOpenStep((cur) => (cur === i ? null : i))}
               />
               {i < steps.length - 1 && (
-                <div className="dotted-divider text-green/40 mt-8 md:mt-10" />
+                <div className="dotted-divider text-green/40 mt-5 md:mt-10" />
               )}
             </ScrollReveal>
           ))}
         </div>
 
-        {/* CTA */}
+        {/* CTA — desktop only; mobile shows this inline with the heading
+            above instead (see the [grid-area:heading] block). */}
         <ScrollReveal
           delay={0.2}
-          className="[grid-area:cta] mt-6 md:mt-14 text-center md:text-left"
+          className="hidden md:block [grid-area:cta] md:mt-14 md:text-left"
         >
           <Link
             href={ctaHref}
             className="text-btn inline-flex items-center gap-1.5 underline decoration-pink decoration-2 underline-offset-4 hover:text-pink transition-colors"
           >
             {cta}
-            <span aria-hidden="true" className="hidden md:inline">
+            <span aria-hidden="true" className="inline no-underline">
               →
             </span>
           </Link>
