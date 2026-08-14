@@ -12,6 +12,16 @@ export type Product = {
   image: string;
   speech: string;
   ingredients: string[];
+  // True only when Shopify was reached AND its "ingredients" metafield came
+  // back null/empty for this product — an explicit live signal, not just
+  // "field not set up yet". Lets a product (the Combo Pack, whose
+  // `ingredients` list above is really "which jars are inside" rather than
+  // real food ingredients) opt out of the PDP ingredients banner entirely by
+  // simply leaving that Shopify metafield blank, without having to touch
+  // code. Undefined/false on the static fallback and whenever Shopify is
+  // unreachable — fails open (banner stays visible) rather than hiding
+  // content because of an outage.
+  hideIngredients?: boolean;
   isCombo?: boolean;
   // ── PDP-specific fields ──────────────────────────────────────────────
   // Free-text heat label shown on the product page (e.g. "Medium - Hot").

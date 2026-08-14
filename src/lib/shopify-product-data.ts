@@ -144,6 +144,31 @@ type AllProductsFullResp = {
   };
 };
 
+// Shopify's rich-text description field always comes back as HTML —
+// its editor wraps content in <p> tags even for a single line the moment
+// it's been through the rich-text toolbar, so "clean" in the Shopify admin
+// preview doesn't mean clean in the underlying body_html. Every consumer of
+// descriptionHtml on the site (PDP copy, shop/cart card blurbs, meta
+// description, JSON-LD) treats it as plain text via `{}` interpolation, not
+// dangerouslySetInnerHTML — so raw markup would otherwise leak onto the
+// page as literal "<p>...</p>". Strip tags, turn block-level breaks into
+// spaces, and decode the handful of entities Shopify actually emits.
+function stripHtml(html: string): string {
+  if (!html) return html;
+  return html
+    .replace(/<\/(p|div|li)>/gi, " ")
+    .replace(/<br\s*\/?>/gi, " ")
+    .replace(/<[^>]+>/g, "")
+    .replace(/&nbsp;/g, " ")
+    .replace(/&amp;/g, "&")
+    .replace(/&#39;|&apos;/g, "'")
+    .replace(/&quot;/g, '"')
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
 function parseIngredients(raw?: string | null): string[] | null {
   if (!raw) return null;
   try {
@@ -183,7 +208,7 @@ async function fetchAllShopifyProducts(): Promise<
     map.set(p.handle, {
       handle: p.handle,
       title: p.title,
-      descriptionHtml: p.descriptionHtml,
+      descriptionHtml: stripHtml(p.descriptionHtml),
       price: variant ? Number(variant.price) : null,
       compareAtPrice: variant?.compareAtPrice ? Number(variant.compareAtPrice) : null,
       available: variant?.availableForSale ?? true,

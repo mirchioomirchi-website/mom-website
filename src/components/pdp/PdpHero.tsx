@@ -120,8 +120,18 @@ export default function PdpHero({ product }: { product: Product }) {
           </p>
 
           {/* Pulled up over the closeup photo's bottom edge on mobile so it
-              reads as overlaying the image, half in/half out. */}
-          <div className="relative z-10 w-48 md:w-44 aspect-[3/4] -mt-32 md:mt-0 mb-3 md:mb-1">
+              reads as overlaying the image, half in/half out. The Combo
+              Pack's shot is three stacked jars, not one — at the same
+              width as a single-jar image each jar reads too small to make
+              out, so it gets a bigger box (and its own aspect ratio,
+              matching the real photo instead of a single jar's 3:4). */}
+          <div
+            className={`relative z-10 -mt-32 md:mt-0 mb-3 md:mb-1 ${
+              product.isCombo
+                ? "w-64 md:w-60 aspect-[428/518]"
+                : "w-48 md:w-44 aspect-[3/4]"
+            }`}
+          >
             <Image
               src={mainImage}
               alt={product.name}

@@ -46,6 +46,7 @@ function mergeProduct(p: Product, live: ShopifyProductData | undefined): Product
       live.ingredients && live.ingredients.length > 0
         ? live.ingredients
         : p.ingredients,
+    hideIngredients: !live.ingredients || live.ingredients.length === 0,
     pdpAccentColor: live.accentColor ?? p.pdpAccentColor,
     mainImage: live.mainImage ?? p.mainImage,
     closeupImage: live.imageCloseup ?? p.closeupImage,

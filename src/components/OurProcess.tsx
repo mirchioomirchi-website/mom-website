@@ -5,9 +5,77 @@ import Link from "next/link";
 import { ScrollReveal } from "@/components/primitives";
 import { SITE_CONTENT } from "@/lib/content";
 
+function ChevronIcon() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M6 9l6 6 6-6" />
+    </svg>
+  );
+}
+
+// Mobile: accordion — only the number + title show at a glance, tap to
+// reveal the description. Three full title+description blocks stacked was
+// a lot of reading before the shopper even scrolled past this section.
+// Desktop keeps the original always-expanded layout (that's `md:` forcing
+// the collapsible track back open regardless of `isOpen`, and hiding the
+// mobile-only chevron) — plenty of room there, no need to hide anything.
+function ProcessStep({
+  step,
+  isOpen,
+  onToggle,
+}: {
+  step: { number: string; title: string; description: string };
+  isOpen: boolean;
+  onToggle: () => void;
+}) {
+  return (
+    <div className="flex items-start gap-5 md:gap-6">
+      <span className="font-sura text-pink/50 text-5xl md:text-6xl leading-none shrink-0">
+        {step.number}
+      </span>
+      <div className="flex-1 min-w-0">
+        <button
+          type="button"
+          onClick={onToggle}
+          aria-expanded={isOpen}
+          className="w-full flex items-center justify-between gap-3 text-left cursor-pointer md:pointer-events-none md:cursor-auto"
+        >
+          <h3 className="text-h4 mb-2 md:mb-2">{step.title}</h3>
+          <span
+            className={`md:hidden shrink-0 text-pink mt-0.5 transition-transform duration-300 ${isOpen ? "rotate-180" : ""}`}
+            aria-hidden="true"
+          >
+            <ChevronIcon />
+          </span>
+        </button>
+        {/* No inline style here on purpose — an inline `gridTemplateRows`
+            would out-specificity `md:grid-rows-[1fr]` and force it shut on
+            desktop too. Plain conditional classes let the `md:` variant
+            win in the cascade at that breakpoint instead. */}
+        <div
+          className={`grid transition-[grid-template-rows] duration-300 ease-out md:grid-rows-[1fr] ${
+            isOpen ? "grid-rows-[1fr]" : "grid-rows-[0fr]"
+          }`}
+        >
+          <div className="overflow-hidden">
+            <p className="text-body leading-relaxed text-dark/70">
+              {step.description}
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function OurProcess() {
   const { eyebrowDevanagari, eyebrowEnglish, heading, steps, cta, ctaHref } =
     SITE_CONTENT.ourProcess;
+
+  // Mobile accordion — one step open at a time, none open by default so
+  // all three titles are visible at a glance. Irrelevant on desktop, where
+  // ProcessStep forces every description open regardless of this state.
+  const [openStep, setOpenStep] = useState<number | null>(null);
 
   // mortar.mp4 is a 21MB clip — with plain `autoPlay` the browser starts
   // fetching/buffering it near page load regardless of scroll position,
@@ -80,20 +148,12 @@ export default function OurProcess() {
         {/* Numbered steps */}
         <div className="[grid-area:steps] flex flex-col gap-8 md:gap-10">
           {steps.map((step, i) => (
-            <ScrollReveal
-              key={step.number}
-              delay={0.1 + i * 0.08}
-              className="flex items-start gap-5 md:gap-6"
-            >
-              <span className="font-sura text-pink/50 text-5xl md:text-6xl leading-none shrink-0">
-                {step.number}
-              </span>
-              <div>
-                <h3 className="text-h4 mb-2">{step.title}</h3>
-                <p className="text-body leading-relaxed text-dark/70">
-                  {step.description}
-                </p>
-              </div>
+            <ScrollReveal key={step.number} delay={0.1 + i * 0.08}>
+              <ProcessStep
+                step={step}
+                isOpen={openStep === i}
+                onToggle={() => setOpenStep((cur) => (cur === i ? null : i))}
+              />
             </ScrollReveal>
           ))}
         </div>

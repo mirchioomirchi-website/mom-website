@@ -7,20 +7,20 @@ import { SITE_CONTENT } from "@/lib/content";
 const { headingLines, subheading, eyebrowDevanagari, eyebrowEnglish } =
   SITE_CONTENT.aboutPage.hero;
 
-// 80% of the viewport tall on desktop. The heading/subheading/eyebrow sit
-// near the top (normal flow); the character is pinned absolutely to the
-// section's own bottom edge so it sits flush against the red story section
-// that follows with zero gap between them.
-// Mobile gets a shorter floor (not 92vh) and less top padding — the text
-// block is short, so a tall section just left a big dead-cream gap above
-// the character before the red section started. The character is also
-// sized up on mobile so it reads as a real illustration filling that space
-// rather than a small icon floating in the middle of it.
+// 90% of the viewport tall on mobile, 80% on desktop. The
+// heading/subheading/eyebrow sit near the top (normal flow); the character
+// is pinned absolutely to the section's own bottom edge so it sits flush
+// against the red story section that follows with zero gap between them.
+// The eyebrow-to-heading gap is tighter on mobile (gap-4) than desktop
+// (gap-10) — on desktop that gap separates two side-by-side columns, but on
+// mobile (flex-col, eyebrow stacked above the heading) the same gap read as
+// a big awkward space between two things that belong together. Character
+// is sized up on mobile so it reads as a real illustration.
 export default function AboutHero() {
   return (
-    <section className="relative bg-cream min-h-[62vh] md:min-h-[80vh] overflow-hidden pt-[110px] md:pt-[200px] cv-auto">
+    <section className="relative bg-cream min-h-[90vh] md:min-h-[80vh] overflow-hidden pt-[110px] md:pt-[200px] cv-auto">
       <div className="max-w-[1400px] mx-auto px-5 md:px-9">
-        <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-10">
+        <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4 md:gap-10">
           <ScrollReveal className="max-w-xl">
             <h1 className="text-h1 text-[2.75rem] md:text-[4rem] text-red mb-6 md:mb-8">
               {headingLines.map((line) => (

@@ -33,7 +33,7 @@ export default function ProductDetailClient({
       <main>
         <PdpHero product={product} />
         <PdpStory product={product} />
-        <PdpIngredients product={product} />
+        {!product.hideIngredients && <PdpIngredients product={product} />}
         <RecipesSection variant="pdp" accentColor={accentColor} />
         <PdpCrossSell relatedProducts={relatedProducts} />
         <Instagram />
