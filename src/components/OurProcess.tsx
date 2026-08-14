@@ -19,6 +19,13 @@ function ChevronIcon() {
 // Desktop keeps the original always-expanded layout (that's `md:` forcing
 // the collapsible track back open regardless of `isOpen`, and hiding the
 // mobile-only chevron) — plenty of room there, no need to hide anything.
+//
+// The number and title live in their own row (fixed-width number column so
+// the description below can indent to line up under the title), separate
+// from the collapsible description block — number+title is the only thing
+// that needs `items-center` alignment, and keeping the (possibly tall, once
+// open) description out of that row means opening it never re-centers the
+// number away from the title.
 function ProcessStep({
   step,
   isOpen,
@@ -29,39 +36,41 @@ function ProcessStep({
   onToggle: () => void;
 }) {
   return (
-    <div className="flex items-start gap-5 md:gap-6">
-      <span className="font-sura text-pink/50 text-5xl md:text-6xl leading-none shrink-0">
-        {step.number}
-      </span>
-      <div className="flex-1 min-w-0">
-        <button
-          type="button"
-          onClick={onToggle}
-          aria-expanded={isOpen}
-          className="w-full flex items-center justify-between gap-3 text-left cursor-pointer md:pointer-events-none md:cursor-auto"
-        >
-          <h3 className="text-h4 mb-2 md:mb-2">{step.title}</h3>
+    <div>
+      <button
+        type="button"
+        onClick={onToggle}
+        aria-expanded={isOpen}
+        className="w-full flex items-center gap-5 md:gap-6 text-left cursor-pointer md:pointer-events-none md:cursor-auto"
+      >
+        <span className="font-sura text-pink/50 text-5xl md:text-6xl leading-none shrink-0 w-14 md:w-16">
+          {step.number}
+        </span>
+        <span className="flex-1 min-w-0 flex items-center justify-between gap-3">
+          <h3 className="text-h4">{step.title}</h3>
           <span
-            className={`md:hidden shrink-0 text-pink mt-0.5 transition-transform duration-300 ${isOpen ? "rotate-180" : ""}`}
+            className={`md:hidden shrink-0 text-pink transition-transform duration-300 ${isOpen ? "rotate-180" : ""}`}
             aria-hidden="true"
           >
             <ChevronIcon />
           </span>
-        </button>
-        {/* No inline style here on purpose — an inline `gridTemplateRows`
-            would out-specificity `md:grid-rows-[1fr]` and force it shut on
-            desktop too. Plain conditional classes let the `md:` variant
-            win in the cascade at that breakpoint instead. */}
-        <div
-          className={`grid transition-[grid-template-rows] duration-300 ease-out md:grid-rows-[1fr] ${
-            isOpen ? "grid-rows-[1fr]" : "grid-rows-[0fr]"
-          }`}
-        >
-          <div className="overflow-hidden">
-            <p className="text-body leading-relaxed text-dark/70">
-              {step.description}
-            </p>
-          </div>
+        </span>
+      </button>
+      {/* No inline style here on purpose — an inline `gridTemplateRows`
+          would out-specificity `md:grid-rows-[1fr]` and force it shut on
+          desktop too. Plain conditional classes let the `md:` variant win
+          in the cascade at that breakpoint instead. Left-padded to match
+          the number column + gap above, so the text lines up under the
+          title instead of under the number. */}
+      <div
+        className={`grid transition-[grid-template-rows] duration-300 ease-out pl-[4.75rem] md:pl-[5.5rem] md:grid-rows-[1fr] ${
+          isOpen ? "grid-rows-[1fr]" : "grid-rows-[0fr]"
+        }`}
+      >
+        <div className="overflow-hidden">
+          <p className="text-body leading-relaxed text-dark/70 pt-2 md:pt-2">
+            {step.description}
+          </p>
         </div>
       </div>
     </div>
@@ -154,6 +163,9 @@ export default function OurProcess() {
                 isOpen={openStep === i}
                 onToggle={() => setOpenStep((cur) => (cur === i ? null : i))}
               />
+              {i < steps.length - 1 && (
+                <div className="dotted-divider text-green/40 mt-8 md:mt-10" />
+              )}
             </ScrollReveal>
           ))}
         </div>

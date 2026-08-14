@@ -113,11 +113,13 @@ export default function Ingredients() {
       className="relative h-auto md:h-[90vh] flex flex-col justify-center pt-8 md:pt-16 pb-16 md:pb-[220px] bg-cream overflow-hidden cv-auto scroll-mt-[84px]"
     >
       {/* Hover overlays — full-bleed decorative ingredient scatter, one per
-          line. Mobile gets its own purpose-cropped image per line (the
-          desktop art reads too small/awkward scaled straight down), swapped
-          in via CSS visibility rather than conditional rendering so both
-          stay preloaded and the opacity crossfade doesn't pop. Shown on
-          hover (desktop) or the short scroll-triggered pulse (all sizes). */}
+          line, same desktop art on every screen size now (the separate
+          mobile crop read too different from the desktop version). The
+          wrapping div spans the section's own top/bottom edges (`top-0
+          bottom-0`) and the image is `fill` + `object-cover` inside it, so
+          it's always exactly 100% of the section's height regardless of
+          viewport. Shown on hover (desktop) or the short scroll-triggered
+          pulse (all sizes). */}
       {LINES.map((line, i) => (
         <div
           key={line.overlay}
@@ -125,16 +127,7 @@ export default function Ingredients() {
           style={{ opacity: active === i ? 1 : 0 }}
           aria-hidden="true"
         >
-          <div className="md:hidden relative w-full h-full">
-            <Image
-              src={line.overlayMobile}
-              alt=""
-              fill
-              unoptimized
-              className="object-cover"
-            />
-          </div>
-          <div className="hidden md:block relative w-full h-full">
+          <div className="relative w-full h-full">
             <Image
               src={line.overlay}
               alt=""
