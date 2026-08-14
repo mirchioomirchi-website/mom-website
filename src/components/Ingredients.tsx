@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
-import { ScrollReveal } from "@/components/primitives";
+import { ScrollReveal, Eyebrow } from "@/components/primitives";
 import { SITE_CONTENT } from "@/lib/content";
 
 const LINES = SITE_CONTENT.ingredients.lines;
@@ -141,14 +141,12 @@ export default function Ingredients() {
 
       {/* Eyebrow */}
       <div className="relative w-full max-w-[1400px] mx-auto px-5 md:px-9 mb-14 md:mb-16 text-center">
-        <ScrollReveal className="inline-flex items-center gap-2.5">
-          <span className="font-sura text-pink text-[15px] md:text-base">
-            {SITE_CONTENT.ingredients.eyebrowDevanagari}
-          </span>
-          <span className="text-pink/50 text-sm">•</span>
-          <span className="font-sura text-pink text-[15px] md:text-base">
-            {SITE_CONTENT.ingredients.eyebrowEnglish}
-          </span>
+        <ScrollReveal>
+          <Eyebrow
+            devanagari={SITE_CONTENT.ingredients.eyebrowDevanagari}
+            english={SITE_CONTENT.ingredients.eyebrowEnglish}
+            color="pink"
+          />
         </ScrollReveal>
       </div>
 

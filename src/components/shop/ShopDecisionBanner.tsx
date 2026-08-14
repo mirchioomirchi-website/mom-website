@@ -2,8 +2,9 @@
 
 import { Fragment } from "react";
 import Link from "next/link";
-import { ScrollReveal } from "@/components/primitives";
+import { ScrollReveal, Eyebrow } from "@/components/primitives";
 import { SITE_CONTENT } from "@/lib/content";
+import { THEME_COLORS } from "@/lib/theme-colors";
 
 const { eyebrowDevanagari, eyebrowEnglish, columns } = SITE_CONTENT.shopPage.decisionBanner;
 
@@ -11,14 +12,13 @@ export default function ShopDecisionBanner() {
   return (
     <section className="relative bg-cream pb-14 md:pb-20 cv-auto">
       <div className="max-w-[1400px] mx-auto px-5 md:px-9">
-        <ScrollReveal>
-          <p className="font-sura text-red text-base md:text-lg flex items-center justify-center gap-2 mb-6 md:mb-8">
-            <span>{eyebrowDevanagari}</span>
-            <span aria-hidden="true" className="text-red/50">
-              ·
-            </span>
-            <span>{eyebrowEnglish}</span>
-          </p>
+        <ScrollReveal className="text-center">
+          <Eyebrow
+            devanagari={eyebrowDevanagari}
+            english={eyebrowEnglish}
+            color="red"
+            className="mb-6 md:mb-8"
+          />
         </ScrollReveal>
 
         {/* Mobile — swipeable cards: each column is its own full card, ~85%
@@ -56,8 +56,7 @@ export default function ShopDecisionBanner() {
                       alignSelf: "stretch",
                       width: "3px",
                       flexShrink: 0,
-                      backgroundImage:
-                        "radial-gradient(circle, #FFF3D7 1.5px, transparent 1.5px)",
+                      backgroundImage: `radial-gradient(circle, ${THEME_COLORS.cream} 1.5px, transparent 1.5px)`,
                       backgroundSize: "3px 13px",
                       backgroundRepeat: "repeat-y",
                       backgroundPosition: "50% 0",

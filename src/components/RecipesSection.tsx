@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
-import { ScrollReveal } from "@/components/primitives";
+import { ScrollReveal, Eyebrow } from "@/components/primitives";
 import { SITE_CONTENT } from "@/lib/content";
 
 const { eyebrowDevanagari, eyebrowEnglish, slides } = SITE_CONTENT.recipes;
@@ -134,10 +134,8 @@ export default function RecipesSection({
               content on every page it appears on; only the background
               color varies (fixed red on home, per-product accent on PDP). */}
           <div className="flex flex-col gap-6 md:gap-8 min-w-0">
-            <ScrollReveal className="flex items-center gap-2.5">
-              <span className="font-sura text-cream text-[15px] md:text-base">{eyebrowDevanagari}</span>
-              <span className="text-cream/50 text-sm">•</span>
-              <span className="font-sura text-cream text-[15px] md:text-base">{eyebrowEnglish}</span>
+            <ScrollReveal>
+              <Eyebrow devanagari={eyebrowDevanagari} english={eyebrowEnglish} color="cream" />
             </ScrollReveal>
 
             {/* Mobile — dish name + description come before the video here

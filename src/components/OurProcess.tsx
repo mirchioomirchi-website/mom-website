@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { ScrollReveal } from "@/components/primitives";
+import { ScrollReveal, Eyebrow } from "@/components/primitives";
 import { SITE_CONTENT } from "@/lib/content";
 
 function ChevronIcon() {
@@ -124,15 +124,7 @@ export default function OurProcess() {
             before the steps list. Desktop's CTA is a separate element
             entirely (see below), not part of this block. */}
         <ScrollReveal className="[grid-area:eh] flex flex-col gap-2 md:gap-2.5 mb-1 md:mb-0">
-          <div className="flex items-center gap-2.5">
-            <span className="font-sura text-pink text-[15px] md:text-base">
-              {eyebrowDevanagari}
-            </span>
-            <span className="text-pink/50 text-sm">•</span>
-            <span className="font-sura text-pink text-[15px] md:text-base">
-              {eyebrowEnglish}
-            </span>
-          </div>
+          <Eyebrow devanagari={eyebrowDevanagari} english={eyebrowEnglish} color="pink" />
           <div className="flex items-end justify-between gap-4">
             <h2 className="text-h2 max-w-[13ch] md:max-w-[8ch]">
               {heading}

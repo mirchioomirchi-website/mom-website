@@ -1,6 +1,6 @@
 "use client";
 
-import { ScrollReveal } from "@/components/primitives";
+import { ScrollReveal, Eyebrow } from "@/components/primitives";
 import { SITE_CONTENT } from "@/lib/content";
 
 const { eyebrowDevanagari, eyebrowEnglish, heading, subheading } = SITE_CONTENT.faqPage.hero;
@@ -14,9 +14,12 @@ export default function FaqHero() {
             <h1 className="order-last md:order-none text-[2.75rem] md:text-[5rem] font-bold text-green leading-[0.95]">
               {heading}
             </h1>
-            <p className="order-first md:order-none font-sura text-red text-base md:text-lg whitespace-nowrap shrink-0 md:pt-4">
-              {eyebrowDevanagari} <span aria-hidden="true">·</span> {eyebrowEnglish}
-            </p>
+            <Eyebrow
+              devanagari={eyebrowDevanagari}
+              english={eyebrowEnglish}
+              color="red"
+              className="order-first md:order-none whitespace-nowrap shrink-0 md:pt-4"
+            />
           </div>
           <p className="text-body text-dark max-w-xl">{subheading}</p>
         </ScrollReveal>

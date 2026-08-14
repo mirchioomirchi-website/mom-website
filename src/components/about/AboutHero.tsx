@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { ScrollReveal } from "@/components/primitives";
+import { ScrollReveal, Eyebrow } from "@/components/primitives";
 import { SITE_CONTENT } from "@/lib/content";
 
 const { headingLines, subheading, eyebrowDevanagari, eyebrowEnglish } =
@@ -41,13 +41,12 @@ export default function AboutHero() {
               heading; back to its normal trailing (right-hand) position
               on desktop via md:order-none. */}
           <ScrollReveal delay={0.1} className="order-first md:order-none shrink-0">
-            <p className="font-sura text-red text-base md:text-lg flex items-center gap-2 whitespace-nowrap md:justify-end">
-              <span>{eyebrowDevanagari}</span>
-              <span aria-hidden="true" className="text-red/50">
-                ·
-              </span>
-              <span>{eyebrowEnglish}</span>
-            </p>
+            <Eyebrow
+              devanagari={eyebrowDevanagari}
+              english={eyebrowEnglish}
+              color="red"
+              className="whitespace-nowrap"
+            />
           </ScrollReveal>
         </div>
       </div>

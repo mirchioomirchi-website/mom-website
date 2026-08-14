@@ -8,6 +8,7 @@ import { SITE_CONTENT } from "@/lib/content";
 import { getProduct } from "@/lib/products";
 import { useCart } from "@/lib/cart-context";
 import { HighlightedCard } from "@/components/pdp/PdpCrossSell";
+import { THEME_COLORS } from "@/lib/theme-colors";
 
 const { eyebrowDevanagari, eyebrowEnglish, mobileHeading, shopAllLabel, shopAllHref, marqueeText, jars } =
   SITE_CONTENT.shop;
@@ -76,7 +77,7 @@ export default function Shop() {
     <section
       id="shop"
       className="relative overflow-hidden cv-auto transition-colors duration-500"
-      style={{ backgroundColor: active ? active.bgDark : "#FFF3D7" }}
+      style={{ backgroundColor: active ? active.bgDark : THEME_COLORS.cream }}
     >
       <div className="relative w-full max-w-[1400px] mx-auto px-5 md:px-9 pt-10 md:pt-14 pb-16 md:pb-24">
         {/* Top row — eyebrow + Shop All link, always on top. Desktop keeps

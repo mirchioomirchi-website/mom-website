@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { ScrollReveal } from "@/components/primitives";
+import { ScrollReveal, Eyebrow } from "@/components/primitives";
 import { SITE_CONTENT } from "@/lib/content";
 import { getProduct } from "@/lib/products";
 import { useCart } from "@/lib/cart-context";
@@ -44,9 +44,7 @@ export default function ShopCombo() {
               doesn't touch the row's top/bottom edges. */}
           <div className="flex flex-col md:justify-between py-4 md:py-8">
             <ScrollReveal>
-              <p className="font-sura text-red text-base md:text-lg mb-3">
-                {eyebrow} <span aria-hidden="true">·</span> {eyebrowSecondary}
-              </p>
+              <Eyebrow devanagari={eyebrow} english={eyebrowSecondary} color="red" className="mb-3" />
               <h2 className="text-h2 font-bold text-green max-w-lg mb-4">{heading}</h2>
               <p className="text-body text-dark/70 max-w-md">{body}</p>
             </ScrollReveal>

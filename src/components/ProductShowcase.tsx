@@ -6,18 +6,21 @@ import Link from "next/link";
 import { useScroll, useMotionValueEvent } from "motion/react";
 import { useCart } from "@/lib/cart-context";
 import { PDP_ACCENT_COLOR, type Product } from "@/lib/products";
+import { THEME_COLORS } from "@/lib/theme-colors";
 
 // Presentation-only extras that don't belong in the shared checkout-critical
 // products.ts (dark showcase background + rotation frame count). Keyed by
 // flavor so this stays in sync automatically if a slug is renamed. Frame
 // images in public/images/jar-frames are true transparent (alpha) cutouts of
 // the real multi-angle jar photography, so bgDark just needs to be a
-// good-looking backdrop — no pixel-matching required. The Devanagari name
+// good-looking backdrop — no pixel-matching required. Green's backdrop is a
+// deliberately darker custom shade (not the --color-green token itself);
+// red/mixed reuse the actual brand red/orange tokens. The Devanagari name
 // used to live here too but now comes live from Shopify (product.nameHi).
 const SHOWCASE_EXTRAS: Record<string, { bgDark: string; frames: number }> = {
   green: { bgDark: "#114A22", frames: 14 },
-  red: { bgDark: "#9B1E15", frames: 11 },
-  mixed: { bgDark: "#B44800", frames: 14 },
+  red: { bgDark: THEME_COLORS.red, frames: 11 },
+  mixed: { bgDark: THEME_COLORS.orange, frames: 14 },
 };
 
 function framePath(flavor: string, n: number) {
@@ -101,7 +104,7 @@ export default function ProductShowcase({ products }: { products: Product[] }) {
   const N = flavours.length;
   const segWidth = N > 0 ? 1 / N : 1;
   const centers = flavours.map((_, i) => i * segWidth + segWidth / 2);
-  const rgbDark = flavours.map((p) => hexToRgb(SHOWCASE_EXTRAS[p.flavor]?.bgDark ?? "#1A0D04"));
+  const rgbDark = flavours.map((p) => hexToRgb(SHOWCASE_EXTRAS[p.flavor]?.bgDark ?? THEME_COLORS.dark));
   const frameCounts = flavours.map((p) => SHOWCASE_EXTRAS[p.flavor]?.frames ?? 1);
 
   const outerRef = useRef<HTMLDivElement>(null);
@@ -233,7 +236,7 @@ export default function ProductShowcase({ products }: { products: Product[] }) {
       <div
         ref={sectionBgRef}
         className="sticky top-0 h-screen w-full overflow-hidden flex flex-col"
-        style={{ backgroundColor: SHOWCASE_EXTRAS[flavours[0]?.flavor]?.bgDark ?? "#114A22" }}
+        style={{ backgroundColor: SHOWCASE_EXTRAS[flavours[0]?.flavor]?.bgDark ?? SHOWCASE_EXTRAS.green.bgDark }}
       >
         <div className="relative flex-1 z-10 pointer-events-none">
           <div className="w-full max-w-[1400px] h-full mx-auto px-5 md:px-9 pt-[13vh] md:pt-0 flex flex-col md:grid md:grid-cols-[1fr_1.1fr_1fr] md:gap-14 lg:gap-20 md:items-center">
@@ -322,7 +325,7 @@ export default function ProductShowcase({ products }: { products: Product[] }) {
                   >
                     <p
                       className="hidden md:block font-quirk font-bold text-lg md:text-2xl uppercase tracking-[0.1em] mb-3 md:mb-5"
-                      style={{ color: "#FFF3D7" }}
+                      style={{ color: THEME_COLORS.cream }}
                     >
                       {p.tagline}
                     </p>
