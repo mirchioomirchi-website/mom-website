@@ -7,18 +7,21 @@ import { SITE_CONTENT } from "@/lib/content";
 const { headingLines, subheading, eyebrowDevanagari, eyebrowEnglish } =
   SITE_CONTENT.aboutPage.hero;
 
-// 90% of the viewport tall on mobile, 80% on desktop. The
-// heading/subheading/eyebrow sit near the top (normal flow); the character
-// is pinned absolutely to the section's own bottom edge so it sits flush
-// against the red story section that follows with zero gap between them.
-// The eyebrow-to-heading gap is tighter on mobile (gap-4) than desktop
-// (gap-10) — on desktop that gap separates two side-by-side columns, but on
-// mobile (flex-col, eyebrow stacked above the heading) the same gap read as
-// a big awkward space between two things that belong together. Character
-// is sized up on mobile so it reads as a real illustration.
+// Desktop: 80% of the viewport tall, character pinned absolutely to the
+// section's own bottom edge so it sits flush against the red story section
+// that follows with zero gap. That vh-based approach doesn't translate to
+// mobile — phone viewport heights vary a lot more than laptop ones (a short
+// iPhone SE vs. a tall Pro Max can differ by several hundred px), so a
+// vh-driven height plus an absolutely-positioned illustration produced a
+// different amount of empty space on every device. Mobile instead just
+// flows normally: no forced section height, and the illustration sits in
+// document flow with a fixed margin-top below the text (see the shared div
+// below — `relative` + normal flow on mobile, `md:absolute` + pinned on
+// desktop) — so it looks identical on every phone regardless of its actual
+// viewport height, and the section is simply as tall as its own content.
 export default function AboutHero() {
   return (
-    <section className="relative bg-cream min-h-[90vh] md:min-h-[80vh] overflow-hidden pt-[110px] md:pt-[200px] cv-auto">
+    <section className="relative bg-cream md:min-h-[80vh] overflow-hidden pt-[110px] md:pt-[200px] cv-auto">
       <div className="max-w-[1400px] mx-auto px-5 md:px-9">
         <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4 md:gap-10">
           <ScrollReveal className="max-w-xl">
@@ -49,9 +52,10 @@ export default function AboutHero() {
         </div>
       </div>
 
-      {/* Pinned flush to the section's bottom edge — no gap before the
-          red section that follows. */}
-      <div className="absolute right-4 md:right-[10rem] bottom-0 w-60 md:w-[21rem] aspect-[319/364]">
+      {/* Mobile: normal flow, right-aligned via ml-auto, fixed mt-10 gap
+          below the text — same on every device. Desktop: switches to
+          absolute, pinned flush to the section's bottom-right edge. */}
+      <div className="relative md:absolute md:right-[10rem] md:bottom-0 w-60 md:w-[21rem] aspect-[319/364] ml-auto mr-4 md:mr-0 mt-10 md:mt-0">
         <Image
           src="/images/about/hero-character.svg"
           alt="Mirchi O Mirchi character illustration"

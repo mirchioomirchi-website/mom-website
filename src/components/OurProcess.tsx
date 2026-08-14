@@ -116,57 +116,35 @@ export default function OurProcess() {
   return (
     <section className="relative bg-cream py-16 md:py-24 overflow-hidden cv-auto">
       <div className="process-grid w-full max-w-[1400px] mx-auto px-5 md:px-9 gap-x-16 gap-y-6 md:gap-y-8">
-        {/* Left column — eyebrow, heading (+ mobile CTA), and the desktop
-            CTA all live in one wrapper now, instead of three separately
-            grid-placed pieces. `.process-grid` stretches this column to
-            match the steps list's full height on desktop, and `md:flex
-            md:flex-col` + `md:mt-auto` on the CTA below is what actually
-            pins it to the bottom of that stretched space. */}
-        <div className="[grid-area:left] md:flex md:flex-col">
-          {/* Eyebrow */}
-          <ScrollReveal className="flex items-center gap-2.5">
-            <span className="font-sura text-pink text-[15px] md:text-base">
-              {eyebrowDevanagari}
-            </span>
-            <span className="text-pink/50 text-sm">•</span>
-            <span className="font-sura text-pink text-[15px] md:text-base">
-              {eyebrowEnglish}
-            </span>
-          </ScrollReveal>
+        {/* Eyebrow */}
+        <ScrollReveal className="[grid-area:eyebrow] flex items-center gap-2.5">
+          <span className="font-sura text-pink text-[15px] md:text-base">
+            {eyebrowDevanagari}
+          </span>
+          <span className="text-pink/50 text-sm">•</span>
+          <span className="font-sura text-pink text-[15px] md:text-base">
+            {eyebrowEnglish}
+          </span>
+        </ScrollReveal>
 
-          {/* Heading — shares a row with the CTA on mobile only (heading
-              left, CTA right, bottom-aligned) so the CTA doesn't need its
-              own separate row before the steps list, and the gap down to
-              the video can stay tight. Desktop's CTA lives separately
-              below instead, pinned to the bottom of the column. */}
-          <ScrollReveal delay={0.05} className="mt-3 md:mt-1 mb-1 md:mb-0">
-            <div className="flex items-end justify-between gap-4">
-              <h2 className="text-h2 max-w-[13ch] md:max-w-[8ch]">
-                {heading}
-              </h2>
-              <Link
-                href={ctaHref}
-                className="md:hidden shrink-0 text-btn inline-flex items-center gap-1.5 underline decoration-pink decoration-2 underline-offset-4 hover:text-pink transition-colors whitespace-nowrap"
-              >
-                {cta}
-              </Link>
-            </div>
-          </ScrollReveal>
-
-          {/* Desktop-only CTA — a size step up from the mobile version and
-              no underline, matching the plain hover-color treatment used
-              elsewhere for larger standalone links. `md:mt-auto` is the
-              piece that actually bottom-aligns it against the steps list. */}
-          <ScrollReveal delay={0.2} className="hidden md:block md:mt-auto md:pt-8">
+        {/* Heading — shares a row with the CTA on mobile only (heading
+            left, CTA right, bottom-aligned) so the CTA doesn't need its
+            own separate row before the steps list, and the gap down to
+            the video can stay tight. Desktop's CTA is a separate element
+            entirely (see below), not part of this row. */}
+        <ScrollReveal delay={0.05} className="[grid-area:heading] mt-3 md:mt-1 mb-1 md:mb-0">
+          <div className="flex items-end justify-between gap-4">
+            <h2 className="text-h2 max-w-[13ch] md:max-w-[8ch]">
+              {heading}
+            </h2>
             <Link
               href={ctaHref}
-              className="text-btn md:text-lg inline-flex items-center gap-1.5 md:gap-2 hover:text-pink transition-colors"
+              className="md:hidden shrink-0 text-btn inline-flex items-center gap-1.5 underline decoration-pink decoration-2 underline-offset-4 hover:text-pink transition-colors whitespace-nowrap"
             >
               {cta}
-              <span aria-hidden="true">→</span>
             </Link>
-          </ScrollReveal>
-        </div>
+          </div>
+        </ScrollReveal>
 
         {/* Video — real multi-angle mortar footage, loop/muted, no controls.
             Lazy-loaded: preload="none" + IntersectionObserver above means
@@ -206,6 +184,26 @@ export default function OurProcess() {
             </ScrollReveal>
           ))}
         </div>
+
+        {/* Desktop-only CTA. Not a named grid-area — placed with explicit
+            grid-row/grid-column instead, spanning the same two rows
+            "steps" spans in column 1 (eyebrow's row through heading's
+            row) and bottom-aligned there via `self-end`, so it lines up
+            with the bottom of the steps list without needing to touch
+            (or risk breaking) eyebrow/heading's own placement. Bigger
+            than the mobile version and no underline. */}
+        <ScrollReveal
+          delay={0.2}
+          className="hidden md:block md:[grid-column:1] md:[grid-row:1/3] md:self-end"
+        >
+          <Link
+            href={ctaHref}
+            className="text-btn md:text-lg inline-flex items-center gap-1.5 md:gap-2 hover:text-pink transition-colors"
+          >
+            {cta}
+            <span aria-hidden="true">→</span>
+          </Link>
+        </ScrollReveal>
       </div>
     </section>
   );
