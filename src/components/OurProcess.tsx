@@ -123,7 +123,7 @@ export default function OurProcess() {
             bottom-aligned) so the CTA doesn't need its own separate row
             before the steps list. Desktop's CTA is a separate element
             entirely (see below), not part of this block. */}
-        <ScrollReveal className="[grid-area:eh] flex flex-col gap-2 md:gap-1 mb-1 md:mb-0">
+        <ScrollReveal className="[grid-area:eh] flex flex-col gap-2 md:gap-2.5 mb-1 md:mb-0">
           <div className="flex items-center gap-2.5">
             <span className="font-sura text-pink text-[15px] md:text-base">
               {eyebrowDevanagari}
