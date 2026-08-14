@@ -5,7 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useScroll, useMotionValueEvent } from "motion/react";
 import { useCart } from "@/lib/cart-context";
-import type { Product } from "@/lib/products";
+import { PDP_ACCENT_COLOR, type Product } from "@/lib/products";
 
 // Presentation-only extras that don't belong in the shared checkout-critical
 // products.ts (dark showcase background + rotation frame count). Keyed by
@@ -78,25 +78,20 @@ function QtyStepper({
   );
 }
 
-// "Boom" starburst Add to Cart button — the exact pink shape supplied in the
-// design assets, with the label overlaid on top instead of a plain pill.
-function BoomAddToCart({ onClick }: { onClick: () => void }) {
+// Standard rectangular Add to Cart CTA — same shape/weight used everywhere
+// else on the site (shop grid, PDP), on the brand yellow (#F8B532) so it
+// reads clearly against every dark per-flavor backdrop. The label color is
+// per-product (same accent used for PDP details/marquee text) so it shifts
+// as the shopper scrolls between flavours, instead of a single fixed color.
+function AddToCartCta({ onClick, accentColor }: { onClick: () => void; accentColor: string }) {
   return (
     <button
       type="button"
       onClick={onClick}
-      aria-label="Add to cart"
-      className="relative w-[138px] h-[70px] md:w-[150px] md:h-[78px] shrink-0 cursor-pointer hover:scale-105 active:scale-95 transition-transform duration-200"
+      className="text-btn font-bold inline-flex items-center justify-center bg-yellow px-7 py-3.5 md:px-8 md:py-4 hover:opacity-90 transition-opacity cursor-pointer shrink-0"
+      style={{ color: accentColor }}
     >
-      <svg viewBox="0 0 145 74" className="absolute inset-0 w-full h-full">
-        <path
-          d="M61.5225 13.6456L75.9025 0L89.5126 19.0001L123.014 10.5L121.444 30.0001L145 37.0001L114.116 49.5002L120.397 66.0002L83.1856 56.504L65.9567 74L57.366 55.3234L16.7509 61.0002L23.556 46.0001L0 31.4999L29.8375 26.5001L22.509 10L61.5225 13.6456Z"
-          fill="var(--color-pink)"
-        />
-      </svg>
-      <span className="relative z-10 flex items-center justify-center w-full h-full text-white text-[12.5px] md:text-[13px] font-quirk font-bold uppercase tracking-[0.06em] leading-none px-3 text-center">
-        Add to Cart
-      </span>
+      Add to Cart
     </button>
   );
 }
@@ -342,7 +337,10 @@ export default function ProductShowcase({ products }: { products: Product[] }) {
                           onIncrease={() => setQty(p.slug, qty + 1)}
                         />
                       ) : (
-                        <BoomAddToCart onClick={() => add(p.slug, 1)} />
+                        <AddToCartCta
+                          onClick={() => add(p.slug, 1)}
+                          accentColor={PDP_ACCENT_COLOR[p.flavor]}
+                        />
                       )}
                       <Link
                         href={`/products/${p.slug}`}

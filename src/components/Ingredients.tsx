@@ -22,11 +22,52 @@ const BASE_RATE = 1;
 const SCROLL_RATE = 1.4;
 const EASE = 0.06;
 
+// How long each line's ingredient overlay auto-pulses into view as it
+// scrolls near the center of the viewport — short and one at a time, so it
+// reads as a gentle nudge rather than a slideshow. Mobile has no hover at
+// all, so this is the only way touch users ever see the overlays; desktop
+// gets it too so a fast scroll-past doesn't skip them entirely.
+const SCROLL_REVEAL_MS = 900;
+
 export default function Ingredients() {
   const trackRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const lineRowRefs = useRef<(HTMLDivElement | null)[]>([]);
   const rateRef = useRef<number[]>(LINES.map(() => BASE_RATE));
   const targetRateRef = useRef<number[]>(LINES.map(() => BASE_RATE));
   const [hovered, setHovered] = useState<number | null>(null);
+  const [scrollActive, setScrollActive] = useState<number | null>(null);
+
+  // Hover always wins over the auto scroll-pulse — pointer users get the
+  // interaction they expect, and hovering a different line doesn't fight
+  // with whatever the scroll pulse was mid-animation on.
+  const active = hovered ?? scrollActive;
+
+  // Scroll-triggered reveal — fires every time a line crosses the vertical
+  // center band of the viewport (works scrolling either direction), holds
+  // briefly, then clears itself.
+  useEffect(() => {
+    const timers: ReturnType<typeof setTimeout>[] = [];
+    const observers = lineRowRefs.current.map((el, i) => {
+      if (!el) return null;
+      const observer = new IntersectionObserver(
+        ([entry]) => {
+          if (!entry.isIntersecting) return;
+          setScrollActive(i);
+          const t = setTimeout(() => {
+            setScrollActive((cur) => (cur === i ? null : cur));
+          }, SCROLL_REVEAL_MS);
+          timers.push(t);
+        },
+        { threshold: 0, rootMargin: "-45% 0px -45% 0px" }
+      );
+      observer.observe(el);
+      return observer;
+    });
+    return () => {
+      observers.forEach((o) => o?.disconnect());
+      timers.forEach(clearTimeout);
+    };
+  }, []);
 
   useEffect(() => {
     const anims = trackRefs.current.map((el) => el?.getAnimations()[0] ?? null);
@@ -69,18 +110,19 @@ export default function Ingredients() {
   return (
     <section
       id="ingredients"
-      className="relative h-[90vh] flex flex-col justify-center pt-16 pb-16 md:pb-[220px] bg-cream overflow-hidden cv-auto scroll-mt-[84px]"
+      className="relative h-auto md:h-[90vh] flex flex-col justify-center pt-8 md:pt-16 pb-16 md:pb-[220px] bg-cream overflow-hidden cv-auto scroll-mt-[84px]"
     >
       {/* Hover overlays — full-bleed decorative ingredient scatter, one per
           line. Mobile gets its own purpose-cropped image per line (the
           desktop art reads too small/awkward scaled straight down), swapped
           in via CSS visibility rather than conditional rendering so both
-          stay preloaded and the opacity crossfade doesn't pop. */}
+          stay preloaded and the opacity crossfade doesn't pop. Shown on
+          hover (desktop) or the short scroll-triggered pulse (all sizes). */}
       {LINES.map((line, i) => (
         <div
           key={line.overlay}
           className="absolute top-0 bottom-0 w-screen left-1/2 -translate-x-1/2 transition-opacity duration-500 ease-out pointer-events-none"
-          style={{ opacity: hovered === i ? 1 : 0 }}
+          style={{ opacity: active === i ? 1 : 0 }}
           aria-hidden="true"
         >
           <div className="md:hidden relative w-full h-full">
@@ -122,6 +164,9 @@ export default function Ingredients() {
         {LINES.map((line, i) => (
           <div
             key={line.overlay + i}
+            ref={(el) => {
+              lineRowRefs.current[i] = el;
+            }}
             className="relative w-screen left-1/2 -translate-x-1/2 overflow-x-hidden overflow-y-visible"
             onMouseEnter={() => setHovered(i)}
             onMouseLeave={() => setHovered((h) => (h === i ? null : h))}
@@ -132,7 +177,7 @@ export default function Ingredients() {
               }}
               className={`flex whitespace-nowrap font-sura leading-[1.5] py-1.5 md:py-2 text-[28px] md:text-[32px] lg:text-[36px] text-dark/70 select-none transition-opacity duration-300 ease-out ${
                 line.direction === "ltr" ? "animate-marquee-ltr" : "animate-marquee-rtl"
-              } ${hovered !== null && hovered !== i ? "opacity-20" : "opacity-100"}`}
+              } ${active !== null && active !== i ? "opacity-20" : "opacity-100"}`}
             >
               <span>{buildChipText(line.items)}</span>
               <span aria-hidden="true">{buildChipText(line.items)}</span>

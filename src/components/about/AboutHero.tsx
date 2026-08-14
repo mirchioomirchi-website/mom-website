@@ -7,13 +7,18 @@ import { SITE_CONTENT } from "@/lib/content";
 const { headingLines, subheading, eyebrowDevanagari, eyebrowEnglish } =
   SITE_CONTENT.aboutPage.hero;
 
-// 80% of the viewport tall. The heading/subheading/eyebrow sit near the top
-// (normal flow); the character is pinned absolutely to the section's own
-// bottom edge so it sits flush against the red story section that follows
-// with zero gap between them.
+// 80% of the viewport tall on desktop. The heading/subheading/eyebrow sit
+// near the top (normal flow); the character is pinned absolutely to the
+// section's own bottom edge so it sits flush against the red story section
+// that follows with zero gap between them.
+// Mobile gets a shorter floor (not 92vh) and less top padding — the text
+// block is short, so a tall section just left a big dead-cream gap above
+// the character before the red section started. The character is also
+// sized up on mobile so it reads as a real illustration filling that space
+// rather than a small icon floating in the middle of it.
 export default function AboutHero() {
   return (
-    <section className="relative bg-cream min-h-[92vh] md:min-h-[80vh] overflow-hidden pt-[150px] md:pt-[200px] cv-auto">
+    <section className="relative bg-cream min-h-[62vh] md:min-h-[80vh] overflow-hidden pt-[110px] md:pt-[200px] cv-auto">
       <div className="max-w-[1400px] mx-auto px-5 md:px-9">
         <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-10">
           <ScrollReveal className="max-w-xl">
@@ -46,7 +51,7 @@ export default function AboutHero() {
 
       {/* Pinned flush to the section's bottom edge — no gap before the
           red section that follows. */}
-      <div className="absolute right-4 md:right-[10rem] bottom-0 w-40 md:w-[21rem] aspect-[319/364]">
+      <div className="absolute right-4 md:right-[10rem] bottom-0 w-60 md:w-[21rem] aspect-[319/364]">
         <Image
           src="/images/about/hero-character.svg"
           alt="Mirchi O Mirchi character illustration"

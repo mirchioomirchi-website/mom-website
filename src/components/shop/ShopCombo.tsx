@@ -74,10 +74,10 @@ export default function ShopCombo() {
           </div>
 
           <ScrollReveal delay={0.1}>
-            {/* aspect-[1000/1121] matches the source photo's own dimensions
+            {/* aspect-[1000/1497] matches the source photo's own dimensions
                 exactly, so object-contain never has to crop it — the full
                 image is always visible regardless of column height. */}
-            <div className="relative w-full aspect-[1000/1121]">
+            <div className="relative w-full aspect-[1000/1497]">
               <Image
                 src="/images/shop/all-flavours.webp"
                 alt="Green, Red and Mixed Chilli Thecha jars with fresh chillies"

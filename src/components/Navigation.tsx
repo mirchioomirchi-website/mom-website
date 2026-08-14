@@ -124,9 +124,11 @@ export default function Navigation() {
         {/* Shared dotted-divider pattern — also reused by CtaBanner. */}
         <div aria-hidden className="dotted-divider absolute bottom-0 left-0 right-0 pointer-events-none" />
 
-        <div className="w-full max-w-[1400px] mx-auto px-5 md:px-9 flex items-center justify-between h-[68px]">
-          {/* Logo */}
-          <Link href="/" aria-label="Mirchi O Mirchi — home">
+        <div className="w-full max-w-[1400px] mx-auto px-5 md:px-6 lg:px-9 flex items-center justify-between gap-3 h-[68px]">
+          {/* Logo — shrink-0 so it never loses ground to the nav links/cart
+              group on medium (tablet/small-laptop) widths, where all three
+              groups are fighting for the same row. */}
+          <Link href="/" aria-label="Mirchi O Mirchi — home" className="shrink-0">
             <Image
               src="/MOM_logo.svg"
               alt="Mirchi O Mirchi"
@@ -138,13 +140,17 @@ export default function Navigation() {
           </Link>
 
           {/* ── DESKTOP CENTER NAV ── */}
-          <div className="hidden md:flex items-center gap-10">
+          {/* flex-1 + justify-center (rather than a fixed gap sitting between
+              two other fixed-width groups) lets this group genuinely shrink
+              its own gap first as the viewport narrows, instead of the whole
+              row overflowing/wrapping on ~1024–1280px laptop widths. */}
+          <div className="hidden md:flex flex-1 min-w-0 items-center justify-center gap-4 lg:gap-10">
             {NAV_LINKS.map((link) => (
               <Link
                 key={link.label}
                 href={link.href}
                 onClick={(e) => handleAnchorClick(e, link.href)}
-                className={NAV_ITEM_CLASS}
+                className={`${NAV_ITEM_CLASS} whitespace-nowrap`}
               >
                 {link.label}
               </Link>
@@ -152,8 +158,8 @@ export default function Navigation() {
           </div>
 
           {/* ── DESKTOP RIGHT ── */}
-          <div className="hidden md:flex items-center gap-5">
-            <button type="button" onClick={() => setBulkOpen(true)} className={`${NAV_ITEM_CLASS} bg-transparent border-none cursor-pointer p-0`}>
+          <div className="hidden md:flex items-center gap-3 lg:gap-5 shrink-0">
+            <button type="button" onClick={() => setBulkOpen(true)} className={`${NAV_ITEM_CLASS} whitespace-nowrap bg-transparent border-none cursor-pointer p-0`}>
               Bulk Orders
             </button>
 

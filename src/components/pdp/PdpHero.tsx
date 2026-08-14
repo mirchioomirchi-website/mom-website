@@ -52,13 +52,23 @@ export default function PdpHero({ product }: { product: Product }) {
     // first viewport (through the Add to Cart button) without scrolling —
     // `min-h-[100dvh]` guarantees the section fills the screen but still
     // grows instead of clipping if a device is unusually short.
-    // Desktop: unchanged half-split, `md:h-screen` grid.
+    // Desktop: half-split grid, `md:min-h-screen` (not `md:h-screen`) — a
+    // *floor*, not a hard cap. On short/small-laptop viewports (13" screens,
+    // zoomed browsers, etc.) the right-hand info column can need more than
+    // 100vh to fit the Hindi name, jar, title, description, detail rows and
+    // Add to Cart button without crowding. A fixed `h-screen` clipped that
+    // overflow silently — nothing scrolled, the button just rendered past
+    // the section's bottom edge and got painted over by whatever section
+    // came next. `min-h-screen` lets the row grow to fit its tallest column
+    // instead, so the button is always reachable by scrolling, on any
+    // screen size, and large screens look identical to before since content
+    // there already fits inside one viewport.
     <section className="relative bg-cream cv-auto">
-      <div className="flex flex-col min-h-[100dvh] md:grid md:grid-cols-2 md:h-screen md:min-h-0">
+      <div className="flex flex-col min-h-[100dvh] md:grid md:grid-cols-2 md:min-h-screen">
         {/* Closeup product photo — falls back to a color-tinted panel with
             the front jar shot when a flavor doesn't have real macro
             photography yet (Shopify metafield placeholder). */}
-        <div className="relative h-[36vh] shrink-0 md:h-full">
+        <div className="relative h-[36vh] shrink-0 md:h-auto md:min-h-full">
           {product.closeupImage ? (
             <Image
               src={product.closeupImage}

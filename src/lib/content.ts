@@ -56,10 +56,10 @@ export const SITE_CONTENT = {
       },
       {
         direction: "rtl" as const,
-        overlay: "/images/ingredients/ingridients overlay - 4.png",
-        overlayMobile: "/images/ingredients/mobile/ingridients overlay - 4.png",
+        overlay: "/images/ingredients/ingridients overlay - 4 jeera.png",
+        overlayMobile: "/images/ingredients/mobile/ingridients overlay - 4 jeera.png",
         items: [
-          { en: "Olive Oil", dev: "जैतून का तेल" },
+          { en: "Oil", dev: "तेल" },
           { en: "Cumin", dev: "जीरा" },
         ],
       },
