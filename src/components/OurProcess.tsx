@@ -116,23 +116,23 @@ export default function OurProcess() {
   return (
     <section className="relative bg-cream py-16 md:py-24 overflow-hidden cv-auto">
       <div className="process-grid w-full max-w-[1400px] mx-auto px-5 md:px-9 gap-x-16 gap-y-6 md:gap-y-8">
-        {/* Eyebrow */}
-        <ScrollReveal className="[grid-area:eyebrow] flex items-center gap-2.5">
-          <span className="font-sura text-pink text-[15px] md:text-base">
-            {eyebrowDevanagari}
-          </span>
-          <span className="text-pink/50 text-sm">•</span>
-          <span className="font-sura text-pink text-[15px] md:text-base">
-            {eyebrowEnglish}
-          </span>
-        </ScrollReveal>
-
-        {/* Heading — shares a row with the CTA on mobile only (heading
-            left, CTA right, bottom-aligned) so the CTA doesn't need its
-            own separate row before the steps list, and the gap down to
-            the video can stay tight. Desktop's CTA is a separate element
-            entirely (see below), not part of this row. */}
-        <ScrollReveal delay={0.05} className="[grid-area:heading] mt-3 md:mt-1 mb-1 md:mb-0">
+        {/* Eyebrow + heading — one grid area, one ScrollReveal, so the gap
+            between them is a plain flex gap we control directly instead of
+            being at the mercy of the grid's row-gap. Heading also shares
+            its row with the CTA on mobile only (heading left, CTA right,
+            bottom-aligned) so the CTA doesn't need its own separate row
+            before the steps list. Desktop's CTA is a separate element
+            entirely (see below), not part of this block. */}
+        <ScrollReveal className="[grid-area:eh] flex flex-col gap-2 md:gap-1 mb-1 md:mb-0">
+          <div className="flex items-center gap-2.5">
+            <span className="font-sura text-pink text-[15px] md:text-base">
+              {eyebrowDevanagari}
+            </span>
+            <span className="text-pink/50 text-sm">•</span>
+            <span className="font-sura text-pink text-[15px] md:text-base">
+              {eyebrowEnglish}
+            </span>
+          </div>
           <div className="flex items-end justify-between gap-4">
             <h2 className="text-h2 max-w-[13ch] md:max-w-[8ch]">
               {heading}
@@ -186,15 +186,14 @@ export default function OurProcess() {
         </div>
 
         {/* Desktop-only CTA. Not a named grid-area — placed with explicit
-            grid-row/grid-column instead, spanning the same two rows
-            "steps" spans in column 1 (eyebrow's row through heading's
-            row) and bottom-aligned there via `self-end`, so it lines up
-            with the bottom of the steps list without needing to touch
-            (or risk breaking) eyebrow/heading's own placement. Bigger
-            than the mobile version and no underline. */}
+            grid-row/grid-column instead, in the same row 1 / column 1 cell
+            as "eh", bottom-aligned there via `self-end` so it lines up
+            with the bottom of the (taller) steps list without needing to
+            touch or risk breaking eh's own placement. Bigger than the
+            mobile version and no underline. */}
         <ScrollReveal
-          delay={0.2}
-          className="hidden md:block md:[grid-column:1] md:[grid-row:1/3] md:self-end"
+          delay={0.15}
+          className="hidden md:block md:[grid-column:1] md:[grid-row:1] md:self-end"
         >
           <Link
             href={ctaHref}

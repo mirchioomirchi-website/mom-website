@@ -302,32 +302,32 @@
 
 /* ============================================
    OUR PROCESS SECTION — named-area grid
-   Mobile order: eyebrow → heading → video → steps → cta
+   Mobile order: eyebrow+heading (one area) → video → steps → cta
    Desktop: two columns, video spans full width at the bottom
    ============================================ */
 .process-grid {
   display: grid;
   grid-template-columns: 1fr;
   grid-template-areas:
-    "eyebrow"
-    "heading"
+    "eh"
     "video"
     "steps";
 }
 @media (min-width: 768px) {
-  /* Back to the original 3-row left column ("steps" spans all three rows
-     in column 2) after a merged-column version broke the section's
-     ordering. The desktop CTA is no longer a named area at all — it's
-     placed with explicit grid-row/grid-column (see OurProcess.tsx) so it
-     can span the same three rows as "steps" and bottom-align there via
-     `self-end`, without touching eyebrow/heading's proven-working
-     placement. */
+  /* Eyebrow and heading now live in one area ("eh") so their own gap is
+     controlled directly on that element (a plain flex-col gap), not by
+     this grid's row-gap — that's what lets them sit close together.
+     "eh" and "steps" share row 1 only (row spanning no longer needed
+     since eyebrow+heading collapsed into a single row). The desktop CTA
+     is still not a named area — it's placed with explicit
+     grid-row/grid-column (see OurProcess.tsx), pinned to row 1 / column 1
+     and bottom-aligned via `self-end` so it lines up with the bottom of
+     the steps list, without touching eh/steps' own placement. */
   .process-grid {
     grid-template-columns: 1fr 1.15fr;
     grid-template-areas:
-      "eyebrow steps"
-      "heading steps"
-      "video   video";
+      "eh    steps"
+      "video video";
     align-items: start;
   }
 }
