@@ -132,7 +132,10 @@ export default function ShopProductGrid({ products }: { products: Product[] }) {
         <ScrollReveal>
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8 md:mb-12">
             <h2 className="text-h3 font-bold text-dark">{allProductsLabel}</h2>
-            <div className="flex flex-col md:flex-row md:items-center gap-3 md:gap-6 text-body-sm text-dark/70">
+            {/* Row on every size now, not just desktop — Availability stays
+                pinned to the left edge and the PIN-code check to the right,
+                on the same line, instead of stacking on mobile. */}
+            <div className="flex flex-row items-center justify-between md:justify-start gap-3 md:gap-6 text-body-sm text-dark/70">
               <div className="relative">
                 <button
                   type="button"

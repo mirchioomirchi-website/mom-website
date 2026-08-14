@@ -329,7 +329,7 @@ export default function ProductShowcase({ products }: { products: Product[] }) {
                     <p className="hidden md:block text-body leading-relaxed text-cream/60 max-w-xs md:max-w-sm mb-6">
                       {p.description}
                     </p>
-                    <div className="flex flex-col items-center gap-3 md:flex-row md:items-center md:gap-7">
+                    <div className="flex flex-col items-center gap-5 md:flex-row md:items-center md:gap-7">
                       {qty > 0 ? (
                         <QtyStepper
                           qty={qty}
@@ -346,7 +346,7 @@ export default function ProductShowcase({ products }: { products: Product[] }) {
                         href={`/products/${p.slug}`}
                         className="text-btn text-cream underline decoration-cream/50 decoration-2 underline-offset-4 hover:decoration-cream transition-colors"
                       >
-                        Learn more →
+                        Learn more <span className="hidden md:inline">→</span>
                       </Link>
                     </div>
                   </div>
